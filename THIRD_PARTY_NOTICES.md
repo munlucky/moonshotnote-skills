@@ -41,6 +41,13 @@ OCR model files are downloaded or cached by the upstream OCR libraries at
 runtime. They are intentionally excluded from this repository. Model files may
 carry separate licenses or use terms from their upstream providers.
 
+## Platform Notes
+
+The pinned `paddlepaddle==3.2.2` runtime publishes a macOS Apple Silicon
+arm64 wheel for Python 3.12. A matching macOS Intel x86_64 wheel was not
+available when this skill was prepared, so macOS Intel is not listed as a
+supported local setup target.
+
 ## Generating a Full Local Dependency Report
 
 After running setup, generate a fuller environment-specific dependency report

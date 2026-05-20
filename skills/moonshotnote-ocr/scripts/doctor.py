@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import importlib.util
 import json
+import os
 import platform
 import shutil
 import sys
@@ -45,7 +46,11 @@ def package_version(name: str) -> str | None:
 
 def main() -> int:
     skill_root = Path(__file__).resolve().parents[1]
-    venv_python = skill_root / ".venv" / "Scripts" / "python.exe"
+    venv_python = (
+        skill_root / ".venv" / "Scripts" / "python.exe"
+        if os.name == "nt"
+        else skill_root / ".venv" / "bin" / "python"
+    )
 
     checks = {
         "python": sys.executable,
@@ -76,7 +81,7 @@ def main() -> int:
     missing = [name for name, ok in checks["imports"].items() if not ok]
     if missing:
         print("Missing imports: " + ", ".join(missing), file=sys.stderr)
-        print("Run scripts/setup.ps1 from the skill directory.", file=sys.stderr)
+        print("Run scripts/setup.ps1 on Windows or scripts/setup.sh on macOS/Linux.", file=sys.stderr)
         return 1
 
     return 0

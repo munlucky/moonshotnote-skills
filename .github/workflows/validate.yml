@@ -9,8 +9,14 @@ on:
 
 jobs:
   validate:
-    name: Validate moonshotnote-ocr
-    runs-on: ubuntu-latest
+    name: Validate moonshotnote-ocr (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
 
     steps:
       - name: Check out repository
@@ -74,6 +80,7 @@ jobs:
               skill_dir / "scripts" / "doctor.py",
               skill_dir / "scripts" / "ocr_image.py",
               skill_dir / "scripts" / "requirements.txt",
+              skill_dir / "scripts" / "setup.sh",
               skill_dir / "scripts" / "setup.ps1",
           ]
           missing = [str(path) for path in required_files if not path.is_file()]
@@ -103,3 +110,26 @@ jobs:
       - name: Verify skills CLI discovery
         run: |
           npx -y skills add . --list
+
+  macos-paddle-wheel:
+    name: Check macOS arm64 PaddlePaddle wheel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify pinned PaddlePaddle macOS arm64 wheel exists
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip download \
+            --dest /tmp/paddle-wheel-check \
+            --only-binary=:all: \
+            --platform macosx_11_0_arm64 \
+            --python-version 312 \
+            --implementation cp \
+            --abi cp312 \
+            --no-deps \
+            paddlepaddle==3.2.2

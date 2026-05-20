@@ -38,10 +38,22 @@ Run setup once on Windows:
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
 ```
 
+Run setup once on macOS Apple Silicon or Linux:
+
+```bash
+bash scripts/setup.sh
+```
+
 Check the local runtime:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/doctor.py
+```
+
+On macOS/Linux:
+
+```bash
+./.venv/bin/python scripts/doctor.py
 ```
 
 OCR an image with PaddleOCR Korean mode:

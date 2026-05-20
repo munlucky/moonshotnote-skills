@@ -20,11 +20,26 @@ npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
 
 The skill intentionally does not bundle OCR models or heavy Python dependencies. Install them into the installed skill's local virtual environment.
 
+Supported local setup targets:
+
+- Windows x64 with Python 3.10, 3.11, or 3.12
+- macOS Apple Silicon arm64 with Python 3.10, 3.11, or 3.12
+- Linux x64 with Python 3.10, 3.11, or 3.12
+
+macOS Intel x86_64 is not supported by the pinned `paddlepaddle==3.2.2` runtime because the matching macOS x86_64 wheel is not published.
+
 After `npx skills add`:
 
 ```powershell
 cd $HOME\.agents\skills\moonshotnote-ocr
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
+```
+
+On macOS Apple Silicon or Linux:
+
+```bash
+cd ~/.agents/skills/moonshotnote-ocr
+bash scripts/setup.sh
 ```
 
 From a repository checkout:
@@ -34,12 +49,25 @@ cd skills\moonshotnote-ocr
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
-The setup script prefers 64-bit Python 3.10 through `py -3.10`, accepts 64-bit Python 3.11 or 3.12 as fallback, creates `.venv`, installs pinned PaddlePaddle/PaddleOCR/Surya versions from binary wheels, then runs `scripts\doctor.py`. It rejects 32-bit Python because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed 64-bit Python runtime for the skill.
+On macOS Apple Silicon or Linux from a repository checkout:
+
+```bash
+cd skills/moonshotnote-ocr
+bash scripts/setup.sh
+```
+
+The setup scripts create `.venv`, install pinned PaddlePaddle/PaddleOCR/Surya versions from binary wheels, then run `scripts/doctor.py`. They reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the skill.
 
 ## Usage
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
+```
+
+macOS/Linux:
+
+```bash
+./.venv/bin/python scripts/ocr_image.py ~/Desktop/screenshot.png --engine paddle --lang korean
 ```
 
 Batch OCR cropped screenshots:
