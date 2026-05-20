@@ -1,0 +1,34 @@
+.moonshot-state/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Skill runtime state
+skills/**/.venv/
+skills/**/output/
+skills/**/outputs/
+skills/**/ocr_output/
+skills/**/ocr-output/
+ocr-test-*/
+skills/**/*.paddle.txt
+skills/**/*.paddle.json
+skills/**/*.paddle.md
+skills/**/*.surya.txt
+skills/**/*.surya.json
+skills/**/*.surya.md
+
+# OCR/model caches if created locally
+.paddleocr/
+.surya/
+models/
+cache/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

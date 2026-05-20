@@ -1,0 +1,105 @@
+name: Validate Skill
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  validate:
+    name: Validate moonshotnote-ocr
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate skill manifest
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PyYAML
+          python - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          import yaml
+
+          skill_dir = Path("skills/moonshotnote-ocr")
+          skill_file = skill_dir / "SKILL.md"
+
+          if not skill_file.is_file():
+              sys.exit("Missing skills/moonshotnote-ocr/SKILL.md")
+
+          text = skill_file.read_text(encoding="utf-8")
+          if not text.startswith("---\n"):
+              sys.exit("SKILL.md must start with YAML frontmatter")
+
+          try:
+              _, frontmatter, body = text.split("---", 2)
+          except ValueError:
+              sys.exit("SKILL.md frontmatter is not closed")
+
+          data = yaml.safe_load(frontmatter) or {}
+          name = data.get("name")
+          description = data.get("description")
+
+          if name != "moonshotnote-ocr":
+              sys.exit(f"Unexpected skill name: {name!r}")
+          if skill_dir.name != name:
+              sys.exit("Skill directory name must match frontmatter name")
+          if not description or not isinstance(description, str):
+              sys.exit("SKILL.md requires a string description")
+          if len(description.strip()) < 80:
+              sys.exit("SKILL.md description is too short for reliable discovery")
+          if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
+              sys.exit("Skill name must use lowercase letters, digits, and hyphens")
+          if not body.strip():
+              sys.exit("SKILL.md body must not be empty")
+
+          required_files = [
+              skill_dir / "agents" / "openai.yaml",
+              skill_dir / "scripts" / "doctor.py",
+              skill_dir / "scripts" / "ocr_image.py",
+              skill_dir / "scripts" / "requirements.txt",
+              skill_dir / "scripts" / "setup.ps1",
+          ]
+          missing = [str(path) for path in required_files if not path.is_file()]
+          if missing:
+              sys.exit("Missing required bundled files: " + ", ".join(missing))
+
+          forbidden = [
+              skill_dir / ".venv",
+              skill_dir / "output",
+              skill_dir / "outputs",
+              skill_dir / "ocr-output",
+              skill_dir / "ocr_output",
+          ]
+          present = [str(path) for path in forbidden if path.exists()]
+          if present:
+              sys.exit("Runtime artifacts must not be committed: " + ", ".join(present))
+
+          print("Skill manifest is valid")
+          PY
+
+      - name: Compile Python helper scripts
+        run: |
+          python -m py_compile \
+            skills/moonshotnote-ocr/scripts/doctor.py \
+            skills/moonshotnote-ocr/scripts/ocr_image.py
+
+      - name: Verify skills CLI discovery
+        run: |
+          npx -y skills add . --list

@@ -1,0 +1,8 @@
+paddlepaddle==3.2.2
+paddleocr==3.4.1
+surya-ocr==0.17.1
+transformers<5
+pillow
+opencv-python
+numpy
+pandas
