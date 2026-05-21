@@ -1,0 +1,45 @@
+version: 1
+description: Public-safe ontology for a Tidy First knowledge skill. The ontology models small code-tidying practices, management decisions, and design-economics theory without bundling source text.
+node_types:
+  Book:
+    description: The normalized root topic for the study graph.
+  Part:
+    description: A major section grouping related practices or theory.
+  Tidy:
+    description: A small structural code change intended to improve readability, locality, or changeability.
+  Management:
+    description: A workflow or sequencing decision about how tidying is planned, batched, reviewed, or committed.
+  Theory:
+    description: A design-economics or software-structure concept used to reason about tidying decisions.
+  Decision:
+    description: A decision heuristic that helps choose whether and when to tidy.
+  Warning:
+    description: A caveat, source-quality note, or misuse risk.
+edge_types:
+  belongs_to:
+    description: Places a node under a larger topic or part.
+  enables:
+    description: A practice makes another practice or decision easier.
+  precedes:
+    description: A practice often comes before another practice in a useful sequence.
+  supports:
+    description: A concept strengthens or explains another concept.
+  separates_from:
+    description: A management rule keeps two categories of work distinct.
+  trades_off_with:
+    description: Two concepts must be balanced rather than maximized together.
+  reduces:
+    description: A practice or theory decreases a target risk or cost.
+  increases:
+    description: A practice or theory increases a target capability.
+  warns_about:
+    description: Marks a caveat or misuse risk.
+  next_topic:
+    description: Indicates a useful learning sequence.
+source_ref_schema:
+  required:
+    - chapter
+    - lines
+  optional:
+    - section
+  note: Source refs point to private OCR-derived line ranges and are provenance markers only.

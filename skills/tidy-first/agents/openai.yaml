@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tidy First"
+  short_description: "Tidy-first design knowledge graph"
+  default_prompt: "Use $tidy-first to answer questions about tidy-first code changes, refactoring sequence, coupling, cohesion, and when to tidy before behavior changes."

@@ -5,6 +5,7 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `moonshotnote-ocr`: Korean-first screenshot and document-image OCR with PaddleOCR, Surya, and low-confidence visual review.
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.
+- `tidy-first`: public-safe Tidy First knowledge graph for small code tidying, behavior/structure separation, coupling, cohesion, reversibility, and options.
 
 ## Install
 
@@ -14,6 +15,7 @@ From a published GitHub repository:
 npx skills add munlucky/moonshotnote-skills --skill moonshotnote-ocr -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill fastapi-clean-architecture -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill text-knowledge-skill-builder -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill tidy-first -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -22,6 +24,7 @@ For local development from this checkout:
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
 npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
+npx skills add . --skill tidy-first -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -144,22 +147,46 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 
 The workflow is `text -> knowledge -> skill`: private source chunks stay ignored under `output/`, while public Skill references contain summaries, graph relations, provenance, and validation scripts.
 
+## tidy-first Usage
+
+The Tidy First skill does not bundle the full OCR text. It ships a public-safe graph and helper scripts:
+
+```powershell
+py -3 skills\tidy-first\scripts\query_graph.py --q "behavior change와 tidying 분리" --json
+py -3 skills\tidy-first\scripts\query_graph.py --q "coupling cohesion reversible change" --json
+py -3 skills\tidy-first\scripts\expand_context.py --q "guard clause dead code symmetry" --out skills\tidy-first\output\source-pack.md
+py -3 skills\tidy-first\scripts\validate_graph.py skills\tidy-first\references
+```
+
+Private OCR-derived source chunks stay under `skills/tidy-first/output/private-source/`, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
+
 ## Dependency Licenses
 
 The skill scripts are MIT licensed. Runtime OCR dependencies keep their own licenses. In particular, `surya-ocr` is GPL-3.0-or-later, so review dependency licensing before bundling this skill into proprietary redistributed products. See `THIRD_PARTY_NOTICES.md`.
 
 ## Validation
 
+On Windows, set UTF-8 mode before running `quick_validate.py` because some skills contain Korean text:
+
+```powershell
+$env:PYTHONUTF8 = "1"
+```
+
 ```powershell
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\moonshotnote-ocr
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\fastapi-clean-architecture
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\text-knowledge-skill-builder
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\tidy-first
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
+py -3 skills\tidy-first\scripts\validate_graph.py skills\tidy-first\references
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\tidy-first\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\tidy-first
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
 npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
+npx skills add . --skill tidy-first -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -170,6 +197,7 @@ npx -y skills add . --list
 npx -y skills add munlucky/moonshotnote-skills --skill moonshotnote-ocr --list
 npx -y skills add munlucky/moonshotnote-skills --skill fastapi-clean-architecture --list
 npx -y skills add munlucky/moonshotnote-skills --skill text-knowledge-skill-builder --list
+npx -y skills add munlucky/moonshotnote-skills --skill tidy-first --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

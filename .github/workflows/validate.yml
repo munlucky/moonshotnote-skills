@@ -74,6 +74,17 @@ jobs:
                   "scripts/lint_knowledge_pack.py",
                   "scripts/audit_public_safety.py",
               ],
+              "tidy-first": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/validate_graph.py",
+                  "scripts/query_graph.py",
+                  "scripts/expand_context.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -139,9 +150,12 @@ jobs:
             skills/fastapi-clean-architecture/scripts/prepare_private_source.py \
             skills/text-knowledge-skill-builder/scripts/chunk_source_text.py \
             skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
-            skills/text-knowledge-skill-builder/scripts/audit_public_safety.py
+            skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/tidy-first/scripts/validate_graph.py \
+            skills/tidy-first/scripts/query_graph.py \
+            skills/tidy-first/scripts/expand_context.py
 
-      - name: Validate FastAPI graph
+      - name: Validate knowledge graphs
         run: |
           python skills/fastapi-clean-architecture/scripts/validate_graph.py \
             skills/fastapi-clean-architecture/references
@@ -149,6 +163,12 @@ jobs:
             skills/fastapi-clean-architecture/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/fastapi-clean-architecture
+          python skills/tidy-first/scripts/validate_graph.py \
+            skills/tidy-first/references
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/tidy-first/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/tidy-first
 
       - name: Verify skills CLI discovery
         run: |
