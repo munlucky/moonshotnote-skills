@@ -1,0 +1,4 @@
+interface:
+  display_name: "Text Knowledge Skill Builder"
+  short_description: "Turn text into public-safe skills"
+  default_prompt: "Use $text-knowledge-skill-builder to turn this source text into a public-safe Codex skill with a knowledge graph and validation checks."

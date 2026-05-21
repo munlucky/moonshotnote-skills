@@ -65,6 +65,15 @@ jobs:
                   "scripts/expand_context.py",
                   "scripts/prepare_private_source.py",
               ],
+              "text-knowledge-skill-builder": [
+                  "agents/openai.yaml",
+                  "references/workflow.md",
+                  "references/knowledge-pack-schema.md",
+                  "references/public-safety-checklist.md",
+                  "scripts/chunk_source_text.py",
+                  "scripts/lint_knowledge_pack.py",
+                  "scripts/audit_public_safety.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -127,12 +136,19 @@ jobs:
             skills/fastapi-clean-architecture/scripts/validate_graph.py \
             skills/fastapi-clean-architecture/scripts/query_graph.py \
             skills/fastapi-clean-architecture/scripts/expand_context.py \
-            skills/fastapi-clean-architecture/scripts/prepare_private_source.py
+            skills/fastapi-clean-architecture/scripts/prepare_private_source.py \
+            skills/text-knowledge-skill-builder/scripts/chunk_source_text.py \
+            skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/text-knowledge-skill-builder/scripts/audit_public_safety.py
 
       - name: Validate FastAPI graph
         run: |
           python skills/fastapi-clean-architecture/scripts/validate_graph.py \
             skills/fastapi-clean-architecture/references
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/fastapi-clean-architecture/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/fastapi-clean-architecture
 
       - name: Verify skills CLI discovery
         run: |
