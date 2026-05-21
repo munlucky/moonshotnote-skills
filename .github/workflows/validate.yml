@@ -79,6 +79,7 @@ jobs:
               skill_dir / "agents" / "openai.yaml",
               skill_dir / "scripts" / "doctor.py",
               skill_dir / "scripts" / "ocr_image.py",
+              skill_dir / "scripts" / "review_low_confidence.py",
               skill_dir / "scripts" / "requirements.txt",
               skill_dir / "scripts" / "setup.sh",
               skill_dir / "scripts" / "setup.ps1",
@@ -105,7 +106,8 @@ jobs:
         run: |
           python -m py_compile \
             skills/moonshotnote-ocr/scripts/doctor.py \
-            skills/moonshotnote-ocr/scripts/ocr_image.py
+            skills/moonshotnote-ocr/scripts/ocr_image.py \
+            skills/moonshotnote-ocr/scripts/review_low_confidence.py
 
       - name: Verify skills CLI discovery
         run: |

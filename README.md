@@ -91,6 +91,15 @@ Outputs:
 
 Default output is `.txt` only. Use `--json` for structured OCR evidence, `--md` for a review report, `--summary` for `batch_summary.json`, or `--all` to write every output.
 
+Low-confidence visual review:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean --json
+.\.venv\Scripts\python.exe scripts\review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+```
+
+The review script creates crop images, contact sheets, `low_confidence_manifest.json`, and `low_confidence_review.md`. Do not treat OCR as fully verified while manifest items remain `needs_review`.
+
 Batch behavior:
 
 - Continues processing later images when one image fails.

@@ -1,4 +1,4 @@
 interface:
   display_name: "MoonshotNote OCR"
-  short_description: "Korean screenshot and document OCR"
-  default_prompt: "Use $moonshotnote-ocr to extract Korean and English text from this screenshot into a source-adjacent OCR text output."
+  short_description: "Korean OCR with low-confidence review"
+  default_prompt: "Use $moonshotnote-ocr to extract Korean and English text from this screenshot, write OCR outputs, and verify low-confidence lines against image evidence before closing."

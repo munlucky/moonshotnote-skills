@@ -1,6 +1,6 @@
 ---
 name: moonshotnote-ocr
-description: Extract OCR text from images, screenshots, scanned pages, Korean or mixed Korean-English UI captures, receipts, signs, document images, tables, and layout-heavy captures. Use PaddleOCR first for normal screenshots and Korean image OCR; use Surya when document layout, reading order, tables, formulas, or markdown reconstruction matter. For scanned PDFs, use a PDF skill to convert pages to images first, then use this skill for OCR.
+description: Extract and verify OCR text from images, screenshots, scanned pages, Korean or mixed Korean-English UI captures, receipts, signs, document images, tables, and layout-heavy captures. Use PaddleOCR first for normal screenshots and Korean image OCR; use Surya when document layout, reading order, tables, formulas, or markdown reconstruction matter. Use the low-confidence review workflow when OCR output contains [unclear], suspicious lines, or low confidence scores, so Codex checks image evidence before closing.
 ---
 
 # moonshotnote-ocr
@@ -29,6 +29,29 @@ Use optional evidence outputs only when needed:
 - `--all`: write txt, json, md, and batch summary
 
 Preserve original text. Do not translate Korean unless the user asks for translation. Mark unreadable or suspicious text as `[unclear]` rather than inventing content.
+
+## Low-confidence Review
+
+Do not treat a low-confidence count as a final result by itself.
+
+When OCR output has `[unclear]`, low-confidence lines, suspicious mixed Korean/English text, table noise, code noise, or visible OCR artifacts:
+
+1. Generate evidence outputs with `--json` or `--all`.
+2. Build a review pack:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+```
+
+3. Inspect the generated crop images/contact sheets against the original page images.
+4. Update `low_confidence_manifest.json` item statuses:
+   - `accepted`: OCR text is good enough
+   - `corrected`: `review_text` contains the corrected text
+   - `unreadable`: source image is not legible enough to recover
+   - `ignored`: non-content chrome, page number, watermark, decoration, or irrelevant table artifact
+5. Do not close the task while any item remains `needs_review` unless the user explicitly accepts that risk.
+
+If there are many low-confidence items, prioritize content-bearing body text, headings, code, table labels, and commands first. Page numbers, viewer chrome, watermarks, tiny benchmark internals, and decorative glyphs can be marked `ignored` after visual confirmation.
 
 ## Commands
 
@@ -74,13 +97,22 @@ Use automatic engine selection:
 .\.venv\Scripts\python.exe scripts/ocr_image.py C:\path\to\page.png --engine auto --lang korean
 ```
 
+Create a visual low-confidence review pack:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+```
+
 ## Verification Policy
 
 After OCR, report:
 
 - engine used
 - output files written
-- low-confidence or suspicious lines, if available
+- low-confidence review pack path, if low-confidence items exist
+- reviewed status counts: accepted, corrected, unreadable, ignored, needs_review
 - whether fallback was used
+
+If `needs_review` is not zero, say clearly that OCR verification is not fully closed. Do not imply the text is final.
 
 For normal screenshots, group extracted UI text by title, navigation, buttons, labels, body text, warning/error messages, and footer when the visual structure makes that classification clear.

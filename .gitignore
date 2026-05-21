@@ -13,6 +13,7 @@ skills/**/output/
 skills/**/outputs/
 skills/**/ocr_output/
 skills/**/ocr-output/
+**/low-confidence-review/
 ocr-test-*/
 skills/**/*.paddle.txt
 skills/**/*.paddle.json
