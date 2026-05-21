@@ -1,0 +1,43 @@
+version: 1
+adapters:
+  fastapi:
+    status: verified_from_public_graph
+    maps:
+      APIRouter:
+        architecture_concept: interface-layer
+        guidance: Route handlers adapt HTTP input and call application services; they should not own business policy.
+        source_refs:
+          - source_skill: fastapi-clean-architecture
+            source_id: api-apirouter
+      Depends:
+        architecture_concept: framework-wiring
+        guidance: Use for interface/infrastructure wiring; avoid placing FastAPI Depends directly inside application or domain services.
+        source_refs:
+          - source_skill: fastapi-clean-architecture
+            source_id: api-depends
+          - source_skill: fastapi-clean-architecture
+            source_id: warning-depends-layer-leak
+      response_model:
+        architecture_concept: dto-schema-boundary
+        guidance: Use response schemas to shape boundary output and avoid leaking sensitive fields.
+        source_refs:
+          - source_skill: fastapi-clean-architecture
+            source_id: api-response-model
+      SQLAlchemy:
+        architecture_concept: infrastructure-layer
+        guidance: Treat ORM models, sessions, migrations, and concrete repositories as infrastructure details.
+        source_refs:
+          - source_skill: fastapi-clean-architecture
+            source_id: concept-sqlalchemy
+          - source_skill: fastapi-clean-architecture
+            source_id: layer-infra
+extension_points:
+  django:
+    status: not_modeled_in_v1
+    guidance: Add only after a public-safe source graph or project evidence exists.
+  nestjs:
+    status: not_modeled_in_v1
+    guidance: Add only after a public-safe source graph or project evidence exists.
+  spring:
+    status: not_modeled_in_v1
+    guidance: Add only after a public-safe source graph or project evidence exists.

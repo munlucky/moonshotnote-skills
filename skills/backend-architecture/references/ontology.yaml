@@ -1,0 +1,60 @@
+version: 1
+description: Public-safe ontology for framework-adapter backend architecture guidance distilled from existing public-safe skill graphs.
+node_types:
+  Principle:
+    description: A framework-independent architecture rule or design principle.
+  Layer:
+    description: A backend architecture layer with dependency-direction meaning.
+  Boundary:
+    description: A boundary where data, control, or dependency direction changes.
+  Pattern:
+    description: A reusable backend design pattern.
+  Workflow:
+    description: A change-management or refactoring workflow.
+  Tradeoff:
+    description: A design-economic factor used to judge architecture work.
+  FrameworkAdapter:
+    description: A framework-specific mapping from a concrete framework feature to architecture concepts.
+  Warning:
+    description: A misuse risk or boundary violation.
+edge_types:
+  belongs_to:
+    description: Places a node under a larger architecture topic.
+  governs:
+    description: A principle constrains or organizes another concept.
+  implements:
+    description: A pattern or adapter realizes another concept.
+  depends_inward:
+    description: A layer depends toward inner policy code.
+  implements_abstraction:
+    description: A concrete outer element implements an inner abstraction.
+  separates_from:
+    description: Keeps two responsibilities or change types distinct.
+  supports:
+    description: A concept strengthens or explains another concept.
+  operationalizes:
+    description: Turns a principle into a workflow decision.
+  reduces:
+    description: Lowers a target risk or cost.
+  increases:
+    description: Raises a target risk, capability, or cost.
+  trades_off_with:
+    description: Requires balancing two competing factors.
+  warns_about:
+    description: Marks a risk or likely boundary violation.
+  maps_to:
+    description: Maps a framework feature to a framework-independent architecture concept.
+  includes:
+    description: Groups a framework-specific mapping under an adapter.
+  next_topic:
+    description: Indicates a useful learning or analysis sequence.
+source_ref_schema:
+  required:
+    - source_skill
+    - source_id
+  note: Source refs point to public-safe graph node, edge, or chunk IDs from existing skills.
+public_safety:
+  tracked_references_must_not_include_raw_source: true
+  max_summary_chars: 600
+  require_source_refs: true
+  require_public_safe_true: true

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Architecture"
+  short_description: "Backend architecture graph with FastAPI adapter mapping"
+  default_prompt: "Use $backend-architecture to reason about backend layers, dependency direction, repository/service/use-case boundaries, framework leak risks, coupling, cohesion, and FastAPI adapter placement."

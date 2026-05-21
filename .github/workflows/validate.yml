@@ -85,6 +85,18 @@ jobs:
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
               ],
+              "backend-architecture": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/framework_adapters.yaml",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/validate_graph.py",
+                  "scripts/query_graph.py",
+                  "scripts/expand_context.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -153,7 +165,10 @@ jobs:
             skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/tidy-first/scripts/validate_graph.py \
             skills/tidy-first/scripts/query_graph.py \
-            skills/tidy-first/scripts/expand_context.py
+            skills/tidy-first/scripts/expand_context.py \
+            skills/backend-architecture/scripts/validate_graph.py \
+            skills/backend-architecture/scripts/query_graph.py \
+            skills/backend-architecture/scripts/expand_context.py
 
       - name: Validate knowledge graphs
         run: |
@@ -169,6 +184,12 @@ jobs:
             skills/tidy-first/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/tidy-first
+          python skills/backend-architecture/scripts/validate_graph.py \
+            skills/backend-architecture/references
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/backend-architecture/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/backend-architecture
 
       - name: Verify skills CLI discovery
         run: |
