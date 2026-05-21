@@ -1,4 +1,4 @@
-name: Validate Skill
+name: Validate Skills
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   validate:
-    name: Validate moonshotnote-ocr (${{ matrix.os }})
+    name: Validate skills (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -43,63 +43,79 @@ jobs:
 
           import yaml
 
-          skill_dir = Path("skills/moonshotnote-ocr")
-          skill_file = skill_dir / "SKILL.md"
+          skills = {
+              "moonshotnote-ocr": [
+                  "agents/openai.yaml",
+                  "scripts/doctor.py",
+                  "scripts/ocr_image.py",
+                  "scripts/review_low_confidence.py",
+                  "scripts/requirements.txt",
+                  "scripts/setup.sh",
+                  "scripts/setup.ps1",
+              ],
+              "fastapi-clean-architecture": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/validate_graph.py",
+                  "scripts/query_graph.py",
+                  "scripts/expand_context.py",
+                  "scripts/prepare_private_source.py",
+              ],
+          }
 
-          if not skill_file.is_file():
-              sys.exit("Missing skills/moonshotnote-ocr/SKILL.md")
+          for expected_name, required in skills.items():
+              skill_dir = Path("skills") / expected_name
+              skill_file = skill_dir / "SKILL.md"
 
-          text = skill_file.read_text(encoding="utf-8")
-          if not text.startswith("---\n"):
-              sys.exit("SKILL.md must start with YAML frontmatter")
+              if not skill_file.is_file():
+                  sys.exit(f"Missing {skill_file}")
 
-          try:
-              _, frontmatter, body = text.split("---", 2)
-          except ValueError:
-              sys.exit("SKILL.md frontmatter is not closed")
+              text = skill_file.read_text(encoding="utf-8")
+              if not text.startswith("---\n"):
+                  sys.exit(f"{skill_file} must start with YAML frontmatter")
 
-          data = yaml.safe_load(frontmatter) or {}
-          name = data.get("name")
-          description = data.get("description")
+              try:
+                  _, frontmatter, body = text.split("---", 2)
+              except ValueError:
+                  sys.exit(f"{skill_file} frontmatter is not closed")
 
-          if name != "moonshotnote-ocr":
-              sys.exit(f"Unexpected skill name: {name!r}")
-          if skill_dir.name != name:
-              sys.exit("Skill directory name must match frontmatter name")
-          if not description or not isinstance(description, str):
-              sys.exit("SKILL.md requires a string description")
-          if len(description.strip()) < 80:
-              sys.exit("SKILL.md description is too short for reliable discovery")
-          if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
-              sys.exit("Skill name must use lowercase letters, digits, and hyphens")
-          if not body.strip():
-              sys.exit("SKILL.md body must not be empty")
+              data = yaml.safe_load(frontmatter) or {}
+              name = data.get("name")
+              description = data.get("description")
 
-          required_files = [
-              skill_dir / "agents" / "openai.yaml",
-              skill_dir / "scripts" / "doctor.py",
-              skill_dir / "scripts" / "ocr_image.py",
-              skill_dir / "scripts" / "review_low_confidence.py",
-              skill_dir / "scripts" / "requirements.txt",
-              skill_dir / "scripts" / "setup.sh",
-              skill_dir / "scripts" / "setup.ps1",
-          ]
-          missing = [str(path) for path in required_files if not path.is_file()]
-          if missing:
-              sys.exit("Missing required bundled files: " + ", ".join(missing))
+              if name != expected_name:
+                  sys.exit(f"Unexpected skill name for {skill_file}: {name!r}")
+              if skill_dir.name != name:
+                  sys.exit(f"{skill_dir}: directory name must match frontmatter name")
+              if not description or not isinstance(description, str):
+                  sys.exit(f"{skill_file} requires a string description")
+              if len(description.strip()) < 80:
+                  sys.exit(f"{skill_file} description is too short for reliable discovery")
+              if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
+                  sys.exit(f"{skill_file} name must use lowercase letters, digits, and hyphens")
+              if not body.strip():
+                  sys.exit(f"{skill_file} body must not be empty")
 
-          forbidden = [
-              skill_dir / ".venv",
-              skill_dir / "output",
-              skill_dir / "outputs",
-              skill_dir / "ocr-output",
-              skill_dir / "ocr_output",
-          ]
-          present = [str(path) for path in forbidden if path.exists()]
-          if present:
-              sys.exit("Runtime artifacts must not be committed: " + ", ".join(present))
+              missing = [str(skill_dir / path) for path in required if not (skill_dir / path).is_file()]
+              if missing:
+                  sys.exit("Missing required bundled files: " + ", ".join(missing))
 
-          print("Skill manifest is valid")
+              forbidden = [
+                  skill_dir / ".venv",
+                  skill_dir / "output",
+                  skill_dir / "outputs",
+                  skill_dir / "ocr-output",
+                  skill_dir / "ocr_output",
+              ]
+              present = [str(path) for path in forbidden if path.exists()]
+              if present:
+                  sys.exit("Runtime artifacts must not be committed: " + ", ".join(present))
+
+          print("Skill manifests are valid")
           PY
 
       - name: Compile Python helper scripts
@@ -107,7 +123,16 @@ jobs:
           python -m py_compile \
             skills/moonshotnote-ocr/scripts/doctor.py \
             skills/moonshotnote-ocr/scripts/ocr_image.py \
-            skills/moonshotnote-ocr/scripts/review_low_confidence.py
+            skills/moonshotnote-ocr/scripts/review_low_confidence.py \
+            skills/fastapi-clean-architecture/scripts/validate_graph.py \
+            skills/fastapi-clean-architecture/scripts/query_graph.py \
+            skills/fastapi-clean-architecture/scripts/expand_context.py \
+            skills/fastapi-clean-architecture/scripts/prepare_private_source.py
+
+      - name: Validate FastAPI graph
+        run: |
+          python skills/fastapi-clean-architecture/scripts/validate_graph.py \
+            skills/fastapi-clean-architecture/references
 
       - name: Verify skills CLI discovery
         run: |

@@ -1,0 +1,39 @@
+version: "1.0"
+description: "Public-safe ontology for the FastAPI clean architecture OCR knowledge graph."
+node_types:
+  Concept:
+    description: "A technical concept or principle."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  Layer:
+    description: "A clean architecture layer or boundary."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  Class:
+    description: "A class or interface named in the book project."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  API:
+    description: "A FastAPI endpoint, router, schema, or framework API."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  Pattern:
+    description: "A reusable design or implementation pattern."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  Warning:
+    description: "A design risk, violation, or implementation caveat."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  SourceRef:
+    description: "A public-safe provenance anchor into the verified OCR source."
+    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+edge_types:
+  depends_on: "Source node depends on target node."
+  implements: "Source implements target interface, pattern, or requirement."
+  belongs_to: "Source belongs to a layer, chapter, or topic."
+  exposes: "Source exposes an API or behavior."
+  validates: "Source validates or constrains target data."
+  persists: "Source persists target data or domain object."
+  injects: "Source injects target dependency."
+  warns_about: "Source highlights a risk in target."
+  next_topic: "Source topic leads to target topic."
+public_safety:
+  tracked_references_must_not_include_full_ocr_text: true
+  max_summary_chars: 600
+  require_source_refs: true
+  require_public_safe_true: true

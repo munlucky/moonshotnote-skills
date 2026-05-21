@@ -1,22 +1,27 @@
-# moonshotnote-ocr
+# moonshotnote-skills
 
-`moonshotnote-ocr` is a Codex-compatible Agent Skill for screenshot and document-image OCR, with a Korean-first PaddleOCR path and a Surya path for document layout, reading order, and table-heavy pages.
+Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` repository.
+
+- `moonshotnote-ocr`: Korean-first screenshot and document-image OCR with PaddleOCR, Surya, and low-confidence visual review.
+- `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 
 ## Install
 
 From a published GitHub repository:
 
 ```powershell
-npx skills add <owner>/<repo> --skill moonshotnote-ocr -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill moonshotnote-ocr -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill fastapi-clean-architecture -g -a codex -y
 ```
 
 For local development from this checkout:
 
 ```powershell
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
+npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 ```
 
-## Setup
+## moonshotnote-ocr Setup
 
 The skill intentionally does not bundle OCR models or heavy Python dependencies. Install them into the installed skill's local virtual environment.
 
@@ -58,7 +63,7 @@ bash scripts/setup.sh
 
 The setup scripts create `.venv`, install pinned PaddlePaddle/PaddleOCR/Surya versions from binary wheels, then run `scripts/doctor.py`. They reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the skill.
 
-## Usage
+## moonshotnote-ocr Usage
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
@@ -112,6 +117,18 @@ Batch behavior:
 - Use Surya for document pages where reading order, table structure, formulas, or markdown reconstruction matter.
 - Use a PDF skill for PDF extraction and page rendering. This skill only handles image inputs or already-rendered scanned pages.
 
+## fastapi-clean-architecture Usage
+
+The FastAPI skill does not bundle the full OCR text. It ships a public-safe graph and helper scripts:
+
+```powershell
+py -3 skills\fastapi-clean-architecture\scripts\query_graph.py --q "FastAPI Depends 의존성 주입" --json
+py -3 skills\fastapi-clean-architecture\scripts\expand_context.py --q "회원가입 유스케이스" --out skills\fastapi-clean-architecture\output\source-pack.md
+py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
+```
+
+For local private source metadata, run `prepare_private_source.py` with the reviewed OCR text and low-confidence review closeout. Its outputs are written under `skills/fastapi-clean-architecture/output/private-source/`, which is ignored by git.
+
 ## Dependency Licenses
 
 The skill scripts are MIT licensed. Runtime OCR dependencies keep their own licenses. In particular, `surya-ocr` is GPL-3.0-or-later, so review dependency licensing before bundling this skill into proprietary redistributed products. See `THIRD_PARTY_NOTICES.md`.
@@ -120,7 +137,10 @@ The skill scripts are MIT licensed. Runtime OCR dependencies keep their own lice
 
 ```powershell
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\moonshotnote-ocr
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\fastapi-clean-architecture
+py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
+npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -128,7 +148,8 @@ Release checklist:
 
 ```powershell
 npx -y skills add . --list
-npx -y skills add <owner>/<repo> --skill moonshotnote-ocr --list
+npx -y skills add munlucky/moonshotnote-skills --skill moonshotnote-ocr --list
+npx -y skills add munlucky/moonshotnote-skills --skill fastapi-clean-architecture --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

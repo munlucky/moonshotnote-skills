@@ -1,0 +1,4 @@
+interface:
+  display_name: "FastAPI Clean Architecture"
+  short_description: "FastAPI clean architecture graph"
+  default_prompt: "Use $fastapi-clean-architecture to answer FastAPI clean architecture questions from the verified OCR knowledge graph."
