@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spring Modern API"
+  short_description: "Spring 6 and Spring Boot 3 modern API graph"
+  default_prompt: "Use $spring-modern-api to answer questions about REST, OpenAPI, Spring MVC, JPA, WebFlux, Spring Security, JWT, OAuth2, testing, deployment, gRPC, observability, and GraphQL from the public-safe knowledge graph."

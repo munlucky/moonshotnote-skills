@@ -1,0 +1,66 @@
+version: 1
+description: Public-safe ontology for Spring 6 and Spring Boot 3 modern API development guidance extracted from private OCR-derived notes.
+node_types:
+  Book:
+    description: The normalized root topic for the study graph.
+  Part:
+    description: A major topic group or book section.
+  APIStyle:
+    description: A style or protocol for API design and implementation.
+  Framework:
+    description: A Spring, Java, or platform framework.
+  Component:
+    description: A Spring component, generated interface, model, repository, service, or runtime building block.
+  Pattern:
+    description: A reusable implementation or architecture pattern.
+  Security:
+    description: Authentication, authorization, token, or web-security concept.
+  Testing:
+    description: Manual, unit, integration, or protocol-specific testing concept.
+  Deployment:
+    description: Container, orchestration, or deployment concept.
+  Observability:
+    description: Logging, tracing, metrics, or monitoring concept.
+  Warning:
+    description: A source-quality caveat or implementation risk.
+edge_types:
+  belongs_to:
+    description: Places a node under a larger topic.
+  uses:
+    description: A concept uses a framework, tool, or component.
+  implements:
+    description: A component realizes a style, pattern, or boundary.
+  generates:
+    description: A tool or specification generates code or artifacts.
+  secures:
+    description: A security concept protects an API or endpoint.
+  authenticates:
+    description: A mechanism validates identity.
+  authorizes:
+    description: A mechanism controls permitted access.
+  tests:
+    description: A testing concept validates an API or component.
+  deploys:
+    description: A deployment concept packages or runs a service.
+  observes:
+    description: A tool or pattern records logs, traces, or metrics.
+  compares_with:
+    description: Relates two API styles or implementation approaches.
+  evolves_to:
+    description: A chapter or concept extends an earlier concept.
+  warns_about:
+    description: Marks a caveat or misuse risk.
+  next_topic:
+    description: Indicates a useful learning sequence.
+source_ref_schema:
+  required:
+    - chapter
+    - lines
+  optional:
+    - section
+  note: Source refs point to private OCR-derived line ranges and are provenance markers only.
+public_safety:
+  tracked_references_must_not_include_raw_source: true
+  max_summary_chars: 600
+  require_source_refs: true
+  require_public_safe_true: true
