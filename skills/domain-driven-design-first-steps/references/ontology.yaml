@@ -1,0 +1,28 @@
+version: 1
+domain: domain-driven-design-first-steps
+source_boundary: third-party-ocr-private-source
+node_types:
+  Concept: Core DDD idea or modeling primitive.
+  Pattern: Reusable strategic, tactical, or integration pattern.
+  Practice: Collaborative or operational method.
+  Decision: Rule of thumb for selecting an architecture or model style.
+  ArchitectureStyle: System-level architecture style connected to DDD boundaries.
+edge_types:
+  separates: Distinguishes concepts that are often confused.
+  informs: One concept guides another design choice.
+  constrains: One concept limits or protects another.
+  implements: A tactical pattern realizes a modeling decision.
+  integrates_with: Concepts interact across boundaries.
+  escalates_to: A simpler option can evolve into a stronger option.
+  validates: A practice tests whether a boundary or model is coherent.
+  cautions_against: Warns against a common misuse.
+source_ref_policy:
+  allowed_sources:
+    - book.paddle.txt
+  tracked_files_must_not_include_raw_source: true
+  refs_use_line_ranges_only: true
+quality_gates:
+  source_ocr_ok_pages: 321
+  source_ocr_error_pages: 0
+  low_confidence_items: 452
+  low_confidence_status: needs_review

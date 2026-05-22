@@ -6,9 +6,10 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.
 - `tidy-first`: public-safe Tidy First knowledge graph for small code tidying, behavior/structure separation, coupling, cohesion, reversibility, and options.
-- `backend-architecture`: public-safe backend architecture graph distilled from FastAPI, Tidy First, Spring Modern API, and Python Architecture Patterns skills, with verified FastAPI and Spring framework adapters plus general data/runtime/operations architecture patterns.
+- `backend-architecture`: public-safe backend architecture graph distilled from FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, and DDD First Steps skills, with verified FastAPI and Spring framework adapters plus general data/runtime/operations/domain modeling patterns.
 - `spring-modern-api`: public-safe Spring 6 and Spring Boot 3 modern API development graph for REST, OpenAPI, WebFlux, Security/JWT, deployment, observability, gRPC, and GraphQL.
 - `python-architecture-patterns`: public-safe Python architecture graph for API design, data modeling, data layers, Twelve-Factor services, web server structure, event-driven systems, testing, packaging, observability, and continuous architecture.
+- `domain-driven-design-first-steps`: public-safe Korean DDD study graph for subdomains, ubiquitous language, bounded contexts, context maps, tactical patterns, event sourcing, CQRS, event storming, microservices, event-driven architecture, and data mesh.
 
 ## Install
 
@@ -22,6 +23,7 @@ npx skills add munlucky/moonshotnote-skills --skill tidy-first -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill backend-architecture -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill spring-modern-api -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill python-architecture-patterns -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -34,6 +36,7 @@ npx skills add . --skill tidy-first -g -a codex -y --copy
 npx skills add . --skill backend-architecture -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
+npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -171,7 +174,7 @@ Private OCR-derived source chunks stay under `skills/tidy-first/output/private-s
 
 ## backend-architecture Usage
 
-The Backend Architecture skill distills framework-independent principles from the public-safe FastAPI, Tidy First, Spring Modern API, and Python Architecture Patterns graphs. It includes verified FastAPI and Spring adapters plus general backend data, runtime, operations, and quality-loop patterns:
+The Backend Architecture skill distills framework-independent principles from the public-safe FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, and DDD First Steps graphs. It includes verified FastAPI and Spring adapters plus general backend data, runtime, operations, quality-loop, and domain-modeling patterns:
 
 ```powershell
 py -3 skills\backend-architecture\scripts\query_graph.py --q "service layer repository dependency inversion" --json
@@ -180,6 +183,8 @@ py -3 skills\backend-architecture\scripts\query_graph.py --q "Spring @RestContro
 py -3 skills\backend-architecture\scripts\query_graph.py --q "WebFlux Mono Flux layer leak" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "event-driven queue monolith microservice tradeoff" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "observability metrics profiling continuous architecture" --json
+py -3 skills\backend-architecture\scripts\query_graph.py --q "bounded context aggregate repository domain event" --json
+py -3 skills\backend-architecture\scripts\query_graph.py --q "event sourcing CQRS event storming data mesh" --json
 py -3 skills\backend-architecture\scripts\expand_context.py --q "coupling cohesion change cost" --out skills\backend-architecture\output\source-pack.md
 py -3 skills\backend-architecture\scripts\validate_graph.py skills\backend-architecture\references
 ```
@@ -212,6 +217,20 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 
 Private OCR-derived source chunks stay under `skills/python-architecture-patterns/output/private-source/`, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
 
+## domain-driven-design-first-steps Usage
+
+The Domain-Driven Design First Steps skill does not bundle the full OCR text. It ships a public-safe graph and helper scripts:
+
+```powershell
+py -3 skills\domain-driven-design-first-steps\scripts\query_graph.py --q "바운디드 컨텍스트" --limit 5
+py -3 skills\domain-driven-design-first-steps\scripts\query_graph.py --q "이벤트 소싱 CQRS" --limit 5
+py -3 skills\domain-driven-design-first-steps\scripts\expand_context.py --node bounded-context
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
+```
+
+Private OCR-derived source chunks stay under `skills/domain-driven-design-first-steps/output/private-source/`, which is ignored by git. The tracked graph contains only summaries, source references, and relationships. The current source quality gate records `321/321` OCR pages processed and `452` low-confidence items still requiring visual review before exact source wording is trusted.
+
 ## Dependency Licenses
 
 The skill scripts are MIT licensed. Runtime OCR dependencies keep their own licenses. In particular, `surya-ocr` is GPL-3.0-or-later, so review dependency licensing before bundling this skill into proprietary redistributed products. See `THIRD_PARTY_NOTICES.md`.
@@ -232,6 +251,7 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\backend-architecture
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\spring-modern-api
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\python-architecture-patterns
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\domain-driven-design-first-steps
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
@@ -246,6 +266,8 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\spring-modern-api
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\python-architecture-patterns\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\python-architecture-patterns
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
 npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
@@ -253,6 +275,7 @@ npx skills add . --skill tidy-first -g -a codex -y --copy
 npx skills add . --skill backend-architecture -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
+npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -267,6 +290,7 @@ npx -y skills add munlucky/moonshotnote-skills --skill tidy-first --list
 npx -y skills add munlucky/moonshotnote-skills --skill backend-architecture --list
 npx -y skills add munlucky/moonshotnote-skills --skill spring-modern-api --list
 npx -y skills add munlucky/moonshotnote-skills --skill python-architecture-patterns --list
+npx -y skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

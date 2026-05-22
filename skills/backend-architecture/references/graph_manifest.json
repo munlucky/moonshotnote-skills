@@ -34,13 +34,21 @@
         "skills/python-architecture-patterns/references/edges.jsonl",
         "skills/python-architecture-patterns/references/chunks.jsonl"
       ]
+    },
+    {
+      "name": "domain-driven-design-first-steps",
+      "source_paths": [
+        "skills/domain-driven-design-first-steps/references/nodes.jsonl",
+        "skills/domain-driven-design-first-steps/references/edges.jsonl",
+        "skills/domain-driven-design-first-steps/references/chunks.jsonl"
+      ]
     }
   ],
-  "source_commit": "60860c9142888006612afbbed91f3c3611bdf691",
+  "source_commit": "25f86162e29d7bad8c47e5956b30d6b3884355d3",
   "counts": {
-    "nodes": 48,
-    "edges": 95,
-    "chunks": 14
+    "nodes": 60,
+    "edges": 119,
+    "chunks": 18
   },
   "framework_adapters_count": 2,
   "public_sanitized": true,
@@ -52,7 +60,11 @@
       "spring"
     ],
     "general_architecture_sources": [
-      "python-architecture-patterns"
+      "python-architecture-patterns",
+      "domain-driven-design-first-steps"
+    ],
+    "source_quality_notes": [
+      "domain-driven-design-first-steps is used only through public-safe references; its manifest records low-confidence OCR review still open, so do not quote private source wording."
     ],
     "future_adapters_are_extension_points_only": true
   }

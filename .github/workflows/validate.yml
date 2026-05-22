@@ -118,6 +118,18 @@ jobs:
                   "references/chunks.jsonl",
                   "scripts/query_knowledge.py",
               ],
+              "domain-driven-design-first-steps": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/query_graph.py",
+                  "scripts/expand_context.py",
+                  "scripts/lint_knowledge_pack.py",
+                  "scripts/audit_public_safety.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -199,7 +211,11 @@ jobs:
             skills/spring-modern-api/scripts/validate_graph.py \
             skills/spring-modern-api/scripts/query_graph.py \
             skills/spring-modern-api/scripts/expand_context.py \
-            skills/python-architecture-patterns/scripts/query_knowledge.py
+            skills/python-architecture-patterns/scripts/query_knowledge.py \
+            skills/domain-driven-design-first-steps/scripts/query_graph.py \
+            skills/domain-driven-design-first-steps/scripts/expand_context.py \
+            skills/domain-driven-design-first-steps/scripts/lint_knowledge_pack.py \
+            skills/domain-driven-design-first-steps/scripts/audit_public_safety.py
 
       - name: Validate knowledge graphs
         run: |
@@ -231,6 +247,10 @@ jobs:
             skills/python-architecture-patterns/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/python-architecture-patterns
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/domain-driven-design-first-steps/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/domain-driven-design-first-steps
 
       - name: Verify skills CLI discovery
         run: |

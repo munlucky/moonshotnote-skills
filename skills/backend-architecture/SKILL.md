@@ -1,6 +1,6 @@
 ---
 name: backend-architecture
-description: Framework-adapter backend architecture assistant backed by a public-safe ontology distilled from FastAPI clean architecture, Tidy First, Spring modern API, and Python architecture patterns graphs. Use when Codex needs to reason about backend layers, dependency direction, repository/service/use-case boundaries, DTO/schema boundaries, data/runtime/operations boundaries, framework leak risks, structure versus behavior changes, coupling, cohesion, reversible architecture changes, or FastAPI/Spring adapter mapping.
+description: Framework-adapter backend architecture assistant backed by a public-safe ontology distilled from FastAPI clean architecture, Tidy First, Spring modern API, Python architecture patterns, and DDD first steps graphs. Use when Codex needs to reason about backend layers, dependency direction, repository/service/use-case boundaries, DDD subdomains, ubiquitous language, bounded contexts, context maps, aggregates, domain events, DTO/schema boundaries, data/runtime/operations boundaries, framework leak risks, structure versus behavior changes, coupling, cohesion, reversible architecture changes, or FastAPI/Spring adapter mapping.
 ---
 
 # Backend Architecture
@@ -17,10 +17,11 @@ Use this skill when the user asks about:
 - coupling, cohesion, change cost, and reversible architecture changes
 - Spring MVC, Spring Service/Repository/JPA, OpenAPI, WebFlux, and Spring Security boundary placement
 - API design, data modeling, event-driven boundaries, monolith/microservice tradeoffs, runtime operations, testing, packaging, observability, and continuous architecture
+- DDD strategic and tactical design: subdomain classification, ubiquitous language, bounded contexts, context maps, aggregates, domain events, event sourcing, CQRS, event storming, and data mesh
 
 ## Source Boundary
 
-This skill is derived only from public-safe graph summaries in `fastapi-clean-architecture`, `tidy-first`, `spring-modern-api`, and `python-architecture-patterns`. It does not include private OCR source text. Treat `source_refs` as links to public graph concepts, not permission to quote original books.
+This skill is derived only from public-safe graph summaries in `fastapi-clean-architecture`, `tidy-first`, `spring-modern-api`, `python-architecture-patterns`, and `domain-driven-design-first-steps`. It does not include private OCR source text. Treat `source_refs` as links to public graph concepts, not permission to quote original books.
 
 It includes verified FastAPI and Spring adapters. Other framework adapters are represented only as extension points; do not invent framework-specific mappings unless the user's codebase supplies evidence.
 
@@ -59,6 +60,9 @@ It includes verified FastAPI and Spring adapters. Other framework adapters are r
 - WebFlux `Mono`/`Flux` and Spring Security filter/security-context details should not become domain model dependencies without an explicit project-level reason.
 - Data modeling and data-layer choices are architecture decisions because data is harder to replace than application code.
 - Event-driven queues decouple long-running work from request paths, but add state tracking, retry, priority, and failure-handling responsibilities.
+- DDD starts with business value and language: classify subdomains before choosing rich domain models, event sourcing, CQRS, or microservices.
+- Bounded contexts are semantic and ownership boundaries; they inform service boundaries but should not be mapped one-to-one to services automatically.
+- Aggregates are transaction and invariant boundaries; repositories should usually load and save aggregates instead of exposing arbitrary persistence internals.
 - Observability, testing, packaging, and profiling/debugging evidence should feed architecture evolution instead of being treated as afterthoughts.
 - Structural refactors and behavior changes should be split when review or rollback cost would otherwise rise.
 - Decoupling is justified when expected future change-cost reduction exceeds the current structural cost.
