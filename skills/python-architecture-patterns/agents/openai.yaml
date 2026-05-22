@@ -1,0 +1,16 @@
+name: python-architecture-patterns
+version: 1.0.0
+description: Public-safe architecture knowledge distilled from reviewed OCR.
+entrypoint: SKILL.md
+references:
+  - references/graph_manifest.json
+  - references/ontology.yaml
+  - references/nodes.jsonl
+  - references/edges.jsonl
+  - references/chunks.jsonl
+tools:
+  - scripts/query_knowledge.py
+source_policy:
+  boundary: third-party
+  raw_source: output/private-source
+  public_safe: true

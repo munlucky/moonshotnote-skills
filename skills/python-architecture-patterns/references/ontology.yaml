@@ -1,0 +1,26 @@
+# Public-safe ontology for the Python Architecture Patterns knowledge skill.
+node_types:
+  Chapter:
+    description: A chapter-level topic from the reviewed OCR source, summarized without source text reproduction.
+  Concept:
+    description: A reusable architectural concept synthesized across one or more chapters.
+edge_types:
+  precedes: Sequential chapter relationship.
+  introduces: A chapter introduces a concept.
+  refines: A chapter makes a concept more concrete.
+  supports: A chapter supports a cross-cutting practice.
+  encapsulates: A chapter wraps implementation details behind a boundary.
+  extends: A chapter expands an earlier concept.
+  analyzes: A chapter compares tradeoffs.
+  enables: A chapter creates a validation mechanism.
+  modularizes: A chapter creates a reusable distribution boundary.
+  observes: A chapter adds runtime evidence through logs.
+  measures: A chapter adds runtime evidence through metrics.
+  informs: A chapter provides evidence for improvement.
+  repairs: A chapter supports failure diagnosis and repair.
+  guides: A chapter guides ongoing architectural change.
+  feeds_into: A concept informs later architecture evolution.
+source_policy:
+  boundary: third-party
+  tracked_content: summaries, labels, graph relations, and line provenance only
+  private_content: raw reviewed OCR chunks under output/private-source

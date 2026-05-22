@@ -38,6 +38,7 @@ jobs:
           python -m pip install PyYAML
           python - <<'PY'
           import re
+          import subprocess
           import sys
           from pathlib import Path
 
@@ -108,6 +109,15 @@ jobs:
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
               ],
+              "python-architecture-patterns": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/query_knowledge.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -154,9 +164,15 @@ jobs:
                   skill_dir / "ocr-output",
                   skill_dir / "ocr_output",
               ]
-              present = [str(path) for path in forbidden if path.exists()]
-              if present:
-                  sys.exit("Runtime artifacts must not be committed: " + ", ".join(present))
+              tracked = subprocess.run(
+                  ["git", "ls-files", "--", *(str(path) for path in forbidden)],
+                  check=False,
+                  capture_output=True,
+                  text=True,
+              )
+              tracked_artifacts = [line for line in tracked.stdout.splitlines() if line.strip()]
+              if tracked_artifacts:
+                  sys.exit("Runtime artifacts must not be tracked: " + ", ".join(tracked_artifacts))
 
           print("Skill manifests are valid")
           PY
@@ -182,7 +198,8 @@ jobs:
             skills/backend-architecture/scripts/expand_context.py \
             skills/spring-modern-api/scripts/validate_graph.py \
             skills/spring-modern-api/scripts/query_graph.py \
-            skills/spring-modern-api/scripts/expand_context.py
+            skills/spring-modern-api/scripts/expand_context.py \
+            skills/python-architecture-patterns/scripts/query_knowledge.py
 
       - name: Validate knowledge graphs
         run: |
@@ -210,6 +227,10 @@ jobs:
             skills/spring-modern-api/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/spring-modern-api
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/python-architecture-patterns/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/python-architecture-patterns
 
       - name: Verify skills CLI discovery
         run: |
