@@ -6,7 +6,7 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.
 - `tidy-first`: public-safe Tidy First knowledge graph for small code tidying, behavior/structure separation, coupling, cohesion, reversibility, and options.
-- `backend-architecture`: public-safe backend architecture graph distilled from the FastAPI and Tidy First skills, with a verified FastAPI framework adapter.
+- `backend-architecture`: public-safe backend architecture graph distilled from FastAPI, Tidy First, and Spring Modern API skills, with verified FastAPI and Spring framework adapters.
 - `spring-modern-api`: public-safe Spring 6 and Spring Boot 3 modern API development graph for REST, OpenAPI, WebFlux, Security/JWT, deployment, observability, gRPC, and GraphQL.
 
 ## Install
@@ -168,11 +168,13 @@ Private OCR-derived source chunks stay under `skills/tidy-first/output/private-s
 
 ## backend-architecture Usage
 
-The Backend Architecture skill distills framework-independent principles from the public-safe FastAPI and Tidy First graphs. v1 includes a verified FastAPI adapter only:
+The Backend Architecture skill distills framework-independent principles from the public-safe FastAPI, Tidy First, and Spring Modern API graphs. It includes verified FastAPI and Spring adapters:
 
 ```powershell
 py -3 skills\backend-architecture\scripts\query_graph.py --q "service layer repository dependency inversion" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "FastAPI Depends layer leak" --json
+py -3 skills\backend-architecture\scripts\query_graph.py --q "Spring @RestController @Service @Repository JPA" --json
+py -3 skills\backend-architecture\scripts\query_graph.py --q "WebFlux Mono Flux layer leak" --json
 py -3 skills\backend-architecture\scripts\expand_context.py --q "coupling cohesion change cost" --out skills\backend-architecture\output\source-pack.md
 py -3 skills\backend-architecture\scripts\validate_graph.py skills\backend-architecture\references
 ```

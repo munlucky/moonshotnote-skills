@@ -51,6 +51,10 @@ def chunk_text(chunk: dict) -> str:
     )
 
 
+def edge_text(edge: dict) -> str:
+    return " ".join([edge.get("source", ""), edge.get("target", ""), edge.get("type", ""), edge.get("summary", "")])
+
+
 def query_graph(query: str, limit: int = 6) -> dict:
     refs = references_dir()
     nodes = load_jsonl(refs / "nodes.jsonl")
@@ -68,11 +72,15 @@ def query_graph(query: str, limit: int = 6) -> dict:
     node_hits = node_hits[:limit]
 
     hit_ids = {node["id"] for node in node_hits}
-    edge_hits = [
-        edge
-        for edge in edges
-        if edge["source"] in hit_ids or edge["target"] in hit_ids or score_text(query_tokens, edge.get("summary", "")) > 0
-    ][: max(limit * 2, 8)]
+    edge_hits = []
+    for edge in edges:
+        score = score_text(query_tokens, edge_text(edge))
+        if edge["source"] in hit_ids or edge["target"] in hit_ids:
+            score += 2
+        if score:
+            edge_hits.append({"score": score, **edge})
+    edge_hits.sort(key=lambda item: (-item["score"], item["source"], item["target"]))
+    edge_hits = edge_hits[: max(limit * 2, 8)]
 
     chunk_hits = []
     for chunk in chunks:
@@ -86,9 +94,26 @@ def query_graph(query: str, limit: int = 6) -> dict:
                 "score": adapter_score,
                 "id": "framework-adapters",
                 "title": "Framework adapters",
-                "summary": "FastAPI adapter mapping is available in references/framework_adapters.yaml; other framework adapters are extension points only.",
-                "source_refs": [{"source_skill": "fastapi-clean-architecture", "source_id": "concept-fastapi"}],
-                "keywords": ["FastAPI", "APIRouter", "Depends", "response_model", "SQLAlchemy", "framework adapter"],
+                "summary": "FastAPI and Spring adapter mappings are available in references/framework_adapters.yaml; other framework adapters are extension points only.",
+                "source_refs": [
+                    {"source_skill": "fastapi-clean-architecture", "source_id": "concept-fastapi"},
+                    {"source_skill": "spring-modern-api", "source_id": "framework-spring"},
+                ],
+                "keywords": [
+                    "FastAPI",
+                    "APIRouter",
+                    "Depends",
+                    "response_model",
+                    "SQLAlchemy",
+                    "Spring",
+                    "@RestController",
+                    "@Service",
+                    "@Repository",
+                    "JPA",
+                    "WebFlux",
+                    "Spring Security",
+                    "framework adapter",
+                ],
                 "public_safe": True,
             }
         )

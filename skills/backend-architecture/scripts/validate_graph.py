@@ -31,7 +31,7 @@ EDGE_TYPES = {
     "includes",
     "next_topic",
 }
-SOURCE_SKILLS = {"fastapi-clean-architecture", "tidy-first"}
+SOURCE_SKILLS = {"fastapi-clean-architecture", "tidy-first", "spring-modern-api"}
 RAW_TEXT_RISK_PATTERNS = [
     re.compile(r"C:\\Users\\", re.IGNORECASE),
     re.compile(r"/Users/"),
@@ -96,6 +96,14 @@ def validate_framework_adapters(path: Path, expected_count: int) -> None:
         "Depends:",
         "response_model:",
         "SQLAlchemy:",
+        "spring:",
+        '"@RestController":',
+        '"@Service":',
+        '"@Repository":',
+        "JPA:",
+        "OpenAPI:",
+        "WebFlux:",
+        "Spring Security:",
         "extension_points:",
     ]
     for fragment in required_fragments:

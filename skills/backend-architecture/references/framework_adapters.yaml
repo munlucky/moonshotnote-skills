@@ -31,13 +31,61 @@ adapters:
             source_id: concept-sqlalchemy
           - source_skill: fastapi-clean-architecture
             source_id: layer-infra
+  spring:
+    status: verified_from_public_graph
+    maps:
+      "@RestController":
+        architecture_concept: interface-layer
+        guidance: Use Spring MVC controllers to adapt HTTP requests and responses into application service calls; keep business policy out of controller methods.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: component-controller
+      "@Service":
+        architecture_concept: application-layer
+        guidance: Use service components as application/use-case coordinators; avoid letting web, security, or ORM mechanics dominate the service contract.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: component-service
+      "@Repository":
+        architecture_concept: repository-pattern
+        guidance: Treat repository components as persistence boundaries; concrete Spring Data/JPA behavior belongs outside domain policy.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: component-repository
+      JPA:
+        architecture_concept: infrastructure-layer
+        guidance: Keep JPA entities, persistence configuration, and database mechanics behind repository or persistence ports.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: component-jpa-persistence
+      OpenAPI:
+        architecture_concept: dto-schema-boundary
+        guidance: Use OpenAPI design-first contracts and generated interfaces as API boundary artifacts, not as domain model ownership.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: concept-openapi-design-first
+          - source_skill: spring-modern-api
+            source_id: component-openapi-codegen
+      WebFlux:
+        architecture_concept: reactive-boundary
+        guidance: Use WebFlux, Mono, and Flux at reactive adapter boundaries; keep domain policy independent from reactive framework types unless the project intentionally models them.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: framework-webflux
+          - source_skill: spring-modern-api
+            source_id: component-mono-flux
+      Spring Security:
+        architecture_concept: security-boundary
+        guidance: Keep filters, JWT parsing, OAuth2 resource server behavior, roles, CORS, and CSRF at the security/interface boundary; pass stable identity or authorization decisions inward.
+        source_refs:
+          - source_skill: spring-modern-api
+            source_id: security-spring-security
+          - source_skill: spring-modern-api
+            source_id: security-jwt
 extension_points:
   django:
     status: not_modeled_in_v1
     guidance: Add only after a public-safe source graph or project evidence exists.
   nestjs:
-    status: not_modeled_in_v1
-    guidance: Add only after a public-safe source graph or project evidence exists.
-  spring:
     status: not_modeled_in_v1
     guidance: Add only after a public-safe source graph or project evidence exists.

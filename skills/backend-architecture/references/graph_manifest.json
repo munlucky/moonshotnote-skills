@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "created_at": "2026-05-21T00:00:00+09:00",
+  "created_at": "2026-05-22T00:00:00+09:00",
   "source_kind": "derived public-safe skill graph",
   "source_skills": [
     {
@@ -18,21 +18,30 @@
         "skills/tidy-first/references/edges.jsonl",
         "skills/tidy-first/references/chunks.jsonl"
       ]
+    },
+    {
+      "name": "spring-modern-api",
+      "source_paths": [
+        "skills/spring-modern-api/references/nodes.jsonl",
+        "skills/spring-modern-api/references/edges.jsonl",
+        "skills/spring-modern-api/references/chunks.jsonl"
+      ]
     }
   ],
-  "source_commit": "809d2b84c2dd40223363ded17a5db41af3cd703b",
+  "source_commit": "1863f6b17c291e07ed1481b39e441178fa264381",
   "counts": {
-    "nodes": 28,
-    "edges": 50,
-    "chunks": 8
+    "nodes": 38,
+    "edges": 74,
+    "chunks": 11
   },
-  "framework_adapters_count": 1,
+  "framework_adapters_count": 2,
   "public_sanitized": true,
   "source_quality_gate": {
     "uses_raw_ocr_source": false,
     "uses_public_skill_graphs_only": true,
     "framework_specific_adapters": [
-      "fastapi"
+      "fastapi",
+      "spring"
     ],
     "future_adapters_are_extension_points_only": true
   }
