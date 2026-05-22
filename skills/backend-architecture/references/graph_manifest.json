@@ -26,13 +26,21 @@
         "skills/spring-modern-api/references/edges.jsonl",
         "skills/spring-modern-api/references/chunks.jsonl"
       ]
+    },
+    {
+      "name": "python-architecture-patterns",
+      "source_paths": [
+        "skills/python-architecture-patterns/references/nodes.jsonl",
+        "skills/python-architecture-patterns/references/edges.jsonl",
+        "skills/python-architecture-patterns/references/chunks.jsonl"
+      ]
     }
   ],
-  "source_commit": "1863f6b17c291e07ed1481b39e441178fa264381",
+  "source_commit": "60860c9142888006612afbbed91f3c3611bdf691",
   "counts": {
-    "nodes": 38,
-    "edges": 74,
-    "chunks": 11
+    "nodes": 48,
+    "edges": 95,
+    "chunks": 14
   },
   "framework_adapters_count": 2,
   "public_sanitized": true,
@@ -42,6 +50,9 @@
     "framework_specific_adapters": [
       "fastapi",
       "spring"
+    ],
+    "general_architecture_sources": [
+      "python-architecture-patterns"
     ],
     "future_adapters_are_extension_points_only": true
   }

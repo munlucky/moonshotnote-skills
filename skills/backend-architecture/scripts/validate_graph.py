@@ -31,7 +31,7 @@ EDGE_TYPES = {
     "includes",
     "next_topic",
 }
-SOURCE_SKILLS = {"fastapi-clean-architecture", "tidy-first", "spring-modern-api"}
+SOURCE_SKILLS = {"fastapi-clean-architecture", "tidy-first", "spring-modern-api", "python-architecture-patterns"}
 RAW_TEXT_RISK_PATTERNS = [
     re.compile(r"C:\\Users\\", re.IGNORECASE),
     re.compile(r"/Users/"),
