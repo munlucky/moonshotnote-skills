@@ -6,7 +6,8 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.
 - `tidy-first`: public-safe Tidy First knowledge graph for small code tidying, behavior/structure separation, coupling, cohesion, reversibility, and options.
-- `backend-architecture`: public-safe backend architecture graph distilled from FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, and DDD First Steps skills, with verified FastAPI and Spring framework adapters plus general data/runtime/operations/domain modeling patterns.
+- `backend-architecture`: registry-driven public-safe backend architecture graph distilled from FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, DDD First Steps, and Modern Java backend code-quality skills, with verified FastAPI/Spring adapters and Java Optional/Stream/CompletableFuture boundary guidance.
+- `modern-java-in-action`: public-safe Modern Java graph for lambdas, streams, collectors, Optional, default methods, date/time APIs, CompletableFuture, and Spring/backend code readability.
 - `spring-modern-api`: public-safe Spring 6 and Spring Boot 3 modern API development graph for REST, OpenAPI, WebFlux, Security/JWT, deployment, observability, gRPC, and GraphQL.
 - `python-architecture-patterns`: public-safe Python architecture graph for API design, data modeling, data layers, Twelve-Factor services, web server structure, event-driven systems, testing, packaging, observability, and continuous architecture.
 - `domain-driven-design-first-steps`: public-safe Korean DDD study graph for subdomains, ubiquitous language, bounded contexts, context maps, tactical patterns, event sourcing, CQRS, event storming, microservices, event-driven architecture, and data mesh.
@@ -21,6 +22,7 @@ npx skills add munlucky/moonshotnote-skills --skill fastapi-clean-architecture -
 npx skills add munlucky/moonshotnote-skills --skill text-knowledge-skill-builder -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill tidy-first -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill backend-architecture -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill modern-java-in-action -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill spring-modern-api -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill python-architecture-patterns -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps -g -a codex -y
@@ -174,18 +176,20 @@ Private OCR-derived source chunks stay under `skills/tidy-first/output/private-s
 
 ## backend-architecture Usage
 
-The Backend Architecture skill distills framework-independent principles from the public-safe FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, and DDD First Steps graphs. It includes verified FastAPI and Spring adapters plus general backend data, runtime, operations, quality-loop, and domain-modeling patterns:
+The Backend Architecture skill is a registry-driven meta skill. It distills framework-independent principles from public-safe FastAPI, Tidy First, Spring Modern API, Python Architecture Patterns, DDD First Steps, and Modern Java graphs. It includes verified FastAPI and Spring adapters plus backend data, runtime, operations, quality-loop, domain-modeling, and Java Optional/Stream/CompletableFuture boundary guidance:
 
 ```powershell
 py -3 skills\backend-architecture\scripts\query_graph.py --q "service layer repository dependency inversion" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "FastAPI Depends layer leak" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "Spring @RestController @Service @Repository JPA" --json
+py -3 skills\backend-architecture\scripts\query_graph.py --q "Spring Optional Stream service layer side effect" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "WebFlux Mono Flux layer leak" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "event-driven queue monolith microservice tradeoff" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "observability metrics profiling continuous architecture" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "bounded context aggregate repository domain event" --json
 py -3 skills\backend-architecture\scripts\query_graph.py --q "event sourcing CQRS event storming data mesh" --json
 py -3 skills\backend-architecture\scripts\expand_context.py --q "coupling cohesion change cost" --out skills\backend-architecture\output\source-pack.md
+py -3 skills\backend-architecture\scripts\build_from_source_skills.py --check
 py -3 skills\backend-architecture\scripts\validate_graph.py skills\backend-architecture\references
 ```
 
@@ -273,6 +277,7 @@ npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
 npx skills add . --skill tidy-first -g -a codex -y --copy
 npx skills add . --skill backend-architecture -g -a codex -y --copy
+npx skills add . --skill modern-java-in-action -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy

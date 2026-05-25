@@ -1,0 +1,65 @@
+version: 1
+description: Public-safe ontology for modern Java language and library features that affect backend code quality.
+node_types:
+  Book:
+    description: Root study source.
+  Part:
+    description: Major topic group.
+  APIStyle:
+    description: A programming style or API style.
+  Framework:
+    description: Java platform or library framework.
+  Component:
+    description: Java type, interface, API, or runtime component.
+  Pattern:
+    description: Reusable coding or architecture pattern.
+  Security:
+    description: Security-related concept.
+  Testing:
+    description: Testing-related concept.
+  Deployment:
+    description: Deployment-related concept.
+  Observability:
+    description: Observability-related concept.
+  Warning:
+    description: Misuse risk or caveat.
+edge_types:
+  belongs_to:
+    description: Places a node under a larger topic.
+  uses:
+    description: A concept uses another concept.
+  implements:
+    description: A component realizes a style or pattern.
+  generates:
+    description: A tool or specification generates code or artifacts.
+  secures:
+    description: A security concept protects a boundary.
+  authenticates:
+    description: Validates identity.
+  authorizes:
+    description: Controls access.
+  tests:
+    description: Validates a component.
+  deploys:
+    description: Packages or runs a service.
+  observes:
+    description: Records runtime evidence.
+  compares_with:
+    description: Relates two approaches.
+  evolves_to:
+    description: Extends an earlier concept.
+  warns_about:
+    description: Marks a caveat or misuse risk.
+  next_topic:
+    description: Indicates a useful learning sequence.
+source_ref_schema:
+  required:
+    - chapter
+    - lines
+  optional:
+    - section
+public_safety:
+  tracked_references_must_not_include_raw_source: true
+  max_summary_chars: 600
+  require_source_refs: true
+  require_public_safe_true: true

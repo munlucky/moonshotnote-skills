@@ -1,6 +1,6 @@
 ---
 name: backend-architecture
-description: Framework-adapter backend architecture assistant backed by a public-safe ontology distilled from FastAPI clean architecture, Tidy First, Spring modern API, Python architecture patterns, and DDD first steps graphs. Use when Codex needs to reason about backend layers, dependency direction, repository/service/use-case boundaries, DDD subdomains, ubiquitous language, bounded contexts, context maps, aggregates, domain events, DTO/schema boundaries, data/runtime/operations boundaries, framework leak risks, structure versus behavior changes, coupling, cohesion, reversible architecture changes, or FastAPI/Spring adapter mapping.
+description: Registry-driven backend architecture meta-skill backed by a public-safe ontology distilled from FastAPI clean architecture, Spring modern API, Python architecture patterns, DDD first steps, Tidy First, and Modern Java backend code-quality graphs. Use when Codex needs to reason about backend layers, dependency direction, repository/service/use-case boundaries, DDD subdomains, bounded contexts, aggregates, domain events, DTO/schema boundaries, data/runtime/operations boundaries, framework leak risks, structure versus behavior changes, coupling, cohesion, reversible architecture changes, FastAPI/Spring adapter mapping, or Java Optional/Stream/CompletableFuture choices that affect Spring/backend maintainability.
 ---
 
 # Backend Architecture
@@ -16,12 +16,17 @@ Use this skill when the user asks about:
 - how to sequence backend refactors as structure changes versus behavior changes
 - coupling, cohesion, change cost, and reversible architecture changes
 - Spring MVC, Spring Service/Repository/JPA, OpenAPI, WebFlux, and Spring Security boundary placement
+- Java `Optional`, `Stream`, `CompletableFuture`, side-effect, async, and code-style choices that affect Spring/backend maintainability
 - API design, data modeling, event-driven boundaries, monolith/microservice tradeoffs, runtime operations, testing, packaging, observability, and continuous architecture
 - DDD strategic and tactical design: subdomain classification, ubiquitous language, bounded contexts, context maps, aggregates, domain events, event sourcing, CQRS, event storming, and data mesh
 
 ## Source Boundary
 
-This skill is derived only from public-safe graph summaries in `fastapi-clean-architecture`, `tidy-first`, `spring-modern-api`, `python-architecture-patterns`, and `domain-driven-design-first-steps`. It does not include private OCR source text. Treat `source_refs` as links to public graph concepts, not permission to quote original books.
+This v2 skill is a registry-driven meta skill. Active source skills are declared in `references/source_registry.yaml`; the curated graph currently uses public-safe summaries from `fastapi-clean-architecture`, `tidy-first`, `spring-modern-api`, `python-architecture-patterns`, `domain-driven-design-first-steps`, and `modern-java-in-action`.
+
+It does not include private OCR source text. Treat `source_refs` as links to public graph concepts, not permission to quote original books.
+
+`modern-java-in-action` is an adjunct backend code-quality source, not an architecture replacement. Use it only for Spring/backend readability, `Optional`, `Stream`, `CompletableFuture`, side-effect, concurrency, and async-boundary reasoning.
 
 It includes verified FastAPI and Spring adapters. Other framework adapters are represented only as extension points; do not invent framework-specific mappings unless the user's codebase supplies evidence.
 
@@ -41,11 +46,12 @@ It includes verified FastAPI and Spring adapters. Other framework adapters are r
    py -3 scripts\expand_context.py --q "FastAPI Depends layer leak" --out output\source-pack.md
    ```
 
-4. Answer in Korean by default. Use the graph to state:
+4. Answer in Korean by default. Use this fixed answer shape:
 
+   - the situation and constraint
    - the relevant boundary or principle
    - the dependency direction
-   - the framework adapter placement
+   - the framework or language placement
    - the change-cost tradeoff
    - the smallest safe next action
 
@@ -58,6 +64,9 @@ It includes verified FastAPI and Spring adapters. Other framework adapters are r
 - Spring `@RestController` and FastAPI `APIRouter` are interface adapters; Spring `@Service` or application services coordinate use cases.
 - Spring Data/JPA, SQLAlchemy, database sessions, and migrations are infrastructure details behind repository or persistence boundaries.
 - WebFlux `Mono`/`Flux` and Spring Security filter/security-context details should not become domain model dependencies without an explicit project-level reason.
+- `Optional` should document absence at lookup or API boundaries; do not use it as a universal field/DTO/persistence convention without project policy.
+- `Stream` pipelines should make transformations readable; do not hide business side effects or shared mutable state inside intermediate operations.
+- `CompletableFuture` belongs at explicit async boundaries where executor ownership, timeout, cancellation, and error behavior are designed.
 - Data modeling and data-layer choices are architecture decisions because data is harder to replace than application code.
 - Event-driven queues decouple long-running work from request paths, but add state tracking, retry, priority, and failure-handling responsibilities.
 - DDD starts with business value and language: classify subdomains before choosing rich domain models, event sourcing, CQRS, or microservices.
@@ -70,9 +79,11 @@ It includes verified FastAPI and Spring adapters. Other framework adapters are r
 ## Resources
 
 - `references/ontology.yaml`: node and edge type definitions.
+- `references/source_registry.yaml`: active public-safe source skill registry for v2 synthesis.
 - `references/framework_adapters.yaml`: FastAPI mapping and future adapter extension policy.
 - `references/nodes.jsonl`, `edges.jsonl`, `chunks.jsonl`: public-safe architecture graph.
-- `references/graph_manifest.json`: source skills, source commit, counts, and safety metadata.
+- `references/graph_manifest.json`: source registry path, source skills, counts, and safety metadata.
+- `scripts/build_from_source_skills.py`: registry and curated source-ref coverage validation.
 - `scripts/query_graph.py`: keyword lookup over nodes, edges, chunks, and adapter mappings.
 - `scripts/expand_context.py`: compact public-safe context pack writer.
 - `scripts/validate_graph.py`: graph and adapter validation.

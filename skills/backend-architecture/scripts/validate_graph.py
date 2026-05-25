@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 
 REQUIRED_NODE_FIELDS = {"id", "type", "name", "summary", "aliases", "source_refs", "public_safe"}
@@ -31,19 +32,84 @@ EDGE_TYPES = {
     "includes",
     "next_topic",
 }
-SOURCE_SKILLS = {
-    "fastapi-clean-architecture",
-    "tidy-first",
-    "spring-modern-api",
-    "python-architecture-patterns",
-    "domain-driven-design-first-steps",
-}
 RAW_TEXT_RISK_PATTERNS = [
     re.compile(r"C:\\Users\\", re.IGNORECASE),
     re.compile(r"/Users/"),
     re.compile(r"\bocr-output\b", re.IGNORECASE),
     re.compile(r"\bprivate-source\b", re.IGNORECASE),
 ]
+
+
+def parse_scalar(value: str) -> Any:
+    value = value.strip()
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    return value.strip('"')
+
+
+def load_source_registry(path: Path) -> list[dict[str, Any]]:
+    sources: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    list_key: str | None = None
+    nested_key: str | None = None
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("- name:"):
+            current = {
+                "name": parse_scalar(stripped.split(":", 1)[1]),
+                "graph_paths": [],
+                "domain_tags": [],
+                "public_safety": {},
+            }
+            sources.append(current)
+            list_key = None
+            nested_key = None
+            continue
+        if current is None:
+            continue
+        if stripped in {"graph_paths:", "domain_tags:"}:
+            list_key = stripped[:-1]
+            nested_key = None
+            continue
+        if stripped == "public_safety:":
+            list_key = None
+            nested_key = "public_safety"
+            continue
+        if stripped.startswith("- ") and list_key:
+            current[list_key].append(parse_scalar(stripped[2:]))
+            continue
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            if nested_key == "public_safety":
+                current["public_safety"][key] = parse_scalar(value)
+            else:
+                current[key] = parse_scalar(value)
+                list_key = None
+    return sources
+
+
+def active_source_names(registry_path: Path) -> set[str]:
+    sources = load_source_registry(registry_path)
+    if not sources:
+        raise ValueError("source_registry.yaml: no sources found")
+    active = set()
+    for source in sources:
+        name = source.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError("source_registry.yaml: source entry missing name")
+        if source.get("status") == "active":
+            safety = source.get("public_safety", {})
+            if safety.get("public_sanitized") is not True:
+                raise ValueError(f"source_registry.yaml: {name} must be public_sanitized")
+            if safety.get("raw_source_tracked") is not False:
+                raise ValueError(f"source_registry.yaml: {name} must not track raw source")
+            active.add(name)
+    return active
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -64,7 +130,7 @@ def require_fields(kind: str, item: dict, required: set[str]) -> None:
         raise ValueError(f"{kind} {item.get('id') or item.get('source')}: missing fields: {missing}")
 
 
-def validate_source_refs(kind: str, ident: str, refs: object) -> None:
+def validate_source_refs(kind: str, ident: str, refs: object, source_skills: set[str]) -> None:
     if not isinstance(refs, list) or not refs:
         raise ValueError(f"{kind} {ident}: source_refs must be a non-empty list")
     for ref in refs:
@@ -72,7 +138,7 @@ def validate_source_refs(kind: str, ident: str, refs: object) -> None:
             raise ValueError(f"{kind} {ident}: source_ref must be an object")
         source_skill = ref.get("source_skill")
         source_id = ref.get("source_id")
-        if source_skill not in SOURCE_SKILLS:
+        if source_skill not in source_skills:
             raise ValueError(f"{kind} {ident}: invalid source_skill {source_skill!r}")
         if not isinstance(source_id, str) or not source_id.strip():
             raise ValueError(f"{kind} {ident}: source_id must be a non-empty string")
@@ -130,11 +196,16 @@ def validate_graph(references_dir: Path) -> None:
     chunks_path = references_dir / "chunks.jsonl"
     ontology_path = references_dir / "ontology.yaml"
     adapters_path = references_dir / "framework_adapters.yaml"
-    for path in [manifest_path, nodes_path, edges_path, chunks_path, ontology_path, adapters_path]:
+    registry_path = references_dir / "source_registry.yaml"
+    for path in [manifest_path, nodes_path, edges_path, chunks_path, ontology_path, adapters_path, registry_path]:
         if not path.is_file():
             raise ValueError(f"missing required file: {path}")
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("version") != 2:
+        raise ValueError("graph_manifest.json: version must be 2")
+    if manifest.get("source_registry_path") != "references/source_registry.yaml":
+        raise ValueError("graph_manifest.json: source_registry_path must be references/source_registry.yaml")
     if manifest.get("public_sanitized") is not True:
         raise ValueError("graph_manifest.json: public_sanitized must be true")
     quality = manifest.get("source_quality_gate", {})
@@ -142,6 +213,17 @@ def validate_graph(references_dir: Path) -> None:
         raise ValueError("graph_manifest.json: must not use raw OCR source")
     if quality.get("uses_public_skill_graphs_only") is not True:
         raise ValueError("graph_manifest.json: must use public skill graphs only")
+    if quality.get("uses_source_registry") is not True:
+        raise ValueError("graph_manifest.json: must use source registry")
+    if quality.get("includes_backend_adjunct_sources") is not True:
+        raise ValueError("graph_manifest.json: must include backend adjunct source policy")
+
+    source_skills = active_source_names(registry_path)
+    manifest_source_names = {source.get("name") for source in manifest.get("source_skills", [])}
+    if manifest_source_names != source_skills:
+        raise ValueError(
+            f"graph_manifest.json source_skills mismatch: expected {sorted(source_skills)}, got {sorted(manifest_source_names)}"
+        )
 
     nodes = load_jsonl(nodes_path)
     edges = load_jsonl(edges_path)
@@ -159,7 +241,7 @@ def validate_graph(references_dir: Path) -> None:
             raise ValueError(f"node {ident}: unknown type {node['type']}")
         if not isinstance(node["aliases"], list):
             raise ValueError(f"node {ident}: aliases must be a list")
-        validate_source_refs("node", ident, node["source_refs"])
+        validate_source_refs("node", ident, node["source_refs"], source_skills)
         validate_public_text("node", ident, node, max_summary_chars)
 
     connected: set[str] = set()
@@ -172,7 +254,7 @@ def validate_graph(references_dir: Path) -> None:
             raise ValueError(f"edge {ident}: unknown target")
         if edge["type"] not in EDGE_TYPES:
             raise ValueError(f"edge {ident}: unknown type {edge['type']}")
-        validate_source_refs("edge", ident, edge["source_refs"])
+        validate_source_refs("edge", ident, edge["source_refs"], source_skills)
         validate_public_text("edge", ident, edge, max_summary_chars)
         connected.update([edge["source"], edge["target"]])
 
@@ -185,7 +267,7 @@ def validate_graph(references_dir: Path) -> None:
         ident = chunk["id"]
         if not isinstance(chunk["keywords"], list) or not chunk["keywords"]:
             raise ValueError(f"chunk {ident}: keywords must be a non-empty list")
-        validate_source_refs("chunk", ident, chunk["source_refs"])
+        validate_source_refs("chunk", ident, chunk["source_refs"], source_skills)
         validate_public_text("chunk", ident, chunk, max_summary_chars)
 
     counts = manifest.get("counts", {})

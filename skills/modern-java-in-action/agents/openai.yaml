@@ -1,0 +1,4 @@
+interface:
+  display_name: "Modern Java in Action"
+  short_description: "Java 8+ functional programming study graph"
+  default_prompt: "Use $modern-java-in-action to explain a Java 8+ functional programming topic with public-safe graph context."

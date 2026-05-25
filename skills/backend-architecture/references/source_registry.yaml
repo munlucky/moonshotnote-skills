@@ -1,0 +1,102 @@
+version: 1
+description: Registry of public-safe source skills used by backend-architecture v2.
+sources:
+  - name: domain-driven-design-first-steps
+    status: active
+    role: core_architecture
+    adapter_eligible: false
+    graph_paths:
+      - skills/domain-driven-design-first-steps/references/nodes.jsonl
+      - skills/domain-driven-design-first-steps/references/edges.jsonl
+      - skills/domain-driven-design-first-steps/references/chunks.jsonl
+    domain_tags:
+      - ddd
+      - strategic-design
+      - bounded-context
+      - tactical-modeling
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false
+  - name: fastapi-clean-architecture
+    status: active
+    role: core_architecture
+    adapter_eligible: true
+    graph_paths:
+      - skills/fastapi-clean-architecture/references/nodes.jsonl
+      - skills/fastapi-clean-architecture/references/edges.jsonl
+      - skills/fastapi-clean-architecture/references/chunks.jsonl
+    domain_tags:
+      - fastapi
+      - clean-architecture
+      - repository
+      - dependency-inversion
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false
+  - name: modern-java-in-action
+    status: active
+    role: adjunct_backend_code_quality
+    adapter_eligible: false
+    graph_paths:
+      - skills/modern-java-in-action/references/nodes.jsonl
+      - skills/modern-java-in-action/references/edges.jsonl
+      - skills/modern-java-in-action/references/chunks.jsonl
+    domain_tags:
+      - code-quality
+      - java-backend
+      - spring-support
+      - optional
+      - stream
+      - completablefuture
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false
+  - name: python-architecture-patterns
+    status: active
+    role: core_architecture
+    adapter_eligible: false
+    graph_paths:
+      - skills/python-architecture-patterns/references/nodes.jsonl
+      - skills/python-architecture-patterns/references/edges.jsonl
+      - skills/python-architecture-patterns/references/chunks.jsonl
+    domain_tags:
+      - api-design
+      - data-layer
+      - runtime
+      - observability
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false
+  - name: spring-modern-api
+    status: active
+    role: core_architecture
+    adapter_eligible: true
+    graph_paths:
+      - skills/spring-modern-api/references/nodes.jsonl
+      - skills/spring-modern-api/references/edges.jsonl
+      - skills/spring-modern-api/references/chunks.jsonl
+    domain_tags:
+      - spring
+      - spring-boot
+      - openapi
+      - security
+      - webflux
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false
+  - name: tidy-first
+    status: active
+    role: core_architecture
+    adapter_eligible: false
+    graph_paths:
+      - skills/tidy-first/references/nodes.jsonl
+      - skills/tidy-first/references/edges.jsonl
+      - skills/tidy-first/references/chunks.jsonl
+    domain_tags:
+      - change-cost
+      - coupling
+      - cohesion
+      - reversible-change
+    public_safety:
+      public_sanitized: true
+      raw_source_tracked: false

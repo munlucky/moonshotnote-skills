@@ -1,10 +1,22 @@
 {
-  "version": 1,
+  "version": 2,
   "created_at": "2026-05-22T00:00:00+09:00",
-  "source_kind": "derived public-safe skill graph",
+  "updated_at": "2026-05-25T00:00:00+09:00",
+  "source_kind": "curated public-safe meta skill graph",
+  "source_registry_path": "references/source_registry.yaml",
   "source_skills": [
     {
+      "name": "domain-driven-design-first-steps",
+      "role": "core_architecture",
+      "source_paths": [
+        "skills/domain-driven-design-first-steps/references/nodes.jsonl",
+        "skills/domain-driven-design-first-steps/references/edges.jsonl",
+        "skills/domain-driven-design-first-steps/references/chunks.jsonl"
+      ]
+    },
+    {
       "name": "fastapi-clean-architecture",
+      "role": "core_architecture",
       "source_paths": [
         "skills/fastapi-clean-architecture/references/nodes.jsonl",
         "skills/fastapi-clean-architecture/references/edges.jsonl",
@@ -12,23 +24,17 @@
       ]
     },
     {
-      "name": "tidy-first",
+      "name": "modern-java-in-action",
+      "role": "adjunct_backend_code_quality",
       "source_paths": [
-        "skills/tidy-first/references/nodes.jsonl",
-        "skills/tidy-first/references/edges.jsonl",
-        "skills/tidy-first/references/chunks.jsonl"
-      ]
-    },
-    {
-      "name": "spring-modern-api",
-      "source_paths": [
-        "skills/spring-modern-api/references/nodes.jsonl",
-        "skills/spring-modern-api/references/edges.jsonl",
-        "skills/spring-modern-api/references/chunks.jsonl"
+        "skills/modern-java-in-action/references/nodes.jsonl",
+        "skills/modern-java-in-action/references/edges.jsonl",
+        "skills/modern-java-in-action/references/chunks.jsonl"
       ]
     },
     {
       "name": "python-architecture-patterns",
+      "role": "core_architecture",
       "source_paths": [
         "skills/python-architecture-patterns/references/nodes.jsonl",
         "skills/python-architecture-patterns/references/edges.jsonl",
@@ -36,35 +42,53 @@
       ]
     },
     {
-      "name": "domain-driven-design-first-steps",
+      "name": "spring-modern-api",
+      "role": "core_architecture",
       "source_paths": [
-        "skills/domain-driven-design-first-steps/references/nodes.jsonl",
-        "skills/domain-driven-design-first-steps/references/edges.jsonl",
-        "skills/domain-driven-design-first-steps/references/chunks.jsonl"
+        "skills/spring-modern-api/references/nodes.jsonl",
+        "skills/spring-modern-api/references/edges.jsonl",
+        "skills/spring-modern-api/references/chunks.jsonl"
+      ]
+    },
+    {
+      "name": "tidy-first",
+      "role": "core_architecture",
+      "source_paths": [
+        "skills/tidy-first/references/nodes.jsonl",
+        "skills/tidy-first/references/edges.jsonl",
+        "skills/tidy-first/references/chunks.jsonl"
       ]
     }
   ],
-  "source_commit": "25f86162e29d7bad8c47e5956b30d6b3884355d3",
   "counts": {
-    "nodes": 60,
-    "edges": 119,
-    "chunks": 18
+    "nodes": 64,
+    "edges": 124,
+    "chunks": 19
   },
   "framework_adapters_count": 2,
   "public_sanitized": true,
   "source_quality_gate": {
     "uses_raw_ocr_source": false,
     "uses_public_skill_graphs_only": true,
+    "uses_source_registry": true,
+    "includes_backend_adjunct_sources": true,
+    "curated_synthesis_graph": true,
     "framework_specific_adapters": [
       "fastapi",
       "spring"
     ],
     "general_architecture_sources": [
+      "domain-driven-design-first-steps",
       "python-architecture-patterns",
-      "domain-driven-design-first-steps"
+      "tidy-first"
+    ],
+    "backend_adjunct_sources": [
+      "modern-java-in-action"
     ],
     "source_quality_notes": [
-      "domain-driven-design-first-steps is used only through public-safe references; its manifest records low-confidence OCR review still open, so do not quote private source wording."
+      "backend-architecture is a curated synthesis graph, not a full concatenation of source skill graphs.",
+      "modern-java-in-action is used only as a backend code-quality adjunct for Spring/backend readability, Optional, Stream, CompletableFuture, side-effect, and async-boundary reasoning.",
+      "Raw OCR text and private chunks stay under ignored output/private-source directories."
     ],
     "future_adapters_are_extension_points_only": true
   }
