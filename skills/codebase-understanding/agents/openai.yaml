@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Understanding"
+  short_description: "Map repositories into queryable code graphs"
+  default_prompt: "Use $codebase-understanding to map this repository, explain its architecture, and assess change impact."

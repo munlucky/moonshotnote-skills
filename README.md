@@ -11,6 +11,7 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `spring-modern-api`: public-safe Spring 6 and Spring Boot 3 modern API development graph for REST, OpenAPI, WebFlux, Security/JWT, deployment, observability, gRPC, and GraphQL.
 - `python-architecture-patterns`: public-safe Python architecture graph for API design, data modeling, data layers, Twelve-Factor services, web server structure, event-driven systems, testing, packaging, observability, and continuous architecture.
 - `domain-driven-design-first-steps`: public-safe Korean DDD study graph for subdomains, ubiquitous language, bounded contexts, context maps, tactical patterns, event sourcing, CQRS, event storming, microservices, event-driven architecture, and data mesh.
+- `codebase-understanding`: lightweight codebase graph workflow for repository onboarding, architecture explanation, focused component analysis, and git diff impact review.
 
 ## Install
 
@@ -26,6 +27,7 @@ npx skills add munlucky/moonshotnote-skills --skill modern-java-in-action -g -a 
 npx skills add munlucky/moonshotnote-skills --skill spring-modern-api -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill python-architecture-patterns -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill codebase-understanding -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -39,6 +41,7 @@ npx skills add . --skill backend-architecture -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
+npx skills add . --skill codebase-understanding -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -235,6 +238,79 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 
 Private OCR-derived source chunks stay under `skills/domain-driven-design-first-steps/output/private-source/`, which is ignored by git. The tracked graph contains only summaries, source references, and relationships. The current source quality gate records `321/321` OCR pages processed and `452` low-confidence items still requiring visual review before exact source wording is trusted.
 
+## codebase-understanding Usage
+
+The Codebase Understanding skill creates a lightweight local graph for repo onboarding, focused explanations, and diff impact review:
+
+By default the scanner climbs from a supplied subdirectory to the detected project root, so repository manifests and `tsconfig.json` / `jsconfig.json` resolver settings are available. Add `--no-root-discovery` only when you intentionally want a narrow subdirectory-only graph.
+
+Default product flow:
+
+```powershell
+py -3 skills\codebase-understanding\scripts\understand_codebase.py C:\path\to\repo-or-subdir
+```
+
+```bash
+python3 skills/codebase-understanding/scripts/understand_codebase.py /path/to/repo-or-subdir
+```
+
+This scans the project, saves `.codebase-understanding/codebase-map.json`, writes semantic review packs and heuristic annotations under `.codebase-understanding/`, writes `.codebase-understanding/diff-overlay.json` when git changed files exist, then opens the dashboard. Use `--no-dashboard` for CI or headless runs.
+
+Consumer modes:
+
+```powershell
+py -3 skills\codebase-understanding\scripts\understand_codebase.py chat . "How is this repo organized?"
+py -3 skills\codebase-understanding\scripts\understand_codebase.py diff . --changed-file src\example.py
+py -3 skills\codebase-understanding\scripts\understand_codebase.py explain . README.md
+py -3 skills\codebase-understanding\scripts\understand_codebase.py onboard .
+py -3 skills\codebase-understanding\scripts\understand_codebase.py study .
+py -3 skills\codebase-understanding\scripts\understand_codebase.py semantic .
+py -3 skills\codebase-understanding\scripts\understand_codebase.py dashboard .
+```
+
+```bash
+python3 skills/codebase-understanding/scripts/understand_codebase.py chat . "How is this repo organized?"
+python3 skills/codebase-understanding/scripts/understand_codebase.py diff . --changed-file src/example.py
+python3 skills/codebase-understanding/scripts/understand_codebase.py explain . README.md
+python3 skills/codebase-understanding/scripts/understand_codebase.py onboard .
+python3 skills/codebase-understanding/scripts/understand_codebase.py study .
+python3 skills/codebase-understanding/scripts/understand_codebase.py semantic .
+python3 skills/codebase-understanding/scripts/understand_codebase.py dashboard .
+```
+
+Lower-level scripts remain available for narrow automation.
+
+Windows:
+
+```powershell
+py -3 skills\codebase-understanding\scripts\scan_codebase.py . --out .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\validate_graph.py .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\query_graph.py .codebase-understanding\codebase-map.json --q "repository service"
+py -3 skills\codebase-understanding\scripts\explain_graph.py .codebase-understanding\codebase-map.json README.md --root .
+py -3 skills\codebase-understanding\scripts\build_chat_prompt.py .codebase-understanding\codebase-map.json --q "How is this repo organized?"
+py -3 skills\codebase-understanding\scripts\semantic_graph.py run .codebase-understanding\codebase-map.json --root . --packs-dir .codebase-understanding\semantic-packs --annotations-out .codebase-understanding\semantic-annotations.json --out .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\query_graph.py .codebase-understanding\codebase-map.json --changed-file src\example.py
+py -3 skills\codebase-understanding\scripts\write_diff_overlay.py .codebase-understanding\codebase-map.json --changed-file src\example.py --out .codebase-understanding\diff-overlay.json
+py -3 skills\codebase-understanding\scripts\serve_dashboard.py .codebase-understanding\codebase-map.json --diff-overlay .codebase-understanding\diff-overlay.json
+```
+
+macOS/Linux:
+
+```bash
+python3 skills/codebase-understanding/scripts/scan_codebase.py . --out .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/validate_graph.py .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/query_graph.py .codebase-understanding/codebase-map.json --q "repository service"
+python3 skills/codebase-understanding/scripts/explain_graph.py .codebase-understanding/codebase-map.json README.md --root .
+python3 skills/codebase-understanding/scripts/build_chat_prompt.py .codebase-understanding/codebase-map.json --q "How is this repo organized?"
+python3 skills/codebase-understanding/scripts/semantic_graph.py run .codebase-understanding/codebase-map.json --root . --packs-dir .codebase-understanding/semantic-packs --annotations-out .codebase-understanding/semantic-annotations.json --out .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/query_graph.py .codebase-understanding/codebase-map.json --changed-file src/example.py
+python3 skills/codebase-understanding/scripts/write_diff_overlay.py .codebase-understanding/codebase-map.json --changed-file src/example.py --out .codebase-understanding/diff-overlay.json
+python3 skills/codebase-understanding/scripts/serve_dashboard.py .codebase-understanding/codebase-map.json --diff-overlay .codebase-understanding/diff-overlay.json
+```
+
+Generated graph output stays under `.codebase-understanding/` and should not be committed unless a user explicitly wants a durable repo map.
+The dashboard includes preset searches for entry points, prompt flow, commands, tools, permissions, messages, config, and tests. Selecting a node shows responsibility, evidence, risk hints, source excerpts, relationships, and copyable follow-up commands; use it to narrow the graph before reading source.
+
 ## Dependency Licenses
 
 The skill scripts are MIT licensed. Runtime OCR dependencies keep their own licenses. In particular, `surya-ocr` is GPL-3.0-or-later, so review dependency licensing before bundling this skill into proprietary redistributed products. See `THIRD_PARTY_NOTICES.md`.
@@ -256,6 +332,7 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\spring-modern-api
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\python-architecture-patterns
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\domain-driven-design-first-steps
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\codebase-understanding
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
@@ -272,6 +349,19 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\python-architecture-patterns
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
+py -3 skills\codebase-understanding\scripts\scan_codebase.py . --out .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\validate_graph.py .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\explain_graph.py .codebase-understanding\codebase-map.json README.md --root .
+py -3 skills\codebase-understanding\scripts\build_chat_prompt.py .codebase-understanding\codebase-map.json --q "backend architecture"
+py -3 skills\codebase-understanding\scripts\semantic_graph.py run .codebase-understanding\codebase-map.json --root . --packs-dir .codebase-understanding\semantic-packs --annotations-out .codebase-understanding\semantic-annotations.json --out .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\write_diff_overlay.py .codebase-understanding\codebase-map.json --changed-file README.md --out .codebase-understanding\diff-overlay.json
+py -3 skills\codebase-understanding\scripts\understand_codebase.py analyze . --no-dashboard
+py -3 skills\codebase-understanding\scripts\understand_codebase.py chat . "backend architecture" --graph .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\understand_codebase.py explain . README.md --graph .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\understand_codebase.py diff . --graph .codebase-understanding\codebase-map.json --changed-file README.md
+py -3 skills\codebase-understanding\scripts\understand_codebase.py onboard . --graph .codebase-understanding\codebase-map.json
+py -3 skills\codebase-understanding\scripts\understand_codebase.py study . --graph .codebase-understanding\codebase-map.json --limit 20
+py -3 skills\codebase-understanding\scripts\understand_codebase.py semantic . --graph .codebase-understanding\codebase-map.json
 npx skills add . --skill moonshotnote-ocr -g -a codex -y --copy
 npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
@@ -281,7 +371,28 @@ npx skills add . --skill modern-java-in-action -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
+npx skills add . --skill codebase-understanding -g -a codex -y --copy
 npx skills ls -g --json
+```
+
+macOS/Linux codebase-understanding smoke:
+
+```bash
+python3 -m py_compile skills/codebase-understanding/scripts/*.py
+python3 skills/codebase-understanding/scripts/scan_codebase.py . --out .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/validate_graph.py .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/explain_graph.py .codebase-understanding/codebase-map.json README.md --root .
+python3 skills/codebase-understanding/scripts/build_chat_prompt.py .codebase-understanding/codebase-map.json --q "backend architecture"
+python3 skills/codebase-understanding/scripts/semantic_graph.py run .codebase-understanding/codebase-map.json --root . --packs-dir .codebase-understanding/semantic-packs --annotations-out .codebase-understanding/semantic-annotations.json --out .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/write_diff_overlay.py .codebase-understanding/codebase-map.json --changed-file README.md --out .codebase-understanding/diff-overlay.json
+python3 skills/codebase-understanding/scripts/understand_codebase.py analyze . --no-dashboard
+python3 skills/codebase-understanding/scripts/understand_codebase.py chat . "backend architecture" --graph .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/understand_codebase.py explain . README.md --graph .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/understand_codebase.py diff . --graph .codebase-understanding/codebase-map.json --changed-file README.md
+python3 skills/codebase-understanding/scripts/understand_codebase.py onboard . --graph .codebase-understanding/codebase-map.json
+python3 skills/codebase-understanding/scripts/understand_codebase.py study . --graph .codebase-understanding/codebase-map.json --limit 20
+python3 skills/codebase-understanding/scripts/understand_codebase.py semantic . --graph .codebase-understanding/codebase-map.json
+npx skills add . --skill codebase-understanding -g -a codex -y --copy
 ```
 
 Release checklist:
@@ -296,6 +407,8 @@ npx -y skills add munlucky/moonshotnote-skills --skill backend-architecture --li
 npx -y skills add munlucky/moonshotnote-skills --skill spring-modern-api --list
 npx -y skills add munlucky/moonshotnote-skills --skill python-architecture-patterns --list
 npx -y skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps --list
+npx -y skills add munlucky/moonshotnote-skills --skill codebase-understanding --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.
+The main validation job runs on both `ubuntu-latest` and `macos-latest`; `codebase-understanding` also has a CI smoke for scan, validate, query, explain, chat prompt, diff overlay, and dashboard HTTP endpoints.

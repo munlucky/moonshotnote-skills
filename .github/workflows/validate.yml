@@ -130,6 +130,22 @@ jobs:
                   "scripts/lint_knowledge_pack.py",
                   "scripts/audit_public_safety.py",
               ],
+              "codebase-understanding": [
+                  "agents/openai.yaml",
+                  "assets/dashboard/index.html",
+                  "references/graph-schema.md",
+                  "references/upstream-analysis.md",
+                  "scripts/build_chat_prompt.py",
+                  "scripts/explain_graph.py",
+                  "scripts/graph_utils.py",
+                  "scripts/query_graph.py",
+                  "scripts/scan_codebase.py",
+                  "scripts/semantic_graph.py",
+                  "scripts/serve_dashboard.py",
+                  "scripts/understand_codebase.py",
+                  "scripts/validate_graph.py",
+                  "scripts/write_diff_overlay.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -215,7 +231,17 @@ jobs:
             skills/domain-driven-design-first-steps/scripts/query_graph.py \
             skills/domain-driven-design-first-steps/scripts/expand_context.py \
             skills/domain-driven-design-first-steps/scripts/lint_knowledge_pack.py \
-            skills/domain-driven-design-first-steps/scripts/audit_public_safety.py
+            skills/domain-driven-design-first-steps/scripts/audit_public_safety.py \
+            skills/codebase-understanding/scripts/build_chat_prompt.py \
+            skills/codebase-understanding/scripts/explain_graph.py \
+            skills/codebase-understanding/scripts/graph_utils.py \
+            skills/codebase-understanding/scripts/query_graph.py \
+            skills/codebase-understanding/scripts/scan_codebase.py \
+            skills/codebase-understanding/scripts/semantic_graph.py \
+            skills/codebase-understanding/scripts/serve_dashboard.py \
+            skills/codebase-understanding/scripts/understand_codebase.py \
+            skills/codebase-understanding/scripts/validate_graph.py \
+            skills/codebase-understanding/scripts/write_diff_overlay.py
 
       - name: Validate knowledge graphs
         run: |
@@ -251,6 +277,142 @@ jobs:
             skills/domain-driven-design-first-steps/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/domain-driven-design-first-steps
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/codebase-understanding
+
+      - name: Validate codebase-understanding consumers
+        run: |
+          python skills/codebase-understanding/scripts/scan_codebase.py \
+            . --out .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/validate_graph.py \
+            .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/query_graph.py \
+            .codebase-understanding/codebase-map.json --q "codebase understanding"
+          python skills/codebase-understanding/scripts/explain_graph.py \
+            .codebase-understanding/codebase-map.json README.md --root .
+          python skills/codebase-understanding/scripts/build_chat_prompt.py \
+            .codebase-understanding/codebase-map.json --q "How is this repository organized?"
+          python skills/codebase-understanding/scripts/semantic_graph.py \
+            run .codebase-understanding/codebase-map.json \
+            --root . \
+            --packs-dir .codebase-understanding/semantic-packs \
+            --annotations-out .codebase-understanding/semantic-annotations.json \
+            --out .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/write_diff_overlay.py \
+            .codebase-understanding/codebase-map.json \
+            --changed-file README.md \
+            --out .codebase-understanding/diff-overlay.json
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            analyze . --no-dashboard
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            chat . "How is this repository organized?" \
+            --graph .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            explain . README.md \
+            --graph .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            diff . \
+            --graph .codebase-understanding/codebase-map.json \
+            --changed-file README.md
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            onboard . \
+            --graph .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            study . \
+            --graph .codebase-understanding/codebase-map.json \
+            --limit 20 \
+            --source-lines 8
+          python skills/codebase-understanding/scripts/understand_codebase.py \
+            semantic . \
+            --graph .codebase-understanding/codebase-map.json
+          python skills/codebase-understanding/scripts/serve_dashboard.py \
+            .codebase-understanding/codebase-map.json \
+            --diff-overlay .codebase-understanding/diff-overlay.json \
+            --host 127.0.0.1 \
+            --port 8766 \
+            --no-open > /tmp/codebase-dashboard.log 2>&1 &
+          DASH_PID=$!
+          trap 'kill "$DASH_PID" 2>/dev/null || true' EXIT
+          sleep 2
+          python - <<'PY'
+          from urllib.request import urlopen
+
+          for url in [
+              "http://127.0.0.1:8766/",
+              "http://127.0.0.1:8766/codebase-map.json",
+              "http://127.0.0.1:8766/diff-overlay.json",
+              "http://127.0.0.1:8766/source?path=README.md&start=1&end=5",
+          ]:
+              with urlopen(url, timeout=10) as response:
+                  if response.status != 200:
+                      raise SystemExit(f"{url} returned {response.status}")
+          print("codebase-understanding dashboard endpoints are reachable")
+          PY
+
+      - name: Validate codebase-understanding TypeScript resolver
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          root = Path(tempfile.mkdtemp(prefix="codebase-understanding-ts-"))
+          (root / "src" / "app").mkdir(parents=True)
+          (root / "src" / "lib").mkdir(parents=True)
+          (root / "tsconfig.json").write_text(
+              json.dumps(
+                  {
+                      "compilerOptions": {
+                          "baseUrl": ".",
+                          "paths": {"@lib/*": ["src/lib/*"]},
+                      }
+                  },
+                  indent=2,
+              ),
+              encoding="utf-8",
+          )
+          (root / "src" / "lib" / "helper.ts").write_text(
+              "export function helper() { return 1 }\n",
+              encoding="utf-8",
+          )
+          (root / "src" / "app" / "main.ts").write_text(
+              "import { helper } from '@lib/helper'\nexport function run() { return helper() }\n",
+              encoding="utf-8",
+          )
+          out = root / "codebase-map.json"
+          subprocess.run(
+              [
+                  sys.executable,
+                  "skills/codebase-understanding/scripts/scan_codebase.py",
+                  str(root),
+                  "--out",
+                  str(out),
+              ],
+              check=True,
+          )
+          subprocess.run(
+              [
+                  sys.executable,
+                  "skills/codebase-understanding/scripts/validate_graph.py",
+                  str(out),
+              ],
+              check=True,
+          )
+          graph = json.loads(out.read_text(encoding="utf-8"))
+          imports = [edge for edge in graph["edges"] if edge["type"] == "imports"]
+          expected = {
+              "source": "file:src/app/main.ts",
+              "target": "file:src/lib/helper.ts",
+          }
+          if not any(edge["source"] == expected["source"] and edge["target"] == expected["target"] for edge in imports):
+              raise SystemExit("missing TypeScript alias import edge")
+          resolver = graph["project"]["resolver"]["typescript"]
+          if not resolver or resolver["pathMappings"] != 1:
+              raise SystemExit("missing TypeScript resolver metadata")
+          print("codebase-understanding TypeScript resolver smoke passed")
+          PY
 
       - name: Verify skills CLI discovery
         run: |

@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codebase Understanding</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #18202f;
+      --muted: #667085;
+      --line: #d8dee9;
+      --accent: #176b87;
+      --changed: #b42318;
+      --affected: #b54708;
+      --shadow: 0 8px 24px rgba(24, 32, 47, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    h1 { margin: 0; font-size: 20px; }
+    .meta { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .presets {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      grid-column: 1 / -1;
+    }
+    input, select, button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      height: 36px;
+      padding: 0 10px;
+    }
+    button { cursor: pointer; }
+    button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .preset {
+      height: 30px;
+      font-size: 12px;
+      color: #344054;
+      background: #f8fafc;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 360px;
+      gap: 14px;
+      padding: 14px;
+      min-height: calc(100vh - 73px);
+    }
+    aside, section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+    aside { overflow: hidden; }
+    .panel-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 650;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .list { overflow: auto; max-height: calc(100vh - 140px); }
+    .item {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf0f5;
+      cursor: pointer;
+    }
+    .item:hover, .item.selected { background: #edf7fa; }
+    .item-title { font-weight: 650; font-size: 13px; overflow-wrap: anywhere; }
+    .item-sub { color: var(--muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: #eef2f6;
+      color: #344054;
+      font-size: 11px;
+      margin-right: 4px;
+    }
+    .badge.changed { background: #fee4e2; color: var(--changed); }
+    .badge.affected { background: #ffead5; color: var(--affected); }
+    #graph {
+      min-height: 620px;
+      position: relative;
+      overflow: hidden;
+    }
+    svg { width: 100%; height: calc(100vh - 116px); display: block; }
+    .node { cursor: pointer; }
+    .node text { font-size: 11px; fill: #18202f; pointer-events: none; }
+    .edge { stroke: #98a2b3; stroke-width: 1.2; opacity: 0.55; }
+    .node circle { fill: #d9eef4; stroke: #176b87; stroke-width: 1.2; }
+    .node.changed circle { fill: #fee4e2; stroke: var(--changed); }
+    .node.affected circle { fill: #ffead5; stroke: var(--affected); }
+    .node.selected circle { stroke-width: 3; }
+    .graph-note {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 37px;
+    }
+    .graph-note strong { color: var(--ink); }
+    .details { padding: 14px; overflow: auto; max-height: calc(100vh - 116px); }
+    .details h2 { margin: 0 0 8px; font-size: 17px; overflow-wrap: anywhere; }
+    .details p { color: var(--muted); line-height: 1.45; }
+    .details h3 { margin: 18px 0 8px; font-size: 13px; color: #344054; text-transform: uppercase; }
+    .details code {
+      display: inline-block;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      color: #344054;
+      background: #f2f4f7;
+      border-radius: 4px;
+      padding: 2px 5px;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .actions button { height: 32px; font-size: 12px; }
+    .hint-list { color: var(--muted); padding-left: 18px; }
+    .hint-list li { margin: 5px 0; }
+    pre.source {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #101828;
+      color: #eef2f6;
+      border-radius: 6px;
+      padding: 10px;
+      max-height: 280px;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .empty { color: var(--muted); padding: 14px; }
+    @media (max-width: 980px) {
+      header { grid-template-columns: 1fr; }
+      main { grid-template-columns: 1fr; }
+      svg { height: 520px; }
+      .list, .details { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="title">Codebase Understanding</h1>
+      <div id="meta" class="meta">Loading graph...</div>
+    </div>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search files, symbols, tags">
+      <select id="layerFilter"><option value="">All layers</option></select>
+      <button id="showAll" class="active">All</button>
+      <button id="showChanged">Changed</button>
+      <button id="showAffected">Affected</button>
+    </div>
+    <div id="presets" class="presets" aria-label="Preset queries"></div>
+  </header>
+  <main>
+    <aside>
+      <div class="panel-head"><span>Nodes</span><span id="count">0</span></div>
+      <div id="list" class="list"></div>
+    </aside>
+    <section id="graph">
+      <div id="graphNote" class="graph-note">Loading view...</div>
+      <svg id="svg" role="img" aria-label="Codebase graph"></svg>
+    </section>
+    <aside>
+      <div class="panel-head">Details</div>
+      <div id="details" class="details"><div class="empty">Select a node.</div></div>
+    </aside>
+  </main>
+  <script>
+    const state = {
+      graph: null,
+      overlay: null,
+      selected: null,
+      sourceCache: new Map(),
+      mode: "all",
+      query: "",
+      layer: "",
+      visibleLimit: 350,
+    };
+
+    const PRESETS = [
+      { label: "Entry", query: "main entrypoint cli launcher app setup" },
+      { label: "Prompt Flow", query: "REPL prompt submit processUserInput processTextPrompt processSlashCommand queryGuard onQuery" },
+      { label: "Commands", query: "slash command command input processSlashCommand commands" },
+      { label: "Tools", query: "tool use tool result permission bash file edit" },
+      { label: "Permissions", query: "permission mode approval canUseTool request decision" },
+      { label: "Messages", query: "assistant user message tool result render transcript" },
+      { label: "Config", query: "settings config model mcp plugin output style" },
+      { label: "Tests", query: "test spec fixture mock regression" },
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const norm = (value) => String(value || "").toLowerCase();
+
+    async function load() {
+      const [graph, overlay] = await Promise.all([
+        fetch("/codebase-map.json").then((r) => r.json()),
+        fetch("/diff-overlay.json").then((r) => r.json()).catch(() => ({ changedNodeIds: [], affectedNodeIds: [] })),
+      ]);
+      state.graph = graph;
+      state.overlay = overlay;
+      $("title").textContent = graph.project?.name || "Codebase Understanding";
+      $("meta").textContent = `${graph.summary?.textFilesScanned || 0} files · ${graph.nodes.length} nodes · ${graph.edges.length} edges · ${graph.layers.length} layers`;
+      renderLayerFilter();
+      renderPresets();
+      if ((overlay.changedNodeIds || []).length > 0) state.mode = "changed";
+      updateModeButtons();
+      bind();
+      render();
+    }
+
+    function bind() {
+      $("search").addEventListener("input", (event) => { state.query = event.target.value; render(); });
+      $("layerFilter").addEventListener("change", (event) => { state.layer = event.target.value; render(); });
+      for (const [id, mode] of [["showAll", "all"], ["showChanged", "changed"], ["showAffected", "affected"]]) {
+        $(id).addEventListener("click", () => {
+          state.mode = mode;
+          updateModeButtons();
+          render();
+        });
+      }
+      window.addEventListener("resize", () => renderGraph(filteredNodes()));
+    }
+
+    function renderPresets() {
+      const root = $("presets");
+      root.innerHTML = "";
+      for (const preset of PRESETS) {
+        const button = document.createElement("button");
+        button.className = "preset";
+        button.type = "button";
+        button.textContent = preset.label;
+        button.title = preset.query;
+        button.addEventListener("click", () => {
+          state.mode = "all";
+          state.layer = "";
+          state.query = preset.query;
+          $("search").value = preset.query;
+          $("layerFilter").value = "";
+          updateModeButtons();
+          render();
+        });
+        root.appendChild(button);
+      }
+    }
+
+    function renderLayerFilter() {
+      const select = $("layerFilter");
+      for (const layer of state.graph.layers || []) {
+        const option = document.createElement("option");
+        option.value = layer.id;
+        option.textContent = `${layer.name} (${(layer.nodeIds || []).length})`;
+        select.appendChild(option);
+      }
+    }
+
+    function updateModeButtons() {
+      const changedCount = (state.overlay?.changedNodeIds || []).length;
+      const affectedCount = (state.overlay?.affectedNodeIds || []).length;
+      $("showAll").textContent = "All";
+      $("showChanged").textContent = `Changed${changedCount ? ` (${changedCount})` : ""}`;
+      $("showAffected").textContent = `Affected${affectedCount ? ` (${affectedCount})` : ""}`;
+      for (const [id, mode] of [["showAll", "all"], ["showChanged", "changed"], ["showAffected", "affected"]]) {
+        $(id).classList.toggle("active", state.mode === mode);
+      }
+    }
+
+    function marker(nodeId) {
+      if (state.overlay?.changedNodeIds?.includes(nodeId)) return "changed";
+      if (state.overlay?.affectedNodeIds?.includes(nodeId)) return "affected";
+      return "";
+    }
+
+    function nodeLayer(nodeId) {
+      for (const layer of state.graph.layers || []) {
+        if ((layer.nodeIds || []).includes(nodeId)) return layer;
+      }
+      return null;
+    }
+
+    function markerRank(nodeId) {
+      const mark = marker(nodeId);
+      if (mark === "changed") return 0;
+      if (mark === "affected") return 1;
+      return 2;
+    }
+
+    function matchingNodes() {
+      const layerIds = new Set();
+      if (state.layer) {
+        const layer = state.graph.layers.find((item) => item.id === state.layer);
+        for (const id of layer?.nodeIds || []) layerIds.add(id);
+      }
+      return state.graph.nodes.filter((node) => {
+        if (state.layer && !layerIds.has(node.id)) return false;
+        const mark = marker(node.id);
+        if (state.mode === "changed" && mark !== "changed") return false;
+        if (state.mode === "affected" && mark !== "affected") return false;
+        if (state.query) {
+          const text = `${node.id} ${node.name} ${node.filePath || ""} ${node.summary || ""} ${node.responsibility || ""} ${(node.riskHints || []).join(" ")} ${(node.tags || []).join(" ")}`;
+          if (!norm(text).includes(norm(state.query))) return false;
+        }
+        return true;
+      }).sort((a, b) => {
+        const rank = markerRank(a.id) - markerRank(b.id);
+        if (rank !== 0) return rank;
+        if (a.type !== b.type) return a.type === "file" ? -1 : 1;
+        return String(a.filePath || a.name).localeCompare(String(b.filePath || b.name));
+      });
+    }
+
+    function filteredNodes() {
+      return matchingNodes().slice(0, state.visibleLimit);
+    }
+
+    function render() {
+      const matches = matchingNodes();
+      const nodes = matches.slice(0, state.visibleLimit);
+      if (!nodes.some((node) => node.id === state.selected)) state.selected = nodes[0]?.id || null;
+      $("count").textContent = matches.length > nodes.length ? `${nodes.length}/${matches.length}` : String(nodes.length);
+      renderGraphNote(matches.length, nodes.length);
+      renderList(nodes);
+      renderGraph(nodes);
+      renderDetails();
+    }
+
+    function renderGraphNote(totalMatches, visibleCount) {
+      const modeLabel = state.mode === "changed" ? "changed nodes" : state.mode === "affected" ? "affected nodes" : "nodes";
+      const cap = totalMatches > visibleCount ? ` Showing first <strong>${visibleCount}</strong>; search or filter layers to narrow.` : "";
+      const overlay = (state.overlay?.changedNodeIds || []).length
+        ? `Diff overlay loaded: <strong>${state.overlay.changedNodeIds.length}</strong> changed, <strong>${(state.overlay.affectedNodeIds || []).length}</strong> affected.`
+        : "No diff overlay loaded.";
+      $("graphNote").innerHTML = `Viewing <strong>${totalMatches}</strong> ${modeLabel}. ${overlay}${cap}`;
+    }
+
+    function renderList(nodes) {
+      const list = $("list");
+      list.innerHTML = "";
+      if (!nodes.length) {
+        list.innerHTML = "<div class='empty'>No nodes match.</div>";
+        return;
+      }
+      for (const node of nodes) {
+        const item = document.createElement("div");
+        item.className = `item ${state.selected === node.id ? "selected" : ""}`;
+        item.innerHTML = `<div class="item-title">${escapeHtml(node.name)}</div>
+          <div class="item-sub">${escapeHtml(node.filePath || node.id)}</div>
+          <div class="item-sub"><span class="badge ${marker(node.id)}">${escapeHtml(marker(node.id) || node.type)}</span>${escapeHtml((node.tags || []).slice(0, 3).join(" · "))}</div>`;
+        item.addEventListener("click", () => { state.selected = node.id; render(); });
+        list.appendChild(item);
+      }
+    }
+
+    function renderGraph(nodes) {
+      const svg = $("svg");
+      const width = svg.clientWidth || 800;
+      const height = svg.clientHeight || 600;
+      const nodeIds = new Set(nodes.map((node) => node.id));
+      const edges = state.graph.edges.filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target)).slice(0, 700);
+      const byId = new Map(nodes.map((node, index) => [node.id, { ...node, index }]));
+      const layerOrder = new Map((state.graph.layers || []).map((layer, index) => [layer.id, index]));
+      const layersByNode = new Map();
+      for (const layer of state.graph.layers || []) for (const id of layer.nodeIds || []) layersByNode.set(id, layer.id);
+      const cols = Math.max(1, Math.ceil(Math.sqrt(nodes.length * width / Math.max(height, 1))));
+      const cellW = width / cols;
+      const rows = Math.ceil(nodes.length / cols);
+      const cellH = Math.max(54, height / Math.max(rows, 1));
+      const positioned = nodes.map((node, index) => {
+        const layerId = layersByNode.get(node.id) || "unknown";
+        const layerOffset = layerOrder.get(layerId) || 0;
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        return {
+          ...node,
+          x: Math.min(width - 60, col * cellW + cellW / 2),
+          y: Math.min(height - 34, row * cellH + 32 + (layerOffset % 3) * 8),
+        };
+      });
+      const pos = new Map(positioned.map((node) => [node.id, node]));
+      svg.innerHTML = "";
+      for (const edge of edges) {
+        const a = pos.get(edge.source);
+        const b = pos.get(edge.target);
+        if (!a || !b) continue;
+        svg.insertAdjacentHTML("beforeend", `<line class="edge" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"></line>`);
+      }
+      for (const node of positioned) {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("class", `node ${marker(node.id)} ${state.selected === node.id ? "selected" : ""}`);
+        group.setAttribute("transform", `translate(${node.x},${node.y})`);
+        group.innerHTML = `<circle r="${node.type === "file" ? 13 : 9}"></circle><text x="16" y="4">${escapeHtml(node.name).slice(0, 34)}</text>`;
+        group.addEventListener("click", () => { state.selected = node.id; render(); });
+        svg.appendChild(group);
+      }
+    }
+
+    async function renderDetails() {
+      const node = state.graph.nodes.find((item) => item.id === state.selected);
+      const details = $("details");
+      if (!node) {
+        details.innerHTML = "<div class='empty'>Select a node.</div>";
+        return;
+      }
+      const layer = nodeLayer(node.id);
+      const incoming = state.graph.edges.filter((edge) => edge.target === node.id).slice(0, 20);
+      const outgoing = state.graph.edges.filter((edge) => edge.source === node.id).slice(0, 20);
+      const evidence = evidenceList(node);
+      const riskHints = (node.riskHints || []).slice(0, 8);
+      details.innerHTML = `<h2>${escapeHtml(node.name)}</h2>
+        <div><span class="badge ${marker(node.id)}">${escapeHtml(marker(node.id) || node.type)}</span><span class="badge">${escapeHtml(node.complexity || "unknown")}</span></div>
+        <p><code>${escapeHtml(node.filePath || node.id)}</code></p>
+        <p>${escapeHtml(node.summary || "")}</p>
+        <h3>Responsibility</h3><p>${escapeHtml(node.responsibility || "No semantic responsibility available.")}</p>
+        <div class="actions">
+          <button type="button" data-action="explain">Explain</button>
+          <button type="button" data-action="chat">Chat Context</button>
+          <button type="button" data-action="diff">Diff Focus</button>
+        </div>
+        <h3>Layer</h3><p>${escapeHtml(layer ? `${layer.name}: ${layer.description}` : "Unknown")}</p>
+        <p>${escapeHtml(node.layerReason || "")}</p>
+        <h3>Tags</h3><p>${escapeHtml((node.tags || []).join(", ") || "none")}</p>
+        <h3>Evidence</h3>${evidence.length ? `<ul class="hint-list">${evidence.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : "<p>None.</p>"}
+        <h3>Risk Hints</h3>${riskHints.length ? `<ul class="hint-list">${riskHints.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : "<p>None.</p>"}
+        <h3>Language Notes</h3><p>${escapeHtml(node.languageNotes || "None.")}</p>
+        <h3>Source</h3><div id="sourceBox"><p>Loading source excerpt...</p></div>
+        <h3>Outgoing</h3>${edgeList(outgoing)}
+        <h3>Incoming</h3>${edgeList(incoming)}`;
+      details.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => copyAction(node, button.getAttribute("data-action")));
+      });
+      await renderSource(node);
+    }
+
+    function evidenceList(node) {
+      return (node.evidence || []).map((item) => {
+        if (!item || !item.filePath) return "";
+        if (Array.isArray(item.lineRange)) return `${item.filePath}:${item.lineRange[0]}-${item.lineRange[1]}`;
+        return item.filePath;
+      }).filter(Boolean);
+    }
+
+    async function renderSource(node) {
+      const box = $("sourceBox");
+      if (!box || !node.filePath) {
+        if (box) box.innerHTML = "<p>No source path.</p>";
+        return;
+      }
+      const firstEvidence = (node.evidence || []).find((item) => item.filePath === node.filePath && Array.isArray(item.lineRange));
+      const start = Math.max(1, Number(firstEvidence?.lineRange?.[0] || node.lineRange?.[0] || 1) - 8);
+      const end = Math.max(start + 40, Number(firstEvidence?.lineRange?.[1] || node.lineRange?.[1] || 80) + 24);
+      const key = `${node.filePath}:${start}:${end}`;
+      try {
+        let payload = state.sourceCache.get(key);
+        if (!payload) {
+          payload = await fetch(`/source?path=${encodeURIComponent(node.filePath)}&start=${start}&end=${end}`).then((r) => r.json());
+          state.sourceCache.set(key, payload);
+        }
+        if (!payload.ok) {
+          box.innerHTML = `<p>${escapeHtml(payload.error || "Source unavailable.")}</p>`;
+          return;
+        }
+        box.innerHTML = `<pre class="source">${escapeHtml(payload.text || "")}</pre>`;
+      } catch (error) {
+        box.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    async function copyAction(node, action) {
+      const path = node.filePath || node.id;
+      const command = action === "explain"
+        ? `explain ${path}`
+        : action === "diff"
+          ? `diff --changed-file ${path}`
+          : `chat "${path} 파일의 역할과 관련 흐름을 설명해줘"`;
+      try {
+        await navigator.clipboard.writeText(command);
+      } catch (_) {
+        window.prompt("Command", command);
+      }
+    }
+
+    function edgeList(edges) {
+      if (!edges.length) return "<p>None.</p>";
+      return `<ul>${edges.map((edge) => `<li><code>${escapeHtml(edge.type)}</code> ${escapeHtml(edge.source)} -> ${escapeHtml(edge.target)}</li>`).join("")}</ul>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[ch]));
+    }
+
+    load().catch((error) => {
+      $("meta").textContent = `Failed to load graph: ${error.message}`;
+      console.error(error);
+    });
+  </script>
+</body>
+</html>

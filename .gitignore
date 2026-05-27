@@ -1,4 +1,5 @@
 .moonshot-state/
+.codebase-understanding/
 
 # Python
 __pycache__/
