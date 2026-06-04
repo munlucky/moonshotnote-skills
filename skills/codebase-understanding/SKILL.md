@@ -11,16 +11,44 @@ Use this skill to turn a repository into a compact code graph, then answer from 
 
 Default output language is Korean unless the user asks otherwise.
 
+This is an agent-operated skill. Do not ask the user to run the bundled Python commands unless they explicitly want manual CLI usage. When the user invokes `$codebase-understanding`, asks to understand a repository, asks how code is structured, asks for onboarding, asks a broad flow question, asks for file/symbol explanation, asks for diff impact, or asks to open the dashboard, choose and run the appropriate script yourself.
+
+The skill name is `codebase-understanding` because it describes the reusable capability. `moonshotnote-skills` is only the repository that distributes several skills; it is not the name of this individual skill.
+
+## Agent Invocation Policy
+
+1. Resolve the target repository.
+   - If the user gives a path, use that path.
+   - If no path is given, use the current Codex session's project/workspace root automatically. In a normal local session this is the shell current working directory. Do not ask the user for a path just because they omitted one.
+   - If a subdirectory is given, let `understand_codebase.py` discover the repository root unless the user asks for a narrow subdirectory analysis.
+2. Resolve the skill directory before running scripts.
+   - Prefer the installed skill path when available: `${CODEX_HOME:-$HOME/.codex}/skills/codebase-understanding`.
+   - If working from this repository, `skills/codebase-understanding` is also valid.
+   - Prefer running the script by absolute path with the shell working directory set to the target repository. That lets the script's default `.` mean the current project.
+   - If you run from the skill directory instead, pass the target repository as an absolute path.
+3. Select the consumer mode from the user's intent.
+   - Whole repo onboarding, "study this repo", or no specific question: run `onboard` after ensuring a graph exists.
+   - Broad architecture or flow question: run `chat . "<question>"` from the target repository, or pass the absolute target repository if running elsewhere.
+   - Specific file, class, function, symbol, or `file:line` request: run `explain . <target>` from the target repository.
+   - Review, PR, changed file, or blast-radius request: run `diff .` with changed files from git or user input.
+   - Learning plan or all-file study guide: run `study .`.
+   - Visual exploration request: run `dashboard .`.
+4. Ensure graph freshness.
+   - If `.codebase-understanding/codebase-map.json` is missing, run the product-style analyze flow first.
+   - If the repository has changed substantially or the user asks for a fresh map, run analyze again.
+   - For quick follow-up questions, reuse the existing graph, then verify final claims against source files.
+5. Answer in terms of the user's request, not in terms of internal scripts. Mention generated files or dashboard URLs only when useful.
+
 ## Default Workflow
 
-Use the product-style entrypoint first. It mirrors the upstream user flow without commit hooks or auto-update:
+Use the product-style entrypoint first when a repository needs a fresh graph. It mirrors the upstream user flow without commit hooks or auto-update:
 
 ```powershell
-py -3 scripts\understand_codebase.py <repo-root-or-subdir>
+py -3 <skill-dir>\scripts\understand_codebase.py
 ```
 
 ```bash
-python3 scripts/understand_codebase.py <repo-root-or-subdir>
+python3 <skill-dir>/scripts/understand_codebase.py
 ```
 
 Default behavior:

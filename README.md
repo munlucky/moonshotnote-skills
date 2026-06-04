@@ -240,21 +240,36 @@ Private OCR-derived source chunks stay under `skills/domain-driven-design-first-
 
 ## codebase-understanding Usage
 
-The Codebase Understanding skill creates a lightweight local graph for repo onboarding, focused explanations, and diff impact review:
+The Codebase Understanding skill creates a lightweight local graph for repo onboarding, focused explanations, and diff impact review.
+
+Normal Codex usage is skill-first. Ask Codex to use the skill; do not treat the Python commands below as commands the user must memorize:
+
+```text
+$codebase-understanding 전체 온보딩 해줘
+$codebase-understanding 인증 흐름이 어떻게 구성돼?
+$codebase-understanding src\auth.ts:login 설명해줘
+$codebase-understanding src\auth.ts 변경 영향 분석해줘
+$codebase-understanding 학습용 리딩 가이드 만들어줘
+$codebase-understanding 대시보드 열어줘
+```
+
+When the skill is invoked without a path, Codex should use the current session's project/workspace root as the target repository. Codex should create or reuse `.codebase-understanding/codebase-map.json`, choose the right consumer mode (`onboard`, `chat`, `explain`, `diff`, `study`, or `dashboard`), run the bundled scripts itself, and verify final claims against source files.
+
+The skill name is `codebase-understanding` because it is the individual capability. `moonshotnote-skills` is the repository that distributes this and other skills.
 
 By default the scanner climbs from a supplied subdirectory to the detected project root, so repository manifests and `tsconfig.json` / `jsconfig.json` resolver settings are available. Add `--no-root-discovery` only when you intentionally want a narrow subdirectory-only graph.
 
-Default product flow:
+Manual CLI fallback:
 
 ```powershell
-py -3 skills\codebase-understanding\scripts\understand_codebase.py C:\path\to\repo-or-subdir
+py -3 C:\Users\moon\.codex\skills\codebase-understanding\scripts\understand_codebase.py
 ```
 
 ```bash
-python3 skills/codebase-understanding/scripts/understand_codebase.py /path/to/repo-or-subdir
+python3 ~/.codex/skills/codebase-understanding/scripts/understand_codebase.py
 ```
 
-This scans the project, saves `.codebase-understanding/codebase-map.json`, writes semantic review packs and heuristic annotations under `.codebase-understanding/`, writes `.codebase-understanding/diff-overlay.json` when git changed files exist, then opens the dashboard. Use `--no-dashboard` for CI or headless runs.
+Run the manual fallback from the repository you want to analyze. This scans the project, saves `.codebase-understanding/codebase-map.json`, writes semantic review packs and heuristic annotations under `.codebase-understanding/`, writes `.codebase-understanding/diff-overlay.json` when git changed files exist, then opens the dashboard. Use `--no-dashboard` for CI or headless runs.
 
 Consumer modes:
 

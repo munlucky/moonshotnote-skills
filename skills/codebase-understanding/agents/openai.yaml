@@ -1,4 +1,4 @@
 interface:
   display_name: "Codebase Understanding"
-  short_description: "Map repositories into queryable code graphs"
-  default_prompt: "Use $codebase-understanding to map this repository, explain its architecture, and assess change impact."
+  short_description: "Automatically map, explain, query, study, and review codebases"
+  default_prompt: "Use $codebase-understanding to inspect the current Codex project when I do not provide a path: create or reuse its graph, choose onboard/chat/explain/diff/study/dashboard from my request, run the bundled scripts yourself, verify against source files, and answer in Korean unless I ask otherwise."
