@@ -18,6 +18,8 @@ SOURCE_SKILLS = {
     "domain-driven-design-first-steps",
     "spring-modern-api",
     "python-architecture-patterns",
+    "daily-webnovel-writing-knowledge-skill",
+    "teddynote-langchain-rag",
 }
 PUBLIC_FILES = ["nodes.jsonl", "edges.jsonl", "chunks.jsonl", "coverage_matrix.jsonl", "query_qa.jsonl"]
 BLOCKING_FLAGS = {"code_heavy", "table_heavy", "exercise_or_qa", "toc_or_index"}

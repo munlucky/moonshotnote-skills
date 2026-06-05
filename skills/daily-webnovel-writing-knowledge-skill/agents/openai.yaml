@@ -1,0 +1,2 @@
+model: gpt-5
+instructions: Use the public-safe graph references. Do not expose private OCR text.

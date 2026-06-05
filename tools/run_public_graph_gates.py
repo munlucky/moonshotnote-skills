@@ -16,6 +16,8 @@ SOURCE_SKILLS = {
     "domain-driven-design-first-steps",
     "modern-java-in-action",
     "tidy-first",
+    "daily-webnovel-writing-knowledge-skill",
+    "teddynote-langchain-rag",
 }
 
 PYTHON = [sys.executable]

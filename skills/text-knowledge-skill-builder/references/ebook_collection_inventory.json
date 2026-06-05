@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "created_at": "2026-06-05T07:52:08.652643+00:00",
+  "collection_scope": "ebook OCR collection, relative source labels only",
+  "processed_sources": [
+    {
+      "skill": "short-term-trading-3pct",
+      "kind": "registered_source",
+      "source_id": "short-term-trading-3pct-dual-ocr",
+      "source_file_count": 2,
+      "line_count": 1399,
+      "chunk_count": 22,
+      "accepted_candidates": 22,
+      "public_counts": {
+        "nodes": 110,
+        "edges": 220,
+        "chunks": 37,
+        "coverage": 37,
+        "qa": 50
+      }
+    },
+    {
+      "skill": "big-trader-leading-stock-trading",
+      "kind": "registered_source",
+      "source_id": "big-trader-leading-stock-dual-ocr",
+      "source_file_count": 2,
+      "line_count": 10048,
+      "chunk_count": 155,
+      "accepted_candidates": 155,
+      "public_counts": {
+        "nodes": 150,
+        "edges": 300,
+        "chunks": 50,
+        "coverage": 50,
+        "qa": 65
+      }
+    },
+    {
+      "skill": "stock-short-term-trading",
+      "kind": "registered_source",
+      "source_id": "stock-short-term-trading-preferred-ocr",
+      "source_file_count": 1,
+      "line_count": 10104,
+      "chunk_count": 156,
+      "accepted_candidates": 156,
+      "public_counts": {
+        "nodes": 170,
+        "edges": 340,
+        "chunks": 57,
+        "coverage": 57,
+        "qa": 75
+      }
+    }
+  ],
+  "gap_sources": [],
+  "public_boundary": "No absolute local paths or OCR text are stored in this inventory."
+}

@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "created_at": "2026-06-05T07:45:18.767044+00:00",
+  "name": "teddynote-langchain-rag",
+  "source_quality_gate": {
+    "classification": "third-party",
+    "source_id": "teddynote-langchain-rag-tesseract-ocr",
+    "ocr_engine": "tesseract_kor_eng",
+    "review_status": "tesseract_unreviewed",
+    "max_knowledge_use": "private OCR chunks were read and converted into candidate-ledger-backed public-safe graph rows",
+    "raw_text_in_public_package": false
+  },
+  "source_paths": [
+    {
+      "id": "teddynote-langchain-rag-tesseract-ocr",
+      "scope": "private OCR source",
+      "basename": "tesseract_all.md"
+    }
+  ],
+  "counts": {
+    "nodes": 190,
+    "edges": 340,
+    "chunks": 64
+  },
+  "coverage_rows": 64,
+  "query_qa_rows": 65,
+  "chunk_grounded_extraction": {
+    "status": "trace_attached",
+    "run_id": "latest",
+    "source_chunks_triaged": 473,
+    "accepted_semantic_candidates": 473,
+    "source_id": "teddynote-langchain-rag-tesseract-ocr",
+    "public_trace_policy": "public rows store stable source ids, chunk ids, line ranges, candidate digests, and abstraction labels only. OCR text is excluded"
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source"
+}

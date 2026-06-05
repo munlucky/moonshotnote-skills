@@ -16,6 +16,8 @@ SOURCE_SKILLS = {
     "domain-driven-design-first-steps",
     "spring-modern-api",
     "python-architecture-patterns",
+    "daily-webnovel-writing-knowledge-skill",
+    "teddynote-langchain-rag",
 }
 
 

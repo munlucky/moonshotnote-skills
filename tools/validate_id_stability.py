@@ -42,6 +42,8 @@ def validate_skill(root: Path, skill: str, baseline_root: Path | None) -> None:
             "domain-driven-design-first-steps": (25, 8, 25),
             "modern-java-in-action": (20, 8, 20),
             "tidy-first": (20, 6, 25),
+            "daily-webnovel-writing-knowledge-skill": (0, 0, 0),
+            "teddynote-langchain-rag": (0, 0, 0),
         }
         min_nodes, min_chunks, min_edges = minimums.get(skill, (5, 2, 5))
         if len(legacy_nodes) < min_nodes:

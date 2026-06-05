@@ -46,7 +46,7 @@ def main() -> int:
     parser.add_argument("--source", required=True, help="Path to source text")
     parser.add_argument("--out-dir", required=True, help="Ignored private-source output directory")
     parser.add_argument("--chunk-lines", type=int, default=120)
-    parser.add_argument("--overlap-lines", type=int, default=10)
+    parser.add_argument("--overlap-lines", type=int, default=20)
     args = parser.parse_args()
 
     source = Path(args.source).resolve()
