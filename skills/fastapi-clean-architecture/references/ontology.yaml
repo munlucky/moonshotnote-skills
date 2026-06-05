@@ -37,3 +37,15 @@ public_safety:
   max_summary_chars: 600
   require_source_refs: true
   require_public_safe_true: true
+source_coverage_notes:
+  - "OCR 원문은 private source이며, public graph는 개발 환경/런타임/DB 준비 개념을 요약 관계로만 참조한다."
+
+shared_ontology_family_mapping:
+  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
+  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
+  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
+
+max_density_second_pass:
+  abstraction_unit: source_id + chapter + section + line_range
+  expression_policy: use concepts and relationships, not source wording or source structure
+  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as

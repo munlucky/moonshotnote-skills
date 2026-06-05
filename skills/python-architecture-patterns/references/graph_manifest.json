@@ -12,7 +12,9 @@
       "unreadable": 179,
       "needs_review": 0
     },
-    "source_boundary": "third-party; no raw source in tracked files"
+    "source_boundary": "third-party; no raw source in tracked files",
+    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
+    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
   },
   "source_paths": [
     {
@@ -21,10 +23,23 @@
     }
   ],
   "counts": {
-    "nodes": 22,
-    "edges": 36,
-    "chunks": 6
+    "nodes": 190,
+    "edges": 320,
+    "chunks": 60
   },
   "public_sanitized": true,
-  "private_source_location": "output/private-source"
+  "private_source_location": "output/private-source",
+  "max_density_second_pass": {
+    "status": "expanded",
+    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
+    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  },
+  "chunk_grounded_extraction": {
+    "status": "trace_attached",
+    "run_id": "latest",
+    "source_chunks_triaged": 226,
+    "accepted_semantic_candidates": 226,
+    "source_id": "python-architecture-patterns-reviewed-ocr",
+    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
+  }
 }

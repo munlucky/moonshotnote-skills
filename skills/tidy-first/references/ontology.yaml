@@ -43,3 +43,15 @@ source_ref_schema:
   optional:
     - section
   note: Source refs point to private OCR-derived line ranges and are provenance markers only.
+source_coverage_notes:
+  - "Tidy First 온톨로지는 작은 구조 변경을 원문 인용이 아니라 결정/이론 관계로 요약해 참조한다."
+
+shared_ontology_family_mapping:
+  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
+  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
+  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
+
+max_density_second_pass:
+  abstraction_unit: source_id + chapter + section + line_range
+  expression_policy: use concepts and relationships, not source wording or source structure
+  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as

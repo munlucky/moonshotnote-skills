@@ -61,9 +61,9 @@
     }
   ],
   "counts": {
-    "nodes": 64,
-    "edges": 124,
-    "chunks": 19
+    "nodes": 182,
+    "edges": 330,
+    "chunks": 58
   },
   "framework_adapters_count": 2,
   "public_sanitized": true,
@@ -90,6 +90,17 @@
       "modern-java-in-action is used only as a backend code-quality adjunct for Spring/backend readability, Optional, Stream, CompletableFuture, side-effect, and async-boundary reasoning.",
       "Raw OCR text and private chunks stay under ignored output/private-source directories."
     ],
-    "future_adapters_are_extension_points_only": true
+    "future_adapters_are_extension_points_only": true,
+    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
+    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
+  },
+  "max_density_second_pass": {
+    "status": "expanded",
+    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
+    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  },
+  "chunk_grounded_extraction": {
+    "status": "source_graph_trace_attached",
+    "public_trace_policy": "backend uses source skill public graph IDs only; no raw OCR or private chunk access"
   }
 }

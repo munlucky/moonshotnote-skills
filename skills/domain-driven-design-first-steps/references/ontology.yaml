@@ -26,3 +26,15 @@ quality_gates:
   source_ocr_error_pages: 0
   low_confidence_items: 452
   low_confidence_status: needs_review
+source_coverage_notes:
+  - "DDD 그래프는 원문 라인 범위만 provenance로 남기고 전략적 판단과 practice를 요약 관계로 보강한다."
+
+shared_ontology_family_mapping:
+  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
+  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
+  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
+
+max_density_second_pass:
+  abstraction_unit: source_id + chapter + section + line_range
+  expression_policy: use concepts and relationships, not source wording or source structure
+  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as

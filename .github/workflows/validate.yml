@@ -61,6 +61,8 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/validate_graph.py",
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
@@ -82,6 +84,8 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/validate_graph.py",
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
@@ -94,6 +98,22 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/canonical_registry.jsonl",
+                  "references/promotion_records.jsonl",
+                  "references/query_qa.jsonl",
+                  "scripts/validate_graph.py",
+                  "scripts/query_graph.py",
+                  "scripts/expand_context.py",
+              ],
+              "modern-java-in-action": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/validate_graph.py",
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
@@ -105,6 +125,8 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/validate_graph.py",
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
@@ -116,6 +138,8 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/query_knowledge.py",
               ],
               "domain-driven-design-first-steps": [
@@ -125,6 +149,8 @@ jobs:
                   "references/nodes.jsonl",
                   "references/edges.jsonl",
                   "references/chunks.jsonl",
+                  "references/coverage_matrix.jsonl",
+                  "references/query_qa.jsonl",
                   "scripts/query_graph.py",
                   "scripts/expand_context.py",
                   "scripts/lint_knowledge_pack.py",
@@ -254,6 +280,9 @@ jobs:
             skills/backend-architecture/scripts/validate_graph.py \
             skills/backend-architecture/scripts/query_graph.py \
             skills/backend-architecture/scripts/expand_context.py \
+            skills/modern-java-in-action/scripts/validate_graph.py \
+            skills/modern-java-in-action/scripts/query_graph.py \
+            skills/modern-java-in-action/scripts/expand_context.py \
             skills/spring-modern-api/scripts/validate_graph.py \
             skills/spring-modern-api/scripts/query_graph.py \
             skills/spring-modern-api/scripts/expand_context.py \
@@ -277,7 +306,25 @@ jobs:
             skills/short-term-trading-3pct/scripts/query_knowledge.py \
             skills/short-term-trading-3pct/scripts/validate_pack.py \
             skills/stock-short-term-trading/scripts/query_knowledge.py \
-            skills/stock-short-term-trading/scripts/validate_pack.py
+            skills/stock-short-term-trading/scripts/validate_pack.py \
+            tools/audit_public_verbatim.py \
+            tools/apply_chunk_grounded_traces.py \
+            tools/extract_chunk_grounded_candidates.py \
+            tools/generate_max_density_public_graph.py \
+            tools/report_graph_delta.py \
+            tools/run_public_graph_gates.py \
+            tools/validate_coverage_matrix.py \
+            tools/validate_query_qa.py \
+            tools/validate_backend_meta_artifacts.py \
+            tools/validate_chunk_grounding.py \
+            tools/validate_edge_evidence.py \
+            tools/validate_forbidden_material.py \
+            tools/validate_id_stability.py \
+            tools/validate_no_manifest_only_generation.py \
+            tools/validate_source_ref_density.py \
+            tools/validate_query_diversity.py \
+            tools/validate_substitution_risk.py \
+            tools/validate_transform_trace.py
 
       - name: Validate knowledge graphs
         run: |
@@ -295,10 +342,17 @@ jobs:
             skills/tidy-first
           python skills/backend-architecture/scripts/validate_graph.py \
             skills/backend-architecture/references
+          python skills/backend-architecture/scripts/build_from_source_skills.py --check
           python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
             skills/backend-architecture/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/backend-architecture
+          python skills/modern-java-in-action/scripts/validate_graph.py \
+            skills/modern-java-in-action/references
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/modern-java-in-action/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/modern-java-in-action
           python skills/spring-modern-api/scripts/validate_graph.py \
             skills/spring-modern-api/references
           python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
@@ -313,6 +367,32 @@ jobs:
             skills/domain-driven-design-first-steps/references
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/domain-driven-design-first-steps
+          python tools/validate_coverage_matrix.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first
+          python tools/validate_query_qa.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture \
+            --top-n 20
+          python tools/validate_backend_meta_artifacts.py --repo-root .
+          python tools/validate_edge_evidence.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/validate_transform_trace.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/validate_forbidden_material.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/validate_substitution_risk.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/audit_public_verbatim.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture \
+            --max-verbatim-words 25 \
+            --max-char-shingle 80 \
+            --fail-on-source-code-match \
+            --fail-on-table-or-exercise-match
+          python tools/validate_id_stability.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/validate_source_ref_density.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+          python tools/validate_query_diversity.py \
+            --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/codebase-understanding
           python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \

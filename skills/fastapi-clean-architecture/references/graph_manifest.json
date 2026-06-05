@@ -12,7 +12,9 @@
       "accepted": 181,
       "corrected": 14,
       "ignored": 532
-    }
+    },
+    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
+    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
   },
   "source_paths": {
     "public": {
@@ -25,14 +27,27 @@
     }
   },
   "counts": {
-    "nodes": 22,
-    "edges": 33,
-    "chunks": 9
+    "nodes": 105,
+    "edges": 175,
+    "chunks": 32
   },
   "public_sanitized": true,
   "private_source_location": "output/private-source/",
   "notes": [
     "Tracked graph files contain summaries and source refs only.",
     "The v1 graph covers core structure, not full code AST or function-level detail."
-  ]
+  ],
+  "max_density_second_pass": {
+    "status": "expanded",
+    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
+    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  },
+  "chunk_grounded_extraction": {
+    "status": "trace_attached",
+    "run_id": "latest",
+    "source_chunks_triaged": 72,
+    "accepted_semantic_candidates": 72,
+    "source_id": "fastapi-clean-architecture-reviewed-ocr",
+    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
+  }
 }

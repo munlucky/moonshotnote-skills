@@ -25,17 +25,32 @@
       "unreadable": 119
     },
     "chunk_count": 161,
-    "public_package_contains_raw_source": false
+    "public_package_contains_raw_source": false,
+    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
+    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
   },
   "counts": {
-    "nodes": 43,
-    "edges": 71,
-    "chunks": 10
+    "nodes": 166,
+    "edges": 285,
+    "chunks": 50
   },
   "public_sanitized": true,
   "public_safety_notes": [
     "Tracked graph files contain summaries, keywords, relationships, and source references only.",
     "Raw OCR text and intermediate chunks stay under ignored output/private-source.",
     "The graph should not be used as a substitute for the original book."
-  ]
+  ],
+  "max_density_second_pass": {
+    "status": "expanded",
+    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
+    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  },
+  "chunk_grounded_extraction": {
+    "status": "trace_attached",
+    "run_id": "latest",
+    "source_chunks_triaged": 174,
+    "accepted_semantic_candidates": 174,
+    "source_id": "spring-modern-api-reviewed-ocr",
+    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
+  }
 }

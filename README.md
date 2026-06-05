@@ -286,6 +286,30 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 
 Private OCR-derived source chunks stay under `skills/domain-driven-design-first-steps/output/private-source/`, which is ignored by git. The tracked graph contains only summaries, source references, and relationships. The current source quality gate records `321/321` OCR pages processed and `452` low-confidence items still requiring visual review before exact source wording is trusted.
 
+## Public-Safe OCR Graph Validation
+
+Programming OCR-derived skills include coverage and query QA fixtures so concept coverage is checked without publishing raw source text:
+
+```powershell
+py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture
+py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture --run-id latest
+py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --min-coverage 0.95
+py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --top-n 20
+py -3 tools\validate_backend_meta_artifacts.py --repo-root .
+py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --run-id latest
+py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --run-id latest
+py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
+py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+```
+
+`tools\extract_chunk_grounded_candidates.py` reads ignored `source_chunks.jsonl` text and writes private semantic candidate ledgers under ignored `output/extraction-candidates/`. `tools\apply_chunk_grounded_traces.py` then attaches public-safe `transform_trace` metadata to references without copying OCR text. `tools\generate_max_density_public_graph.py` remains a bootstrap expansion utility, not the authoritative chunk-content extractor.
+
 ## codebase-understanding Usage
 
 The Codebase Understanding skill creates a lightweight local graph for repo onboarding, focused explanations, and diff impact review.
@@ -415,6 +439,21 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\python-architecture-patterns
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
+py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture
+py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture --run-id latest
+py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --min-coverage 0.95
+py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --top-n 20
+py -3 tools\validate_backend_meta_artifacts.py --repo-root .
+py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --run-id latest
+py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --run-id latest
+py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
+py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\big-trader-leading-stock-trading\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\big-trader-leading-stock-trading
 py -3 skills\big-trader-leading-stock-trading\scripts\validate_pack.py

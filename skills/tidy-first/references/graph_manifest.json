@@ -13,17 +13,32 @@
     "source_file_count": 55,
     "line_count": 2237,
     "known_unclear_markers": 38,
-    "public_package_contains_raw_source": false
+    "public_package_contains_raw_source": false,
+    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
+    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
   },
   "counts": {
-    "nodes": 36,
-    "edges": 60,
-    "chunks": 9
+    "nodes": 74,
+    "edges": 118,
+    "chunks": 22
   },
   "public_sanitized": true,
   "public_safety_notes": [
     "Tracked graph files contain summaries, keywords, relationships, and source references only.",
     "Raw OCR text and intermediate chunks stay under ignored output/private-source.",
     "The graph should not be used as a substitute for the original book."
-  ]
+  ],
+  "max_density_second_pass": {
+    "status": "expanded",
+    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
+    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  },
+  "chunk_grounded_extraction": {
+    "status": "trace_attached",
+    "run_id": "latest",
+    "source_chunks_triaged": 22,
+    "accepted_semantic_candidates": 22,
+    "source_id": "tidy-first-ocr",
+    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
+  }
 }
