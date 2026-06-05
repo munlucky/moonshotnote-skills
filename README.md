@@ -12,6 +12,9 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `python-architecture-patterns`: public-safe Python architecture graph for API design, data modeling, data layers, Twelve-Factor services, web server structure, event-driven systems, testing, packaging, observability, and continuous architecture.
 - `domain-driven-design-first-steps`: public-safe Korean DDD study graph for subdomains, ubiquitous language, bounded contexts, context maps, tactical patterns, event sourcing, CQRS, event storming, microservices, event-driven architecture, and data mesh.
 - `codebase-understanding`: lightweight codebase graph workflow for repository onboarding, architecture explanation, focused component analysis, and git diff impact review.
+- `big-trader-leading-stock-trading`: public-safe Korean trading study graph distilled from dual OCR outputs, covering 주도주, 대장주, 테마주 사이클, 트레이딩 Big 4, 비중 조절, 손절, 스윙매매, and training-roadmap concepts.
+- `short-term-trading-3pct`: public-safe Korean trading study graph distilled from Tesseract and WinRT OCR outputs, covering 상한가 다음날 단타, 종목 선정, HTS 세팅, 분할매수, 3% 익절, 09:30 시간 제한, and 진입 금지 패턴.
+- `stock-short-term-trading`: public-safe Korean trading study graph distilled from Tesseract and WinRT OCR outputs, covering 단타/스윙 유형, 손실 방어, 이동평균선, 호가창, 거래량, 테마주, 종가 베팅, 시간외 단일가, NXT/KRX, and 직장인 MTS routines.
 
 ## Install
 
@@ -28,6 +31,9 @@ npx skills add munlucky/moonshotnote-skills --skill spring-modern-api -g -a code
 npx skills add munlucky/moonshotnote-skills --skill python-architecture-patterns -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill codebase-understanding -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill big-trader-leading-stock-trading -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill short-term-trading-3pct -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill stock-short-term-trading -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -42,6 +48,9 @@ npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
+npx skills add . --skill big-trader-leading-stock-trading -g -a codex -y --copy
+npx skills add . --skill short-term-trading-3pct -g -a codex -y --copy
+npx skills add . --skill stock-short-term-trading -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -163,6 +172,45 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 ```
 
 The workflow is `text -> knowledge -> skill`: private source chunks stay ignored under `output/`, while public Skill references contain summaries, graph relations, provenance, and validation scripts.
+
+## big-trader-leading-stock-trading Usage
+
+The Big Trader skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from two OCR outputs of the same Korean trading book:
+
+```powershell
+py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "주도주 대장주 차이"
+py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "종가 베팅 비중 조절"
+py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "스윙매매 38스윙"
+py -3 skills\big-trader-leading-stock-trading\scripts\validate_pack.py
+```
+
+Private OCR-derived source chunks stay under `skills/big-trader-leading-stock-trading/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
+
+## short-term-trading-3pct Usage
+
+The Short-Term Trading 3 Percent skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from Tesseract and WinRT OCR outputs of the same Korean trading ebook:
+
+```powershell
+py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "상한가 다음날"
+py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "09시30분"
+py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "3% 익절"
+py -3 skills\short-term-trading-3pct\scripts\validate_pack.py
+```
+
+Private OCR-derived source chunks stay under `skills/short-term-trading-3pct/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
+
+## stock-short-term-trading Usage
+
+The Stock Short-Term Trading skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from Tesseract and WinRT OCR outputs of the same Korean trading ebook:
+
+```powershell
+py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "호가창 거래량"
+py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "NXT 괴리율 거래량"
+py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "직장인 종가 시간외 자동감시"
+py -3 skills\stock-short-term-trading\scripts\validate_pack.py
+```
+
+Private OCR-derived source chunks stay under `skills/stock-short-term-trading/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
 
 ## tidy-first Usage
 
@@ -348,6 +396,9 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\python-architecture-patterns
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\domain-driven-design-first-steps
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\codebase-understanding
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\big-trader-leading-stock-trading
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\short-term-trading-3pct
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\stock-short-term-trading
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
@@ -364,6 +415,15 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\python-architecture-patterns
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\big-trader-leading-stock-trading\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\big-trader-leading-stock-trading
+py -3 skills\big-trader-leading-stock-trading\scripts\validate_pack.py
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\short-term-trading-3pct\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\short-term-trading-3pct
+py -3 skills\short-term-trading-3pct\scripts\validate_pack.py
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\stock-short-term-trading\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\stock-short-term-trading
+py -3 skills\stock-short-term-trading\scripts\validate_pack.py
 py -3 skills\codebase-understanding\scripts\scan_codebase.py . --out .codebase-understanding\codebase-map.json
 py -3 skills\codebase-understanding\scripts\validate_graph.py .codebase-understanding\codebase-map.json
 py -3 skills\codebase-understanding\scripts\explain_graph.py .codebase-understanding\codebase-map.json README.md --root .
@@ -387,6 +447,9 @@ npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
+npx skills add . --skill big-trader-leading-stock-trading -g -a codex -y --copy
+npx skills add . --skill short-term-trading-3pct -g -a codex -y --copy
+npx skills add . --skill stock-short-term-trading -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -423,6 +486,9 @@ npx -y skills add munlucky/moonshotnote-skills --skill spring-modern-api --list
 npx -y skills add munlucky/moonshotnote-skills --skill python-architecture-patterns --list
 npx -y skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps --list
 npx -y skills add munlucky/moonshotnote-skills --skill codebase-understanding --list
+npx -y skills add munlucky/moonshotnote-skills --skill big-trader-leading-stock-trading --list
+npx -y skills add munlucky/moonshotnote-skills --skill short-term-trading-3pct --list
+npx -y skills add munlucky/moonshotnote-skills --skill stock-short-term-trading --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "created_at": "2026-06-05T00:05:00+09:00",
+  "name": "stock-short-term-trading",
+  "source_quality_gate": {
+    "ocr_inputs": ["tesseract_all.md", "winrt_all.md"],
+    "tesseract_pages": 368,
+    "winrt_pages": 368,
+    "tesseract_errors": 0,
+    "winrt_errors": 0,
+    "method": "Two OCR outputs were compared; public knowledge uses short summaries and page refs only."
+  },
+  "source_paths": [
+    {"id": "tesseract_all", "basename": "tesseract_all.md", "scope": "private OCR source"},
+    {"id": "winrt_all", "basename": "winrt_all.md", "scope": "private OCR source"}
+  ],
+  "counts": {
+    "nodes": 31,
+    "edges": 38,
+    "chunks": 18
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source",
+  "notes": [
+    "The book source is treated as third-party material.",
+    "Tracked references are concise study summaries, not a full-text substitute.",
+    "Investment content must be framed as educational, not financial advice."
+  ]
+}

@@ -1,0 +1,37 @@
+version: 1
+domain: korean-short-term-stock-trading-study
+source_boundary: third-party-ocr-derived
+public_policy:
+  raw_text_public: false
+  long_quotes_public: false
+  public_summaries_only: true
+node_types:
+  Strategy:
+    description: Overall trading approach or workflow.
+  SelectionCriterion:
+    description: Candidate stock selection signal.
+  Setup:
+    description: Tool, screen, or premarket configuration.
+  EntrySignal:
+    description: Condition used to decide buying timing.
+  ExitRule:
+    description: Profit taking, stop, time stop, or risk reduction rule.
+  RiskControl:
+    description: Capital allocation or loss-control concept.
+  AvoidPattern:
+    description: Pattern the source advises avoiding.
+  SourceQuality:
+    description: OCR and provenance handling concept.
+edge_types:
+  uses:
+    description: A strategy uses a concept as part of execution.
+  depends_on:
+    description: One concept needs another prerequisite.
+  confirms:
+    description: A signal gives evidence for another concept.
+  limits:
+    description: A rule constrains risk, time, or exposure.
+  excludes:
+    description: A pattern should be avoided by the strategy.
+  refines:
+    description: A concept adds detail to a broader concept.

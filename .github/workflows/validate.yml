@@ -146,6 +146,36 @@ jobs:
                   "scripts/validate_graph.py",
                   "scripts/write_diff_overlay.py",
               ],
+              "big-trader-leading-stock-trading": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/query_knowledge.py",
+                  "scripts/validate_pack.py",
+              ],
+              "short-term-trading-3pct": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/query_knowledge.py",
+                  "scripts/validate_pack.py",
+              ],
+              "stock-short-term-trading": [
+                  "agents/openai.yaml",
+                  "references/ontology.yaml",
+                  "references/graph_manifest.json",
+                  "references/nodes.jsonl",
+                  "references/edges.jsonl",
+                  "references/chunks.jsonl",
+                  "scripts/query_knowledge.py",
+                  "scripts/validate_pack.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -241,7 +271,13 @@ jobs:
             skills/codebase-understanding/scripts/serve_dashboard.py \
             skills/codebase-understanding/scripts/understand_codebase.py \
             skills/codebase-understanding/scripts/validate_graph.py \
-            skills/codebase-understanding/scripts/write_diff_overlay.py
+            skills/codebase-understanding/scripts/write_diff_overlay.py \
+            skills/big-trader-leading-stock-trading/scripts/query_knowledge.py \
+            skills/big-trader-leading-stock-trading/scripts/validate_pack.py \
+            skills/short-term-trading-3pct/scripts/query_knowledge.py \
+            skills/short-term-trading-3pct/scripts/validate_pack.py \
+            skills/stock-short-term-trading/scripts/query_knowledge.py \
+            skills/stock-short-term-trading/scripts/validate_pack.py
 
       - name: Validate knowledge graphs
         run: |
@@ -279,6 +315,21 @@ jobs:
             skills/domain-driven-design-first-steps
           python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
             skills/codebase-understanding
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/big-trader-leading-stock-trading/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/big-trader-leading-stock-trading
+          python skills/big-trader-leading-stock-trading/scripts/validate_pack.py
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/short-term-trading-3pct/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/short-term-trading-3pct
+          python skills/short-term-trading-3pct/scripts/validate_pack.py
+          python skills/text-knowledge-skill-builder/scripts/lint_knowledge_pack.py \
+            skills/stock-short-term-trading/references
+          python skills/text-knowledge-skill-builder/scripts/audit_public_safety.py \
+            skills/stock-short-term-trading
+          python skills/stock-short-term-trading/scripts/validate_pack.py
 
       - name: Validate codebase-understanding consumers
         run: |

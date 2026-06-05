@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "created_at": "2026-06-04T15:05:00+09:00",
+  "name": "short-term-trading-3pct",
+  "source_quality_gate": {
+    "classification": "third-party",
+    "ocr_engines": ["Tesseract kor+eng psm6", "WinRT ko"],
+    "engine_use": "Both OCR outputs were compared. Public knowledge uses only short paraphrased concepts supported by one or both outputs.",
+    "known_limits": ["OCR noise remains in numeric values and labels", "Chart images were summarized from surrounding OCR text", "This pack is educational and not financial advice"]
+  },
+  "source_paths": ["tesseract_all.md", "winrt_all.md"],
+  "counts": {
+    "nodes": 18,
+    "edges": 24,
+    "chunks": 8
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source"
+}

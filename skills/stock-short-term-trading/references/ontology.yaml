@@ -1,0 +1,22 @@
+version: 1
+domain: korean_short_term_stock_trading
+source_boundary: third-party-public-safe-summary
+node_types:
+  Concept: Core reusable idea or principle.
+  Strategy: Trading setup or repeatable playbook.
+  Indicator: Market signal or chart/order-flow measure.
+  RiskControl: Rule for loss prevention and capital protection.
+  ToolSetup: HTS/MTS/NXT configuration or screen usage.
+  MarketSession: Trading time window or venue.
+  TraderRoutine: Behavioral routine or workflow.
+edge_types:
+  requires: Source concept needs another concept to work.
+  supports: Source concept improves or confirms the target concept.
+  warns_against: Source concept is a caution about the target.
+  applies_in: Source concept is used in a market session or setup.
+  contrasts_with: Source concept should be compared with the target.
+  sequence: Source concept is followed by the target in a workflow.
+public_safety:
+  raw_source_excluded: true
+  long_verbatim_excerpts_allowed: false
+  source_refs_required: true

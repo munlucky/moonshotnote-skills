@@ -1,0 +1,8 @@
+interface:
+  display_name: "주도주 매매 지식팩"
+  short_description: "주도주/대장주 단기매매 요약 지식"
+  brand_color: "#2563EB"
+  default_prompt: "Use $big-trader-leading-stock-trading to explain the 주도주 and 대장주 trading framework from the local knowledge pack."
+
+policy:
+  allow_implicit_invocation: true

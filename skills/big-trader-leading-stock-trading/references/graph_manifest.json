@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "created_at": "2026-06-04T14:41:07.898255+00:00",
+  "name": "big-trader-leading-stock-trading",
+  "source_quality_gate": {
+    "boundary": "third-party",
+    "ocr_inputs_used": [
+      "WinRT OCR combined output",
+      "Tesseract OCR combined output"
+    ],
+    "strategy": "WinRT prose primary, Tesseract heading/layout cross-check, public summaries only",
+    "raw_text_in_public_package": false
+  },
+  "source_paths": [
+    "output/private-source/dual_ocr_pages.md",
+    "output/private-source/source_chunks.jsonl",
+    "output/private-source/dual_ocr_page_index.json"
+  ],
+  "counts": {
+    "nodes": 23,
+    "edges": 24,
+    "chunks": 11
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source"
+}
