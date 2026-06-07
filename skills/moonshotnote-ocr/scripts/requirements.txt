@@ -1,5 +1,6 @@
 paddlepaddle==3.2.2
 paddleocr==3.4.1
+paddlex[ocr]==3.4.3
 surya-ocr==0.17.1
 transformers<5
 pillow

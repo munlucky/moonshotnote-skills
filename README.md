@@ -12,9 +12,8 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `python-architecture-patterns`: public-safe Python architecture graph for API design, data modeling, data layers, Twelve-Factor services, web server structure, event-driven systems, testing, packaging, observability, and continuous architecture.
 - `domain-driven-design-first-steps`: public-safe Korean DDD study graph for subdomains, ubiquitous language, bounded contexts, context maps, tactical patterns, event sourcing, CQRS, event storming, microservices, event-driven architecture, and data mesh.
 - `codebase-understanding`: lightweight codebase graph workflow for repository onboarding, architecture explanation, focused component analysis, and git diff impact review.
-- `big-trader-leading-stock-trading`: public-safe Korean trading study graph distilled from dual OCR outputs, covering 주도주, 대장주, 테마주 사이클, 트레이딩 Big 4, 비중 조절, 손절, 스윙매매, and training-roadmap concepts.
-- `short-term-trading-3pct`: public-safe Korean trading study graph distilled from Tesseract and WinRT OCR outputs, covering 상한가 다음날 단타, 종목 선정, HTS 세팅, 분할매수, 3% 익절, 09:30 시간 제한, and 진입 금지 패턴.
-- `stock-short-term-trading`: public-safe Korean trading study graph distilled from Tesseract and WinRT OCR outputs, covering 단타/스윙 유형, 손실 방어, 이동평균선, 호가창, 거래량, 테마주, 종가 베팅, 시간외 단일가, NXT/KRX, and 직장인 MTS routines.
+- `daily-webnovel-writing-knowledge`: public-safe Korean webnovel writing graph for planning, serialization strategy, episode structure, cliffhangers, reader metrics, submission, contracts, and sustainable completion habits.
+- `teddynote-langchain-rag`: public-safe RAG and LangChain knowledge graph for document loading, splitting, embeddings, vector stores, retrievers, prompts, chains, evaluation, deployment, and troubleshooting.
 
 ## Install
 
@@ -31,9 +30,8 @@ npx skills add munlucky/moonshotnote-skills --skill spring-modern-api -g -a code
 npx skills add munlucky/moonshotnote-skills --skill python-architecture-patterns -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill codebase-understanding -g -a codex -y
-npx skills add munlucky/moonshotnote-skills --skill big-trader-leading-stock-trading -g -a codex -y
-npx skills add munlucky/moonshotnote-skills --skill short-term-trading-3pct -g -a codex -y
-npx skills add munlucky/moonshotnote-skills --skill stock-short-term-trading -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -44,18 +42,18 @@ npx skills add . --skill fastapi-clean-architecture -g -a codex -y --copy
 npx skills add . --skill text-knowledge-skill-builder -g -a codex -y --copy
 npx skills add . --skill tidy-first -g -a codex -y --copy
 npx skills add . --skill backend-architecture -g -a codex -y --copy
+npx skills add . --skill modern-java-in-action -g -a codex -y --copy
 npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
-npx skills add . --skill big-trader-leading-stock-trading -g -a codex -y --copy
-npx skills add . --skill short-term-trading-3pct -g -a codex -y --copy
-npx skills add . --skill stock-short-term-trading -g -a codex -y --copy
+npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
+npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
 
-The skill intentionally does not bundle OCR models or heavy Python dependencies. Install them into the installed skill's local virtual environment.
+The skill intentionally does not bundle OCR models or heavy Python dependencies. Install them into a shared Moonshot Relay runtime so Codex and Claude account-root copies can reuse the same OCR environment.
 
 Supported local setup targets:
 
@@ -68,16 +66,20 @@ macOS Intel x86_64 is not supported by the pinned `paddlepaddle==3.2.2` runtime 
 After `npx skills add`:
 
 ```powershell
-cd $HOME\.agents\skills\moonshotnote-ocr
+cd $HOME\.codex\skills\moonshotnote-ocr
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
 On macOS Apple Silicon or Linux:
 
 ```bash
-cd ~/.agents/skills/moonshotnote-ocr
+cd ~/.codex/skills/moonshotnote-ocr
 bash scripts/setup.sh
 ```
+
+By default, setup creates `%MOONSHOT_RELAY_HOME%\runtimes\moonshotnote-ocr-py312`, or `%USERPROFILE%\.moonshot-relay\runtimes\moonshotnote-ocr-py312` when `MOONSHOT_RELAY_HOME` is unset. Set `MOONSHOTNOTE_OCR_RUNTIME` or pass `-RuntimePath` only when a custom shared runtime location is required.
+
+Do not install or set up these skills under `~/.agents/skills`; use account roots such as `~/.codex/skills` or `~/.claude/skills`.
 
 From a repository checkout:
 
@@ -93,30 +95,55 @@ cd skills/moonshotnote-ocr
 bash scripts/setup.sh
 ```
 
-The setup scripts create `.venv`, install pinned PaddlePaddle/PaddleOCR/Surya versions from binary wheels, then run `scripts/doctor.py`. They reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the skill.
+The setup scripts create or update the shared runtime, install pinned PaddlePaddle/PaddleOCR/PP-StructureV3/Surya dependencies from binary wheels, then run `scripts/doctor.py`. They reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the runtime. `doctor.py` reports PP-StructureV3 as an optional capability and shows whether it is running inside the shared runtime.
 
 ## moonshotnote-ocr Usage
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
 ```
 
 macOS/Linux:
 
 ```bash
-./.venv/bin/python scripts/ocr_image.py ~/Desktop/screenshot.png --engine paddle --lang korean
+OCR_PYTHON="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}/runtimes/moonshotnote-ocr-py312/bin/python"
+"$OCR_PYTHON" scripts/ocr_image.py ~/Desktop/screenshot.png --engine paddle --lang korean
 ```
 
 Batch OCR cropped screenshots:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\captures --pattern *-crop.png --engine paddle --lang korean --summary
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\captures --pattern *-crop.png --engine paddle --lang korean --summary
 ```
 
 Automatic engine selection:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\page.png --engine auto --lang korean
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\page.png --engine auto --lang korean
+```
+
+Ebook page routing:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\ebook-page.png --engine auto --page-mode auto --lang korean --json
+```
+
+PaddleOCR-only mode avoids Surya runtime use:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\page.png --engine paddle --page-mode auto --lang korean
+```
+
+PP-StructureV3 can be requested only when `scripts\doctor.py` reports `optional_capabilities.pp_structure.available=true`:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\table.png --engine pp-structure --page-mode table --lang korean --json
 ```
 
 Outputs:
@@ -126,13 +153,14 @@ Outputs:
   screenshot.paddle.txt
 ```
 
-Default output is `.txt` only. Use `--json` for structured OCR evidence, `--md` for a review report, `--summary` for `batch_summary.json`, or `--all` to write every output.
+Default output is `.txt` only. Use `--json` for structured OCR evidence, `--md` for a review report, `--summary` for `batch_summary.json`, or `--all` to write every output. JSON keeps the legacy `engine`, `input`, `text`, `items`, `warnings`, and `low_confidence` keys and may add `requested_engine`, `fallback_used`, `fallback_reason`, `page_type`, `page_type_confidence`, `runtime_metadata`, and `structured`.
 
 Low-confidence visual review:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean --json
-.\.venv\Scripts\python.exe scripts\review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts\ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean --json
+& $ocrPython scripts\review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
 ```
 
 The review script creates crop images, contact sheets, `low_confidence_manifest.json`, and `low_confidence_review.md`. Do not treat OCR as fully verified while manifest items remain `needs_review`.
@@ -146,7 +174,10 @@ Batch behavior:
 ## Engine Policy
 
 - Use PaddleOCR first for normal screenshots, UI captures, signs, receipts, and Korean or mixed Korean-English images.
-- Use Surya for document pages where reading order, table structure, formulas, or markdown reconstruction matter.
+- Use `--page-mode auto` for ebook captures so PaddleOCR boxes classify plain text, tables, multi-column pages, layout-heavy pages, or unknown pages.
+- Use optional PP-StructureV3 for table/layout parsing only when `doctor.py` reports it is available.
+- Use Surya for document pages where reading order, formulas, complex layout, or markdown reconstruction matter.
+- Use `--engine paddle` to keep execution on PaddleOCR and avoid Surya runtime use.
 - Use a PDF skill for PDF extraction and page rendering. This skill only handles image inputs or already-rendered scanned pages.
 
 ## fastapi-clean-architecture Usage
@@ -173,44 +204,29 @@ py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\
 
 The workflow is `text -> knowledge -> skill`: private source chunks stay ignored under `output/`, while public Skill references contain summaries, graph relations, provenance, and validation scripts.
 
-## big-trader-leading-stock-trading Usage
+## daily-webnovel-writing-knowledge Usage
 
-The Big Trader skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from two OCR outputs of the same Korean trading book:
-
-```powershell
-py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "주도주 대장주 차이"
-py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "종가 베팅 비중 조절"
-py -3 skills\big-trader-leading-stock-trading\scripts\query_knowledge.py "스윙매매 38스윙"
-py -3 skills\big-trader-leading-stock-trading\scripts\validate_pack.py
-```
-
-Private OCR-derived source chunks stay under `skills/big-trader-leading-stock-trading/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
-
-## short-term-trading-3pct Usage
-
-The Short-Term Trading 3 Percent skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from Tesseract and WinRT OCR outputs of the same Korean trading ebook:
+The Daily Webnovel Writing Knowledge skill ships a public-safe graph and helper query script:
 
 ```powershell
-py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "상한가 다음날"
-py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "09시30분"
-py -3 skills\short-term-trading-3pct\scripts\query_knowledge.py "3% 익절"
-py -3 skills\short-term-trading-3pct\scripts\validate_pack.py
+py -3 skills\daily-webnovel-writing-knowledge-skill\scripts\query_knowledge.py "연재 전략"
+py -3 skills\daily-webnovel-writing-knowledge-skill\scripts\query_knowledge.py "클리프행어"
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\daily-webnovel-writing-knowledge-skill\references
 ```
 
-Private OCR-derived source chunks stay under `skills/short-term-trading-3pct/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
+The tracked graph contains only summaries, source references, and relationships.
 
-## stock-short-term-trading Usage
+## teddynote-langchain-rag Usage
 
-The Stock Short-Term Trading skill does not bundle raw OCR text. It ships a public-safe graph and helper scripts distilled from Tesseract and WinRT OCR outputs of the same Korean trading ebook:
+The TeddyNote LangChain RAG skill ships a public-safe graph and helper query script:
 
 ```powershell
-py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "호가창 거래량"
-py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "NXT 괴리율 거래량"
-py -3 skills\stock-short-term-trading\scripts\query_knowledge.py --query "직장인 종가 시간외 자동감시"
-py -3 skills\stock-short-term-trading\scripts\validate_pack.py
+py -3 skills\teddynote-langchain-rag\scripts\query_knowledge.py "retriever"
+py -3 skills\teddynote-langchain-rag\scripts\query_knowledge.py "chunking"
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\teddynote-langchain-rag\references
 ```
 
-Private OCR-derived source chunks stay under `skills/stock-short-term-trading/output/private-source/` when generated locally, which is ignored by git. The tracked graph contains only summaries, source references, and relationships.
+The tracked graph contains only summaries, source references, and relationships.
 
 ## tidy-first Usage
 
@@ -291,21 +307,21 @@ Private OCR-derived source chunks stay under `skills/domain-driven-design-first-
 Programming OCR-derived skills include coverage and query QA fixtures so concept coverage is checked without publishing raw source text:
 
 ```powershell
-py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture
-py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture --run-id latest
-py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --min-coverage 0.95
-py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --top-n 20
+py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --min-coverage 0.95
+py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --top-n 20
 py -3 tools\validate_backend_meta_artifacts.py --repo-root .
-py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --run-id latest
-py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --run-id latest
-py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
-py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
+py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
+py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
 ```
 
 `tools\extract_chunk_grounded_candidates.py` reads ignored `source_chunks.jsonl` text and writes private semantic candidate ledgers under ignored `output/extraction-candidates/`. `tools\apply_chunk_grounded_traces.py` then attaches public-safe `transform_trace` metadata to references without copying OCR text. `tools\generate_max_density_public_graph.py` remains a bootstrap expansion utility, not the authoritative chunk-content extractor.
@@ -416,13 +432,13 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\text-knowledge-skill-builder
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\tidy-first
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\backend-architecture
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\modern-java-in-action
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\spring-modern-api
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\python-architecture-patterns
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\domain-driven-design-first-steps
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\codebase-understanding
-py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\big-trader-leading-stock-trading
-py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\short-term-trading-3pct
-py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\stock-short-term-trading
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\daily-webnovel-writing-knowledge-skill
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\teddynote-langchain-rag
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
@@ -439,30 +455,25 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\python-architecture-patterns
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\domain-driven-design-first-steps\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\domain-driven-design-first-steps
-py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture
-py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture --run-id latest
-py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --min-coverage 0.95
-py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --top-n 20
+py -3 tools\run_public_graph_gates.py --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\run_public_graph_gates.py --profile local-full --skills tidy-first,fastapi-clean-architecture,modern-java-in-action,domain-driven-design-first-steps,spring-modern-api,python-architecture-patterns,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\validate_coverage_matrix.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --min-coverage 0.95
+py -3 tools\validate_query_qa.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --top-n 20
 py -3 tools\validate_backend_meta_artifacts.py --repo-root .
-py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --run-id latest
-py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first --run-id latest
-py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
-py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture
-py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\big-trader-leading-stock-trading\references
-py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\big-trader-leading-stock-trading
-py -3 skills\big-trader-leading-stock-trading\scripts\validate_pack.py
-py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\short-term-trading-3pct\references
-py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\short-term-trading-3pct
-py -3 skills\short-term-trading-3pct\scripts\validate_pack.py
-py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\stock-short-term-trading\references
-py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\stock-short-term-trading
-py -3 skills\stock-short-term-trading\scripts\validate_pack.py
+py -3 tools\validate_edge_evidence.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_transform_trace.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_forbidden_material.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_substitution_risk.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_no_manifest_only_generation.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\validate_chunk_grounding.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --run-id latest
+py -3 tools\audit_public_verbatim.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill --max-verbatim-words 25 --max-char-shingle 80 --fail-on-source-code-match --fail-on-table-or-exercise-match
+py -3 tools\validate_id_stability.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_source_ref_density.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 tools\validate_query_diversity.py --skills fastapi-clean-architecture,spring-modern-api,python-architecture-patterns,domain-driven-design-first-steps,modern-java-in-action,tidy-first,backend-architecture,teddynote-langchain-rag,daily-webnovel-writing-knowledge-skill
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\teddynote-langchain-rag\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\teddynote-langchain-rag
+py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\daily-webnovel-writing-knowledge-skill\references
+py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\daily-webnovel-writing-knowledge-skill
 py -3 skills\codebase-understanding\scripts\scan_codebase.py . --out .codebase-understanding\codebase-map.json
 py -3 skills\codebase-understanding\scripts\validate_graph.py .codebase-understanding\codebase-map.json
 py -3 skills\codebase-understanding\scripts\explain_graph.py .codebase-understanding\codebase-map.json README.md --root .
@@ -486,9 +497,8 @@ npx skills add . --skill spring-modern-api -g -a codex -y --copy
 npx skills add . --skill python-architecture-patterns -g -a codex -y --copy
 npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
-npx skills add . --skill big-trader-leading-stock-trading -g -a codex -y --copy
-npx skills add . --skill short-term-trading-3pct -g -a codex -y --copy
-npx skills add . --skill stock-short-term-trading -g -a codex -y --copy
+npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
+npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -521,13 +531,13 @@ npx -y skills add munlucky/moonshotnote-skills --skill fastapi-clean-architectur
 npx -y skills add munlucky/moonshotnote-skills --skill text-knowledge-skill-builder --list
 npx -y skills add munlucky/moonshotnote-skills --skill tidy-first --list
 npx -y skills add munlucky/moonshotnote-skills --skill backend-architecture --list
+npx -y skills add munlucky/moonshotnote-skills --skill modern-java-in-action --list
 npx -y skills add munlucky/moonshotnote-skills --skill spring-modern-api --list
 npx -y skills add munlucky/moonshotnote-skills --skill python-architecture-patterns --list
 npx -y skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-steps --list
 npx -y skills add munlucky/moonshotnote-skills --skill codebase-understanding --list
-npx -y skills add munlucky/moonshotnote-skills --skill big-trader-leading-stock-trading --list
-npx -y skills add munlucky/moonshotnote-skills --skill short-term-trading-3pct --list
-npx -y skills add munlucky/moonshotnote-skills --skill stock-short-term-trading --list
+npx -y skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge --list
+npx -y skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

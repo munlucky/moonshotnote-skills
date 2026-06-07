@@ -1,5 +1,6 @@
 param(
     [string]$PythonVersion = "3.10",
+    [string]$RuntimePath,
     [switch]$DisableUvFallback,
     [switch]$SkipInstall
 )
@@ -9,8 +10,34 @@ if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyCo
     $PSNativeCommandUseErrorActionPreference = $false
 }
 
-$SkillRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$VenvPath = Join-Path $SkillRoot ".venv"
+$SkillRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$AgentsSkillsRoot = Join-Path $HOME ".agents\skills"
+if (Test-Path $AgentsSkillsRoot) {
+    $resolvedAgentsSkillsRoot = (Resolve-Path $AgentsSkillsRoot).Path.TrimEnd('\')
+    $normalizedSkillRoot = $SkillRoot.TrimEnd('\')
+    if ($normalizedSkillRoot.Equals($resolvedAgentsSkillsRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+        $normalizedSkillRoot.StartsWith("$resolvedAgentsSkillsRoot\", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to set up a Codex skill under $resolvedAgentsSkillsRoot. Install under $HOME\.codex\skills instead."
+    }
+}
+
+function Resolve-Runtime-Path {
+    if ($RuntimePath) {
+        return $RuntimePath
+    }
+    if ($env:MOONSHOTNOTE_OCR_RUNTIME) {
+        return $env:MOONSHOTNOTE_OCR_RUNTIME
+    }
+    $relayHome = if ($env:MOONSHOT_RELAY_HOME) { $env:MOONSHOT_RELAY_HOME } else { Join-Path $HOME ".moonshot-relay" }
+    return (Join-Path $relayHome "runtimes\moonshotnote-ocr-py312")
+}
+
+$VenvPath = Resolve-Runtime-Path
+$VenvParent = Split-Path -Parent $VenvPath
+if (-not (Test-Path $VenvParent)) {
+    New-Item -ItemType Directory -Path $VenvParent -Force | Out-Null
+}
+Write-Host "Using shared OCR runtime at $VenvPath"
 
 function Invoke-Checked {
     param(
@@ -105,7 +132,7 @@ if (Test-Path $VenvPath) {
     $existingPython = Join-Path $VenvPath "Scripts\python.exe"
     $existingInfo = if (Test-Path $existingPython) { Get-Python-Info -Exe $existingPython -VersionArg $null } else { $null }
     if (-not $existingInfo -or $existingInfo.arch -ne "64bit" -or $existingInfo.version -notin @("3.10", "3.11", "3.12")) {
-        Write-Host "Removing incompatible skill-local virtual environment: $VenvPath"
+        Write-Host "Removing incompatible OCR virtual environment: $VenvPath"
         Remove-Item -LiteralPath $VenvPath -Recurse -Force
     }
 }

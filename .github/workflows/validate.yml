@@ -49,6 +49,13 @@ jobs:
                   "agents/openai.yaml",
                   "scripts/doctor.py",
                   "scripts/ocr_image.py",
+                  "scripts/ocr_pipeline/models.py",
+                  "scripts/ocr_pipeline/router.py",
+                  "scripts/ocr_pipeline/output.py",
+                  "scripts/ocr_pipeline/engines/paddle.py",
+                  "scripts/ocr_pipeline/engines/pp_structure.py",
+                  "scripts/ocr_pipeline/engines/surya.py",
+                  "scripts/ocr_pipeline/classifiers/page_type.py",
                   "scripts/review_low_confidence.py",
                   "scripts/requirements.txt",
                   "scripts/setup.sh",
@@ -267,6 +274,17 @@ jobs:
             skills/moonshotnote-ocr/scripts/doctor.py \
             skills/moonshotnote-ocr/scripts/ocr_image.py \
             skills/moonshotnote-ocr/scripts/review_low_confidence.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/models.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/utils.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/output.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/router.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/engines/paddle.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/engines/pp_structure.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/engines/surya.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/classifiers/page_type.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/postprocess/paragraphs.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/postprocess/columns.py \
+            skills/moonshotnote-ocr/scripts/ocr_pipeline/postprocess/tables.py \
             skills/fastapi-clean-architecture/scripts/validate_graph.py \
             skills/fastapi-clean-architecture/scripts/query_graph.py \
             skills/fastapi-clean-architecture/scripts/expand_context.py \

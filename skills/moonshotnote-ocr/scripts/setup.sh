@@ -4,10 +4,20 @@ set -euo pipefail
 PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 DISABLE_UV_FALLBACK="${DISABLE_UV_FALLBACK:-0}"
+MOONSHOT_RELAY_HOME="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-VENV_PATH="$SKILL_ROOT/.venv"
+AGENTS_SKILLS_ROOT="$(cd "$HOME/.agents/skills" 2>/dev/null && pwd || printf '%s' "$HOME/.agents/skills")"
+case "$SKILL_ROOT/" in
+  "$AGENTS_SKILLS_ROOT"/*)
+    echo "Refusing to set up a Codex skill under $AGENTS_SKILLS_ROOT. Install under $HOME/.codex/skills instead." >&2
+    exit 1
+    ;;
+esac
+VENV_PATH="${MOONSHOTNOTE_OCR_RUNTIME:-$MOONSHOT_RELAY_HOME/runtimes/moonshotnote-ocr-py312}"
+mkdir -p "$(dirname "$VENV_PATH")"
+echo "Using shared OCR runtime at $VENV_PATH"
 
 run_checked() {
   "$@"
@@ -121,7 +131,7 @@ echo "Using Python: $(python_info_json "$PYTHON_EXE")"
 if [[ -d "$VENV_PATH" ]]; then
   VENV_PYTHON="$VENV_PATH/bin/python"
   if [[ ! -x "$VENV_PYTHON" ]] || ! is_compatible_python "$VENV_PYTHON"; then
-    echo "Removing incompatible skill-local virtual environment: $VENV_PATH"
+    echo "Removing incompatible OCR virtual environment: $VENV_PATH"
     rm -rf "$VENV_PATH"
   fi
 fi

@@ -1,0 +1,21 @@
+plan_dir: .moonshot-relay/docs/tasks/moonshotnote-ocr-ebook-capture-ocr
+master_plan: 00-master-plan-v1.md
+execution_mode: in-session-coordinator
+runtime_state: unavailable
+status: completed_with_runtime_caveats
+phases:
+  - id: 01-runtime-dependency-spike
+    file: 01-runtime-dependency-spike-v1.md
+    status: completed
+  - id: 02-canonical-ocr-schema
+    file: 02-canonical-ocr-schema-v1.md
+    status: completed
+  - id: 03-routing-and-postprocess
+    file: 03-routing-and-postprocess-v1.md
+    status: completed
+  - id: 04-docs-and-review-workflow
+    file: 04-docs-and-review-workflow-v1.md
+    status: completed
+  - id: 05-verification-closeout
+    file: 05-verification-closeout-v1.md
+    status: completed_with_runtime_caveats

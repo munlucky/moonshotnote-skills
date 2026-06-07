@@ -1,0 +1,50 @@
+reviewed_package_root: ".moonshot-relay/docs/tasks/moonshotnote-ocr-ebook-capture-ocr/"
+review_iteration: 1
+review_date: "2026-06-07"
+review_mode: "independent parallel subagent review, parent-owned edits"
+
+reviewers:
+  - id: "019ea0a2-f14c-7112-8a82-b08462d5f7e0"
+    perspective: "moonshot-plan-writer package readiness"
+  - id: "019ea0a3-5221-71d1-9cda-1649166ff530"
+    perspective: "OCR runtime/API/dependency risk"
+  - id: "019ea0a3-b69a-7e30-ac3f-3cce1a4fe57e"
+    perspective: "implementation execution readiness"
+
+blocking_findings:
+  - "Create the package root and all phase files before claiming execution readiness."
+  - "Split phase ownership under scripts/ocr_pipeline so schema/adapters and routing/postprocess do not conflict."
+  - "Add read-only/non-payload boundaries for unrelated skills, generated OCR outputs, venvs, model caches, and system quick_validate.py."
+  - "Make PP-StructureV3 a hard Phase 1 go/no-go decision under paddleocr[doc-parser]==3.4.1 or equivalent wheel-only install policy."
+  - "Define canonical items[] coordinate/source/reading-order contract so review_low_confidence.py remains compatible."
+  - "Define requested_engine/engine/fallback output contract for auto routes and batch summary."
+  - "Split CI-light fixture tests from local-only OCR smoke because CI intentionally avoids heavy OCR runtime/model downloads."
+  - "Record existing .github/workflows/validate.yml drift as repo-wide blocker separate from OCR target checks."
+
+accepted_changes:
+  - "Package files were created under .moonshot-relay/docs/tasks/moonshotnote-ocr-ebook-capture-ocr/."
+  - "Phase files now live at package root with 00-master-plan-v1.md and NN-*-v1.md names."
+  - "Review artifact uses planning-loop/plan-quality-review-iter-01.yaml and records required review fields."
+  - "Phase 1 now has explicit PP-StructureV3 go/no-go criteria and unavailable fallback policy."
+  - "Phase 2 owns canonical models, adapters, and output writing."
+  - "Phase 3 owns classifier/router/postprocess only and depends on Phase 2."
+  - "Output contract now specifies runtime_metadata instead of a single model field."
+  - "Verification uses target-scope npx skills add . --skill moonshotnote-ocr --list and PYTHONUTF8 before quick_validate.py."
+
+rejected_or_backlog_changes:
+  - "Do not remove opencv-python in this plan."
+  - "Do not add viewer UI crop/body crop preprocessing."
+  - "Do not add VLM or Tesseract routes."
+  - "Do not require heavy OCR model inference in CI."
+  - "Do not perform global install sync, commit, or push without explicit user request."
+  - "Do not broaden dependency install to paddleocr[all]; test doc-parser only first."
+
+remaining_ambiguity:
+  - "Exact classifier thresholds must be finalized in Phase 3 implementation and documented in page_type.py."
+  - "Exact PP-StructureV3 import/API name must be discovered in Phase 1."
+  - "Actual local OCR smoke fixture paths depend on available ebook capture samples at execution time."
+  - "Repo-wide CI drift around removed trading skills remains outside this OCR plan unless separately approved."
+
+parent_closeout:
+  status: "accepted_with_edits"
+  note: "Parent session applied accepted review changes to the package files; child agents did not mutate repo files."

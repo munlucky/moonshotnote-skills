@@ -1,6 +1,6 @@
 ---
 name: moonshotnote-ocr
-description: Extract and verify OCR text from images, screenshots, scanned pages, Korean or mixed Korean-English UI captures, receipts, signs, document images, tables, and layout-heavy captures. Use PaddleOCR first for normal screenshots and Korean image OCR; use Surya when document layout, reading order, tables, formulas, or markdown reconstruction matter. Use the low-confidence review workflow when OCR output contains [unclear], suspicious lines, or low confidence scores, so Codex checks image evidence before closing.
+description: Extract and verify OCR text from images, screenshots, scanned pages, Korean or mixed Korean-English UI captures, receipts, signs, ebook captures, document images, tables, and layout-heavy captures. Use PaddleOCR first for normal screenshots and Korean image OCR; use page-mode auto for ebook pages; use optional PP-StructureV3 when available for table pages; use Surya when document layout, reading order, formulas, or complex markdown reconstruction matter. Use the low-confidence review workflow when OCR output contains [unclear], suspicious lines, or low confidence scores, so Codex checks image evidence before closing.
 ---
 
 # moonshotnote-ocr
@@ -10,7 +10,10 @@ Use this skill to extract reliable OCR from image files and scanned page images.
 ## Engine Choice
 
 - Use PaddleOCR first for normal screenshots, UI captures, receipts, signs, mobile captures, Korean text, and mixed Korean-English text.
-- Use Surya when the input is a document page where layout, reading order, tables, section headers, or formulas matter.
+- Use `--page-mode auto` for ebook captures so PaddleOCR boxes can classify `plain-text`, `table`, `multi-column`, `layout`, or `unknown`.
+- Use optional PP-StructureV3 only when `doctor.py` reports `optional_capabilities.pp_structure.available=true`; it is intended for table/layout parsing and may be unavailable on a local runtime.
+- Use Surya when the input is a document page where layout, reading order, section headers, formulas, or markdown reconstruction matter.
+- Use `--engine paddle` when the task must avoid Surya runtime use.
 - For PDFs, do not reimplement PDF handling here. If text is selectable, use a PDF skill. If scanned, convert pages to images with a PDF skill, then run this skill on the page images.
 
 ## Output Policy
@@ -30,6 +33,8 @@ Use optional evidence outputs only when needed:
 
 Preserve original text. Do not translate Korean unless the user asks for translation. Mark unreadable or suspicious text as `[unclear]` rather than inventing content.
 
+Structured JSON fields are additive. Existing consumers can keep reading `engine`, `input`, `text`, `items`, `warnings`, and `low_confidence`. New outputs may also include `requested_engine`, `fallback_used`, `fallback_reason`, `page_type`, `page_type_confidence`, `runtime_metadata`, and `structured`.
+
 ## Low-confidence Review
 
 Do not treat a low-confidence count as a final result by itself.
@@ -40,7 +45,8 @@ When OCR output has `[unclear]`, low-confidence lines, suspicious mixed Korean/E
 2. Build a review pack:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
 ```
 
 3. Inspect the generated crop images/contact sheets against the original page images.
@@ -61,6 +67,8 @@ Run setup once on Windows:
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
 ```
 
+By default, setup creates a shared runtime at `%MOONSHOT_RELAY_HOME%\runtimes\moonshotnote-ocr-py312`, or `%USERPROFILE%\.moonshot-relay\runtimes\moonshotnote-ocr-py312` when `MOONSHOT_RELAY_HOME` is unset. Set `MOONSHOTNOTE_OCR_RUNTIME` or pass `-RuntimePath` only when a custom shared runtime location is required.
+
 Run setup once on macOS Apple Silicon or Linux:
 
 ```bash
@@ -70,44 +78,72 @@ bash scripts/setup.sh
 Check the local runtime:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/doctor.py
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/doctor.py
 ```
 
 On macOS/Linux:
 
 ```bash
-./.venv/bin/python scripts/doctor.py
+OCR_PYTHON="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}/runtimes/moonshotnote-ocr-py312/bin/python"
+"$OCR_PYTHON" scripts/doctor.py
 ```
 
 OCR an image with PaddleOCR Korean mode:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\screenshot.png --engine paddle --lang korean
 ```
 
 OCR a directory of cropped screenshots:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/ocr_image.py C:\path\to\captures --pattern *-crop.png --engine paddle --lang korean --summary
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\captures --pattern *-crop.png --engine paddle --lang korean --summary
 ```
 
 Use automatic engine selection:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/ocr_image.py C:\path\to\page.png --engine auto --lang korean
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\page.png --engine auto --lang korean
+```
+
+Use ebook page classification:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\ebook-page.png --engine auto --page-mode auto --lang korean --json
+```
+
+Force PaddleOCR only:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\page.png --engine paddle --page-mode auto --lang korean
+```
+
+Request PP-StructureV3 only when `doctor.py` reports it is available:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\table.png --engine pp-structure --page-mode table --json
 ```
 
 Create a visual low-confidence review pack:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/review_low_confidence.py C:\path\to\ocr-output\paddle --threshold 0.75
 ```
 
 ## Verification Policy
 
 After OCR, report:
 
-- engine used
+- requested engine and actual engine used
+- page type and whether fallback was used
 - output files written
 - low-confidence review pack path, if low-confidence items exist
 - reviewed status counts: accepted, corrected, unreadable, ignored, needs_review
