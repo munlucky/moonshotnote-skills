@@ -1,5 +1,5 @@
 version: 1
-source_id: daily-webnovel-writing-reviewed-ocr
+source_id: daily-webnovel-writing-clean-v2
 source_classification: third-party
 public_safe_policy: "maximal source-knowledge use through lossy abstraction; no source wording, examples, tables, exercises, or chart reconstruction"
 node_types:

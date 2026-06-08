@@ -1,54 +1,37 @@
 {
-  "version": 1,
-  "created_at": "2026-05-23T08:55:00+09:00",
-  "source_title": "모던 자바 인 액션",
-  "source_kind": "private OCR-derived screenshots, manually low-confidence reviewed",
-  "source_sha256": "AB559C4650729F69629822D2F4682AA3F189451F57A4342EF2C3F55C545EF917",
-  "source_paths": [
-    "page-*.png"
-  ],
-  "private_source_location": "skills/modern-java-in-action/output/private-source/",
+  "version": 2,
+  "created_at": "2026-06-08T05:41:13.125985+00:00",
+  "name": "modern-java-in-action",
   "source_quality_gate": {
-    "review_status": "manual_low_confidence_review_complete",
-    "source_image_count": 239,
-    "ocr_text_file_count": 239,
-    "line_count": 8632,
-    "known_unclear_markers": 0,
-    "low_confidence_item_count": 670,
-    "low_confidence_review_status": "reviewed_no_needs_review_remaining",
-    "low_confidence_status_counts": {
-      "corrected": 21,
-      "ignored": 649,
-      "needs_review": 0,
-      "unreadable": 0
-    },
-    "private_chunk_count": 79,
-    "public_package_contains_raw_source": false,
-    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
-    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
+    "classification": "third-party",
+    "source_id": "modern-java-in-action-clean-v2",
+    "ocr_engine": "moonshotnote_ocr_v2_paddle_final_clean",
+    "review_status": "final_clean_v2_auto_manual_remaining_3",
+    "max_knowledge_use": "private OCR chunks were read and converted into candidate-ledger-backed public-safe graph rows",
+    "raw_text_in_public_package": false
   },
-  "counts": {
-    "nodes": 115,
-    "edges": 185,
-    "chunks": 36
-  },
-  "public_sanitized": true,
-  "public_safety_notes": [
-    "Tracked graph files contain summaries, keywords, relationships, and source references only.",
-    "Raw OCR text and intermediate chunks stay under ignored output/private-source.",
-    "The graph should not be used as a substitute for the original book."
+  "source_paths": [
+    {
+      "id": "modern-java-in-action-clean-v2",
+      "scope": "private OCR source",
+      "basename": "프로그래밍__모던 자바 인 액션.clean.md"
+    }
   ],
-  "max_density_second_pass": {
-    "status": "expanded",
-    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
-    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
+  "counts": {
+    "nodes": 152,
+    "edges": 185,
+    "chunks": 49
   },
+  "coverage_rows": 38,
+  "query_qa_rows": 42,
   "chunk_grounded_extraction": {
     "status": "trace_attached",
-    "run_id": "latest",
-    "source_chunks_triaged": 87,
-    "accepted_semantic_candidates": 87,
-    "source_id": "modern-java-in-action-reviewed-ocr",
-    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
-  }
+    "run_id": "clean-v2",
+    "source_chunks_triaged": 199,
+    "accepted_semantic_candidates": 199,
+    "source_id": "modern-java-in-action-clean-v2",
+    "public_trace_policy": "public rows store stable source ids, chunk ids, line ranges, candidate digests, and abstraction labels only. OCR text is excluded"
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source"
 }

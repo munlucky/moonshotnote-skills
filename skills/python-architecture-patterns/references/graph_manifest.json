@@ -1,45 +1,37 @@
 {
-  "version": "1.0.0",
-  "created_at": "2026-05-22T01:34:04.827402+00:00",
+  "version": 2,
+  "created_at": "2026-06-08T05:41:20.815985+00:00",
   "name": "python-architecture-patterns",
   "source_quality_gate": {
-    "ocr_engine": "PaddleOCR reviewed with low-confidence manifest and Surya fallback",
-    "reviewed_pages": 667,
-    "low_confidence_status": {
-      "accepted": 260,
-      "corrected": 209,
-      "ignored": 87,
-      "unreadable": 179,
-      "needs_review": 0
-    },
-    "source_boundary": "third-party; no raw source in tracked files",
-    "public_knowledge_scope": "concepts, relationships, coverage, and query fixtures; no source expression copy",
-    "source_ref_policy": "stable source IDs and review status only; no absolute local paths"
+    "classification": "third-party",
+    "source_id": "python-architecture-patterns-clean-v2",
+    "ocr_engine": "moonshotnote_ocr_v2_paddle_final_clean",
+    "review_status": "final_clean_v2_auto_manual_remaining_24",
+    "max_knowledge_use": "private OCR chunks were read and converted into candidate-ledger-backed public-safe graph rows",
+    "raw_text_in_public_package": false
   },
   "source_paths": [
     {
-      "id": "paddle-reviewed-combined.txt",
-      "description": "Reviewed OCR combined text, stored only in private-source output and original user OCR folder."
+      "id": "python-architecture-patterns-clean-v2",
+      "scope": "private OCR source",
+      "basename": "프로그래밍__파이썬 아키텍처 패턴.clean.md"
     }
   ],
   "counts": {
-    "nodes": 190,
+    "nodes": 231,
     "edges": 320,
-    "chunks": 60
+    "chunks": 73
   },
-  "public_sanitized": true,
-  "private_source_location": "output/private-source",
-  "max_density_second_pass": {
-    "status": "expanded",
-    "public_knowledge_scope": "section-level concepts, relationships, decisions, warnings, and topic indexes",
-    "source_expression_policy": "source ideas are used; source wording, code examples, tables, and exercises are excluded"
-  },
+  "coverage_rows": 62,
+  "query_qa_rows": 64,
   "chunk_grounded_extraction": {
     "status": "trace_attached",
-    "run_id": "latest",
-    "source_chunks_triaged": 226,
-    "accepted_semantic_candidates": 226,
-    "source_id": "python-architecture-patterns-reviewed-ocr",
-    "public_trace_policy": "public rows store stable chunk references, line ranges, short candidate digests, and abstraction loss labels only. OCR text is excluded"
-  }
+    "run_id": "clean-v2",
+    "source_chunks_triaged": 469,
+    "accepted_semantic_candidates": 469,
+    "source_id": "python-architecture-patterns-clean-v2",
+    "public_trace_policy": "public rows store stable source ids, chunk ids, line ranges, candidate digests, and abstraction labels only. OCR text is excluded"
+  },
+  "public_sanitized": true,
+  "private_source_location": "output/private-source"
 }

@@ -1,16 +1,144 @@
 {
   "version": 1,
-  "created_at": "2026-06-05T07:52:08.652643+00:00",
+  "created_at": "2026-06-08T05:41:44.538986+00:00",
   "collection_scope": "ebook OCR collection, relative source labels only",
   "processed_sources": [
     {
-      "skill": "short-term-trading-3pct",
+      "skill": "daily-webnovel-writing-knowledge-skill",
+      "kind": "skill",
+      "source_id": "daily-webnovel-writing-clean-v2",
+      "source_file_count": 1,
+      "line_count": 3651,
+      "chunk_count": 56,
+      "accepted_candidates": 56,
+      "public_counts": {
+        "nodes": 90,
+        "edges": 155,
+        "chunks": 30,
+        "coverage": 30,
+        "qa": 45
+      }
+    },
+    {
+      "skill": "domain-driven-design-first-steps",
+      "kind": "skill",
+      "source_id": "domain-driven-design-first-steps-clean-v2",
+      "source_file_count": 1,
+      "line_count": 15340,
+      "chunk_count": 236,
+      "accepted_candidates": 236,
+      "public_counts": {
+        "nodes": 182,
+        "edges": 225,
+        "chunks": 59,
+        "coverage": 44,
+        "qa": 52
+      }
+    },
+    {
+      "skill": "fastapi-clean-architecture",
+      "kind": "skill",
+      "source_id": "fastapi-clean-architecture-clean-v2",
+      "source_file_count": 1,
+      "line_count": 7098,
+      "chunk_count": 109,
+      "accepted_candidates": 109,
+      "public_counts": {
+        "nodes": 150,
+        "edges": 175,
+        "chunks": 47,
+        "coverage": 35,
+        "qa": 42
+      }
+    },
+    {
+      "skill": "modern-java-in-action",
+      "kind": "skill",
+      "source_id": "modern-java-in-action-clean-v2",
+      "source_file_count": 1,
+      "line_count": 12894,
+      "chunk_count": 199,
+      "accepted_candidates": 199,
+      "public_counts": {
+        "nodes": 152,
+        "edges": 185,
+        "chunks": 49,
+        "coverage": 38,
+        "qa": 42
+      }
+    },
+    {
+      "skill": "python-architecture-patterns",
+      "kind": "skill",
+      "source_id": "python-architecture-patterns-clean-v2",
+      "source_file_count": 1,
+      "line_count": 30457,
+      "chunk_count": 469,
+      "accepted_candidates": 469,
+      "public_counts": {
+        "nodes": 231,
+        "edges": 320,
+        "chunks": 73,
+        "coverage": 62,
+        "qa": 64
+      }
+    },
+    {
+      "skill": "teddynote-langchain-rag",
+      "kind": "skill",
+      "source_id": "teddynote-langchain-rag-clean-v2",
+      "source_file_count": 1,
+      "line_count": 33791,
+      "chunk_count": 520,
+      "accepted_candidates": 520,
+      "public_counts": {
+        "nodes": 190,
+        "edges": 340,
+        "chunks": 64,
+        "coverage": 64,
+        "qa": 65
+      }
+    },
+    {
+      "skill": "tidy-first",
+      "kind": "skill",
+      "source_id": "tidy-first-clean-v2",
+      "source_file_count": 1,
+      "line_count": 5601,
+      "chunk_count": 86,
+      "accepted_candidates": 86,
+      "public_counts": {
+        "nodes": 121,
+        "edges": 220,
+        "chunks": 33,
+        "coverage": 22,
+        "qa": 35
+      }
+    },
+    {
+      "skill": "ebook-1page-stock-chart",
       "kind": "registered_source",
-      "source_id": "short-term-trading-3pct-dual-ocr",
-      "source_file_count": 2,
-      "line_count": 1399,
-      "chunk_count": 22,
-      "accepted_candidates": 22,
+      "source_id": "ebook-1page-stock-chart-clean-v2",
+      "source_file_count": 1,
+      "line_count": 8894,
+      "chunk_count": 137,
+      "accepted_candidates": 137,
+      "public_counts": {
+        "nodes": 90,
+        "edges": 180,
+        "chunks": 30,
+        "coverage": 30,
+        "qa": 40
+      }
+    },
+    {
+      "skill": "ebook-short-term-trading-3pct",
+      "kind": "registered_source",
+      "source_id": "ebook-short-term-trading-3pct-clean-v2",
+      "source_file_count": 1,
+      "line_count": 690,
+      "chunk_count": 11,
+      "accepted_candidates": 11,
       "public_counts": {
         "nodes": 110,
         "edges": 220,
@@ -20,13 +148,13 @@
       }
     },
     {
-      "skill": "big-trader-leading-stock-trading",
+      "skill": "ebook-big-trader-leading-stock",
       "kind": "registered_source",
-      "source_id": "big-trader-leading-stock-dual-ocr",
-      "source_file_count": 2,
-      "line_count": 10048,
-      "chunk_count": 155,
-      "accepted_candidates": 155,
+      "source_id": "ebook-big-trader-leading-stock-clean-v2",
+      "source_file_count": 1,
+      "line_count": 8273,
+      "chunk_count": 128,
+      "accepted_candidates": 128,
       "public_counts": {
         "nodes": 150,
         "edges": 300,
@@ -36,19 +164,83 @@
       }
     },
     {
-      "skill": "stock-short-term-trading",
+      "skill": "ebook-stock-investing-joy",
       "kind": "registered_source",
-      "source_id": "stock-short-term-trading-preferred-ocr",
+      "source_id": "ebook-stock-investing-joy-clean-v2",
       "source_file_count": 1,
-      "line_count": 10104,
-      "chunk_count": 156,
-      "accepted_candidates": 156,
+      "line_count": 3616,
+      "chunk_count": 56,
+      "accepted_candidates": 56,
+      "public_counts": {
+        "nodes": 95,
+        "edges": 190,
+        "chunks": 32,
+        "coverage": 32,
+        "qa": 42
+      }
+    },
+    {
+      "skill": "ebook-stock-short-term-trading",
+      "kind": "registered_source",
+      "source_id": "ebook-stock-short-term-trading-clean-v2",
+      "source_file_count": 1,
+      "line_count": 13278,
+      "chunk_count": 205,
+      "accepted_candidates": 205,
       "public_counts": {
         "nodes": 170,
         "edges": 340,
         "chunks": 57,
         "coverage": 57,
         "qa": 75
+      }
+    },
+    {
+      "skill": "ebook-daangn-ai-development",
+      "kind": "registered_source",
+      "source_id": "ebook-daangn-ai-development-clean-v2",
+      "source_file_count": 1,
+      "line_count": 7828,
+      "chunk_count": 121,
+      "accepted_candidates": 121,
+      "public_counts": {
+        "nodes": 180,
+        "edges": 360,
+        "chunks": 60,
+        "coverage": 60,
+        "qa": 70
+      }
+    },
+    {
+      "skill": "ebook-woowahan-ai-development",
+      "kind": "registered_source",
+      "source_id": "ebook-woowahan-ai-development-clean-v2",
+      "source_file_count": 1,
+      "line_count": 11054,
+      "chunk_count": 170,
+      "accepted_candidates": 170,
+      "public_counts": {
+        "nodes": 220,
+        "edges": 440,
+        "chunks": 74,
+        "coverage": 74,
+        "qa": 80
+      }
+    },
+    {
+      "skill": "ebook-wyckoff-pattern",
+      "kind": "registered_source",
+      "source_id": "ebook-wyckoff-pattern-clean-v2",
+      "source_file_count": 1,
+      "line_count": 6291,
+      "chunk_count": 97,
+      "accepted_candidates": 97,
+      "public_counts": {
+        "nodes": 130,
+        "edges": 260,
+        "chunks": 44,
+        "coverage": 44,
+        "qa": 55
       }
     }
   ],

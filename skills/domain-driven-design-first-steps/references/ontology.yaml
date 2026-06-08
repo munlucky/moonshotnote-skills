@@ -1,40 +1,23 @@
 version: 1
-domain: domain-driven-design-first-steps
-source_boundary: third-party-ocr-private-source
+source_id: domain-driven-design-first-steps-clean-v2
+source_classification: third-party
+public_safe_policy: "maximal source-knowledge use through lossy abstraction; no source wording, examples, tables, exercises, or chart reconstruction"
 node_types:
-  Concept: Core DDD idea or modeling primitive.
-  Pattern: Reusable strategic, tactical, or integration pattern.
-  Practice: Collaborative or operational method.
-  Decision: Rule of thumb for selecting an architecture or model style.
-  ArchitectureStyle: System-level architecture style connected to DDD boundaries.
+  - Concept
+  - Principle
+  - Pattern
+  - Decision
+  - Workflow
+  - Warning
+  - Practice
+  - Boundary
 edge_types:
-  separates: Distinguishes concepts that are often confused.
-  informs: One concept guides another design choice.
-  constrains: One concept limits or protects another.
-  implements: A tactical pattern realizes a modeling decision.
-  integrates_with: Concepts interact across boundaries.
-  escalates_to: A simpler option can evolve into a stronger option.
-  validates: A practice tests whether a boundary or model is coherent.
-  cautions_against: Warns against a common misuse.
-source_ref_policy:
-  allowed_sources:
-    - book.paddle.txt
-  tracked_files_must_not_include_raw_source: true
-  refs_use_line_ranges_only: true
-quality_gates:
-  source_ocr_ok_pages: 321
-  source_ocr_error_pages: 0
-  low_confidence_items: 452
-  low_confidence_status: needs_review
-source_coverage_notes:
-  - "DDD 그래프는 원문 라인 범위만 provenance로 남기고 전략적 판단과 practice를 요약 관계로 보강한다."
-
-shared_ontology_family_mapping:
-  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
-  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
-  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
-
-max_density_second_pass:
-  abstraction_unit: source_id + chapter + section + line_range
-  expression_policy: use concepts and relationships, not source wording or source structure
-  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as
+  - supports
+  - depends_on
+  - informs
+  - constrains
+  - precedes
+  - warns_about
+  - refines
+  - contrasts_with
+trace_required: true

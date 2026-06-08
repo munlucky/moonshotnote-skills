@@ -1,38 +1,23 @@
-# Public-safe ontology for the Python Architecture Patterns knowledge skill.
+version: 1
+source_id: python-architecture-patterns-clean-v2
+source_classification: third-party
+public_safe_policy: "maximal source-knowledge use through lossy abstraction; no source wording, examples, tables, exercises, or chart reconstruction"
 node_types:
-  Chapter:
-    description: A chapter-level topic from the reviewed OCR source, summarized without source text reproduction.
-  Concept:
-    description: A reusable architectural concept synthesized across one or more chapters.
+  - Concept
+  - Principle
+  - Pattern
+  - Decision
+  - Workflow
+  - Warning
+  - Practice
+  - Boundary
 edge_types:
-  precedes: Sequential chapter relationship.
-  introduces: A chapter introduces a concept.
-  refines: A chapter makes a concept more concrete.
-  supports: A chapter supports a cross-cutting practice.
-  encapsulates: A chapter wraps implementation details behind a boundary.
-  extends: A chapter expands an earlier concept.
-  analyzes: A chapter compares tradeoffs.
-  enables: A chapter creates a validation mechanism.
-  modularizes: A chapter creates a reusable distribution boundary.
-  observes: A chapter adds runtime evidence through logs.
-  measures: A chapter adds runtime evidence through metrics.
-  informs: A chapter provides evidence for improvement.
-  repairs: A chapter supports failure diagnosis and repair.
-  guides: A chapter guides ongoing architectural change.
-  feeds_into: A concept informs later architecture evolution.
-source_policy:
-  boundary: third-party
-  tracked_content: summaries, labels, graph relations, and line provenance only
-  private_content: raw reviewed OCR chunks under output/private-source
-source_coverage_notes:
-  - "Chapter/Concept 온톨로지 안에서 API 경계와 운영 증거를 public-safe 요약으로 확장한다."
-
-shared_ontology_family_mapping:
-  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
-  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
-  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
-
-max_density_second_pass:
-  abstraction_unit: source_id + chapter + section + line_range
-  expression_policy: use concepts and relationships, not source wording or source structure
-  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as
+  - supports
+  - depends_on
+  - informs
+  - constrains
+  - precedes
+  - warns_about
+  - refines
+  - contrasts_with
+trace_required: true

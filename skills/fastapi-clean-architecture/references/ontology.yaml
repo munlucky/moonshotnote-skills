@@ -1,51 +1,23 @@
-version: "1.0"
-description: "Public-safe ontology for the FastAPI clean architecture OCR knowledge graph."
+version: 1
+source_id: fastapi-clean-architecture-clean-v2
+source_classification: third-party
+public_safe_policy: "maximal source-knowledge use through lossy abstraction; no source wording, examples, tables, exercises, or chart reconstruction"
 node_types:
-  Concept:
-    description: "A technical concept or principle."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  Layer:
-    description: "A clean architecture layer or boundary."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  Class:
-    description: "A class or interface named in the book project."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  API:
-    description: "A FastAPI endpoint, router, schema, or framework API."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  Pattern:
-    description: "A reusable design or implementation pattern."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  Warning:
-    description: "A design risk, violation, or implementation caveat."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
-  SourceRef:
-    description: "A public-safe provenance anchor into the verified OCR source."
-    required_fields: ["id", "type", "name", "summary", "aliases", "source_refs", "public_safe"]
+  - Concept
+  - Principle
+  - Pattern
+  - Decision
+  - Workflow
+  - Warning
+  - Practice
+  - Boundary
 edge_types:
-  depends_on: "Source node depends on target node."
-  implements: "Source implements target interface, pattern, or requirement."
-  belongs_to: "Source belongs to a layer, chapter, or topic."
-  exposes: "Source exposes an API or behavior."
-  validates: "Source validates or constrains target data."
-  persists: "Source persists target data or domain object."
-  injects: "Source injects target dependency."
-  warns_about: "Source highlights a risk in target."
-  next_topic: "Source topic leads to target topic."
-public_safety:
-  tracked_references_must_not_include_full_ocr_text: true
-  max_summary_chars: 600
-  require_source_refs: true
-  require_public_safe_true: true
-source_coverage_notes:
-  - "OCR 원문은 private source이며, public graph는 개발 환경/런타임/DB 준비 개념을 요약 관계로만 참조한다."
-
-shared_ontology_family_mapping:
-  families: [Concept, Principle, Pattern, Boundary, Layer, Workflow, Decision, Tradeoff, Warning, Practice, FrameworkFeature, CodeIdiom, Operation]
-  policy: "Local node types stay validator-compatible while ontology_family records the shared cross-skill family."
-  public_safety: "Use source concepts and relationships without copying source expression, examples, tables, or exercises."
-
-max_density_second_pass:
-  abstraction_unit: source_id + chapter + section + line_range
-  expression_policy: use concepts and relationships, not source wording or source structure
-  mapping_policy: prefer closeMatch, maps_to, specializes, and contrasts_with over same_as
+  - supports
+  - depends_on
+  - informs
+  - constrains
+  - precedes
+  - warns_about
+  - refines
+  - contrasts_with
+trace_required: true
