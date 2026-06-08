@@ -2,7 +2,10 @@ param(
     [string]$PythonVersion = "3.10",
     [string]$RuntimePath,
     [switch]$DisableUvFallback,
-    [switch]$SkipInstall
+    [switch]$SkipInstall,
+    [switch]$InstallStructure,
+    [switch]$InstallSurya,
+    [switch]$InstallAll
 )
 
 $ErrorActionPreference = "Stop"
@@ -155,6 +158,14 @@ Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "--upg
 if (-not $SkipInstall) {
     $requirements = Join-Path $PSScriptRoot "requirements.txt"
     Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "--only-binary=:all:", "-r", $requirements)
+    if ($InstallStructure -or $InstallAll) {
+        $structureRequirements = Join-Path $PSScriptRoot "requirements-structure.txt"
+        Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "--only-binary=:all:", "-r", $structureRequirements)
+    }
+    if ($InstallSurya -or $InstallAll) {
+        $suryaRequirements = Join-Path $PSScriptRoot "requirements-surya.txt"
+        Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "--only-binary=:all:", "-r", $suryaRequirements)
+    }
 }
 
 Invoke-Checked -FilePath $VenvPython -Arguments @((Join-Path $PSScriptRoot "doctor.py"))

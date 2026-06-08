@@ -16,10 +16,11 @@ REQUIRED_IMPORTS = [
     "pandas",
     "paddle",
     "paddleocr",
-    "surya",
 ]
 
 OPTIONAL_IMPORTS = [
+    "paddlex",
+    "surya",
     "transformers",
 ]
 
@@ -76,6 +77,20 @@ def pp_structure_capability() -> dict[str, object]:
     return {"available": True, "reason": None}
 
 
+def surya_capability() -> dict[str, object]:
+    cli = resolve_cli("surya_ocr") or resolve_cli("surya")
+    if not module_available("surya") and not cli:
+        return {
+            "available": False,
+            "reason": "surya-ocr is not installed; rerun setup with the Surya optional dependency when needed",
+        }
+
+    if not cli:
+        return {"available": False, "reason": "surya package is installed, but no surya CLI was found"}
+
+    return {"available": True, "reason": None, "cli": cli}
+
+
 def main() -> int:
     skill_root = Path(__file__).resolve().parents[1]
     runtime_root = default_runtime_root()
@@ -107,11 +122,13 @@ def main() -> int:
         "packages": {
             "paddlepaddle": package_version("paddlepaddle"),
             "paddleocr": package_version("paddleocr"),
+            "paddlex": package_version("paddlex"),
             "surya-ocr": package_version("surya-ocr"),
             "transformers": package_version("transformers"),
         },
         "optional_capabilities": {
             "pp_structure": pp_structure_capability(),
+            "surya": surya_capability(),
         },
         "cli": {
             "surya": resolve_cli("surya"),
@@ -126,6 +143,7 @@ def main() -> int:
     if missing:
         print("Missing imports: " + ", ".join(missing), file=sys.stderr)
         print("Run scripts/setup.ps1 on Windows or scripts/setup.sh on macOS/Linux.", file=sys.stderr)
+        print("Optional PP-StructureV3 and Surya dependencies are installed only when explicitly requested.", file=sys.stderr)
         return 1
 
     return 0

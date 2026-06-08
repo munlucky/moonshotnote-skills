@@ -67,6 +67,14 @@ Run setup once on Windows:
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
 ```
 
+Default setup installs the PaddleOCR core runtime only. Install optional table/layout dependencies only when needed:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallStructure
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallSurya
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallAll
+```
+
 By default, setup creates a shared runtime at `%MOONSHOT_RELAY_HOME%\runtimes\moonshotnote-ocr-py312`, or `%USERPROFILE%\.moonshot-relay\runtimes\moonshotnote-ocr-py312` when `MOONSHOT_RELAY_HOME` is unset. Set `MOONSHOTNOTE_OCR_RUNTIME` or pass `-RuntimePath` only when a custom shared runtime location is required.
 
 Run setup once on macOS Apple Silicon or Linux:
@@ -74,6 +82,16 @@ Run setup once on macOS Apple Silicon or Linux:
 ```bash
 bash scripts/setup.sh
 ```
+
+On macOS Apple Silicon, keep the default setup path for PaddleOCR first. Optional dependencies can be requested explicitly:
+
+```bash
+bash scripts/setup.sh --with-structure
+bash scripts/setup.sh --with-surya
+bash scripts/setup.sh --with-all
+```
+
+macOS Intel x86_64 is not supported by the pinned PaddlePaddle runtime.
 
 Check the local runtime:
 

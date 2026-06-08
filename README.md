@@ -2,7 +2,7 @@
 
 Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` repository.
 
-- `moonshotnote-ocr`: Korean-first screenshot and document-image OCR with PaddleOCR, Surya, and low-confidence visual review.
+- `moonshotnote-ocr`: Korean-first screenshot and document-image OCR with PaddleOCR, optional PP-StructureV3/Surya fallbacks, and low-confidence visual review.
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.
 - `tidy-first`: public-safe Tidy First knowledge graph for small code tidying, behavior/structure separation, coupling, cohesion, reversibility, and options.
@@ -70,11 +70,27 @@ cd $HOME\.codex\skills\moonshotnote-ocr
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
+Default setup installs the PaddleOCR core runtime only. Install optional table/layout dependencies only when needed:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -InstallStructure
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -InstallSurya
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -InstallAll
+```
+
 On macOS Apple Silicon or Linux:
 
 ```bash
 cd ~/.codex/skills/moonshotnote-ocr
 bash scripts/setup.sh
+```
+
+Optional dependencies can be requested explicitly:
+
+```bash
+bash scripts/setup.sh --with-structure
+bash scripts/setup.sh --with-surya
+bash scripts/setup.sh --with-all
 ```
 
 By default, setup creates `%MOONSHOT_RELAY_HOME%\runtimes\moonshotnote-ocr-py312`, or `%USERPROFILE%\.moonshot-relay\runtimes\moonshotnote-ocr-py312` when `MOONSHOT_RELAY_HOME` is unset. Set `MOONSHOTNOTE_OCR_RUNTIME` or pass `-RuntimePath` only when a custom shared runtime location is required.
@@ -95,7 +111,7 @@ cd skills/moonshotnote-ocr
 bash scripts/setup.sh
 ```
 
-The setup scripts create or update the shared runtime, install pinned PaddlePaddle/PaddleOCR/PP-StructureV3/Surya dependencies from binary wheels, then run `scripts/doctor.py`. They reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the runtime. `doctor.py` reports PP-StructureV3 as an optional capability and shows whether it is running inside the shared runtime.
+The setup scripts create or update the shared runtime, install pinned PaddlePaddle/PaddleOCR core dependencies from binary wheels, then run `scripts/doctor.py`. PP-StructureV3 and Surya are optional installs because their transitive wheels are heavier and more platform-sensitive, especially on macOS. The scripts reject unsupported Python or CPU combinations because OCR dependencies otherwise fall back to fragile local source builds. If `uv` is available and no compatible system Python exists, setup installs a uv-managed Python runtime for the runtime. `doctor.py` reports PP-StructureV3 and Surya as optional capabilities and shows whether it is running inside the shared runtime.
 
 ## moonshotnote-ocr Usage
 

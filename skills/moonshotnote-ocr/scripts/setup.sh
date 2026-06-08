@@ -4,10 +4,43 @@ set -euo pipefail
 PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 DISABLE_UV_FALLBACK="${DISABLE_UV_FALLBACK:-0}"
+INSTALL_STRUCTURE="${INSTALL_STRUCTURE:-0}"
+INSTALL_SURYA="${INSTALL_SURYA:-0}"
+INSTALL_ALL="${INSTALL_ALL:-0}"
 MOONSHOT_RELAY_HOME="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+for arg in "$@"; do
+  case "$arg" in
+    --with-structure|--install-structure)
+      INSTALL_STRUCTURE=1
+      ;;
+    --with-surya|--install-surya)
+      INSTALL_SURYA=1
+      ;;
+    --with-all|--install-all)
+      INSTALL_ALL=1
+      ;;
+    --skip-install)
+      SKIP_INSTALL=1
+      ;;
+    --disable-uv-fallback)
+      DISABLE_UV_FALLBACK=1
+      ;;
+    *)
+      echo "Unknown setup option: $arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [[ "$INSTALL_ALL" == "1" ]]; then
+  INSTALL_STRUCTURE=1
+  INSTALL_SURYA=1
+fi
+
 AGENTS_SKILLS_ROOT="$(cd "$HOME/.agents/skills" 2>/dev/null && pwd || printf '%s' "$HOME/.agents/skills")"
 case "$SKILL_ROOT/" in
   "$AGENTS_SKILLS_ROOT"/*)
@@ -150,6 +183,12 @@ run_checked "$VENV_PYTHON" -m pip install --upgrade pip
 
 if [[ "$SKIP_INSTALL" != "1" ]]; then
   run_checked "$VENV_PYTHON" -m pip install --only-binary=:all: -r "$SCRIPT_DIR/requirements.txt"
+  if [[ "$INSTALL_STRUCTURE" == "1" ]]; then
+    run_checked "$VENV_PYTHON" -m pip install --only-binary=:all: -r "$SCRIPT_DIR/requirements-structure.txt"
+  fi
+  if [[ "$INSTALL_SURYA" == "1" ]]; then
+    run_checked "$VENV_PYTHON" -m pip install --only-binary=:all: -r "$SCRIPT_DIR/requirements-surya.txt"
+  fi
 fi
 
 run_checked "$VENV_PYTHON" "$SCRIPT_DIR/doctor.py"
