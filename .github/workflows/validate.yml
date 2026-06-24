@@ -209,6 +209,14 @@ jobs:
                   "scripts/query_knowledge.py",
                   "scripts/validate_pack.py",
               ],
+              "moonshot-research": [
+                  "agents/openai.yaml",
+                  "references/source-strategy.md",
+                  "references/report-contract.md",
+                  "scripts/research_harness.py",
+                  "scripts/requirements-optional.txt",
+                  "tests/test_research_harness.py",
+              ],
           }
 
           for expected_name, required in skills.items():
@@ -319,6 +327,7 @@ jobs:
             skills/codebase-understanding/scripts/understand_codebase.py \
             skills/codebase-understanding/scripts/validate_graph.py \
             skills/codebase-understanding/scripts/write_diff_overlay.py \
+            skills/moonshot-research/scripts/research_harness.py \
             skills/big-trader-leading-stock-trading/scripts/query_knowledge.py \
             skills/big-trader-leading-stock-trading/scripts/validate_pack.py \
             skills/short-term-trading-3pct/scripts/query_knowledge.py \
@@ -343,6 +352,10 @@ jobs:
             tools/validate_query_diversity.py \
             tools/validate_substitution_risk.py \
             tools/validate_transform_trace.py
+
+      - name: Validate moonshot-research harness
+        run: |
+          python -m unittest discover -s skills/moonshot-research/tests
 
       - name: Validate knowledge graphs
         run: |

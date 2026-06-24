@@ -1,0 +1,4 @@
+interface:
+  display_name: "Moonshot Research"
+  short_description: "Parallel public-web deep research workflow"
+  default_prompt: "Use $moonshot-research to research the current public-web evidence, fan out across relevant sources, resolve contradictions, and return a cited report in Korean."

@@ -14,6 +14,7 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `codebase-understanding`: lightweight codebase graph workflow for repository onboarding, architecture explanation, focused component analysis, and git diff impact review.
 - `daily-webnovel-writing-knowledge`: public-safe Korean webnovel writing graph for planning, serialization strategy, episode structure, cliffhangers, reader metrics, submission, contracts, and sustainable completion habits.
 - `teddynote-langchain-rag`: public-safe RAG and LangChain knowledge graph for document loading, splitting, embeddings, vector stores, retrievers, prompts, chains, evaluation, deployment, and troubleshooting.
+- `moonshot-research`: public-web deep research workflow for current trend discovery, X/Reddit/Hacker News/GitHub/news scans, contradiction checks, and cited report generation.
 
 ## Install
 
@@ -32,6 +33,7 @@ npx skills add munlucky/moonshotnote-skills --skill domain-driven-design-first-s
 npx skills add munlucky/moonshotnote-skills --skill codebase-understanding -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill moonshot-research -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -49,6 +51,7 @@ npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
 npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
 npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
+npx skills add . --skill moonshot-research -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -243,6 +246,25 @@ py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\
 ```
 
 The tracked graph contains only summaries, source references, and relationships.
+
+## moonshot-research Usage
+
+The Moonshot Research skill is a procedural public-web research harness. It ships a no-key Python CLI for public source fan-out plus instructions for Codex synthesis:
+
+```powershell
+py -3 skills\moonshot-research\scripts\research_harness.py "developer AI trends" --lanes web,reddit,hn,github,youtube,x --rounds 2 --limit-per-lane 5
+py -3 skills\moonshot-research\scripts\research_harness.py "Korean cosmetic brands" --lanes web,x,reddit,youtube --rounds 2 --limit-per-lane 5
+```
+
+Optional blocked-page escalation:
+
+```powershell
+py -3 -m pip install -r skills\moonshot-research\scripts\requirements-optional.txt
+py -3 -m playwright install chromium
+py -3 skills\moonshot-research\scripts\research_harness.py "developer AI trends" --escalation full --media-metadata
+```
+
+Outputs are written under `skills\moonshot-research\output\research\...` by default and ignored by git. Use `--out <dir>` for durable artifacts. Read `skills\moonshot-research\references\source-strategy.md` for platform-specific source ladders and `skills\moonshot-research\references\report-contract.md` for longer report structure.
 
 ## tidy-first Usage
 
@@ -455,6 +477,10 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\codebase-understanding
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\daily-webnovel-writing-knowledge-skill
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\teddynote-langchain-rag
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\moonshot-research
+py -3 -m py_compile skills\moonshot-research\scripts\research_harness.py
+py -3 -m unittest discover -s skills\moonshot-research\tests
+py -3 skills\moonshot-research\scripts\research_harness.py --print-capabilities
 py -3 skills\fastapi-clean-architecture\scripts\validate_graph.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\lint_knowledge_pack.py skills\fastapi-clean-architecture\references
 py -3 skills\text-knowledge-skill-builder\scripts\audit_public_safety.py skills\fastapi-clean-architecture
@@ -515,6 +541,7 @@ npx skills add . --skill domain-driven-design-first-steps -g -a codex -y --copy
 npx skills add . --skill codebase-understanding -g -a codex -y --copy
 npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
 npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
+npx skills add . --skill moonshot-research -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -554,6 +581,7 @@ npx -y skills add munlucky/moonshotnote-skills --skill domain-driven-design-firs
 npx -y skills add munlucky/moonshotnote-skills --skill codebase-understanding --list
 npx -y skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge --list
 npx -y skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag --list
+npx -y skills add munlucky/moonshotnote-skills --skill moonshot-research --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.
