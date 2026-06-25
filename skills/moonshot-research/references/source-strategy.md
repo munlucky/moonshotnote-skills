@@ -15,12 +15,18 @@ It deduplicates URLs, fetches public page metadata when possible, scans for acce
 
 Optional escalation is available when dependencies are installed:
 
-- `--escalation tls`: adds `curl_cffi` with browser TLS identities.
-- `--escalation browser`: adds Playwright Chromium for public page rendering and JSON-LD/OGP extraction.
-- `--escalation full`: tries public variants, TLS impersonation, then browser rendering.
+- `--escalation public`: tries public route variants such as oEmbed, `.json`, `/rss`, mobile host, and Jina reader.
+- `--escalation tls`: adds `curl_cffi` with Safari/Chrome/Firefox TLS identities, origin warmup, referer, and cookies.
+- `--escalation browser`: adds Playwright rendering for DOM proof, JSON-LD/OGP extraction, and optional network request capture.
+- `--escalation full`: tries direct fetch, public variants, TLS impersonation, then browser rendering.
+- `--real-chrome --chrome-profile <dir>`: uses system Chrome with a persistent profile for browser escalation when headless Chromium is blocked.
+- `--capture-network`: captures rendered `/api`, `/graphql`, `.json`, job/apply/status request URLs with sensitive query keys stripped.
+- `--verification-profile apply-availability`: requires enabled apply-action proof and automatically captures candidate network APIs.
 - `--media-metadata`: adds `yt-dlp` metadata and caption language discovery for YouTube/media URLs.
 
 Run `scripts/research_harness.py --print-capabilities` before assuming optional escalation is active.
+
+`200 OK` is not enough. The harness marks WAF/challenge pages, empty SPA shells, tiny bodies, missing success selectors, disabled success selectors, and login boundaries as failed or suspect evidence. Treat `suspect_ok` as a prompt for escalation, not as proof.
 
 ## Query Planning
 
@@ -70,9 +76,17 @@ X public access is often incomplete. Treat results as sampled evidence.
 - Separate "consumer buzz", "sales traction", "founder/investor attention", and "developer adoption"; these are different claims.
 - Use rankings only after explaining the weighting.
 
+## Job And Actionability Checks
+
+- Separate "posting exists" from "user can apply now".
+- Do not use static copy such as `상시채용`, `open role`, or a search snippet as apply-availability proof.
+- Require a rendered enabled apply button, explicit public status/API evidence, or a primary page statement that unambiguously says applications are currently open.
+- Use `--verification-profile apply-availability` for Wanted-style checks. It escalates to `full` if needed, evaluates Korean/English apply selectors, captures public network API candidates, and treats login-required states as unknown.
+- If authentication, a private session, CAPTCHA, or region/account gating is required to determine button state, report `unknown-auth-required` or the recorded access boundary. Do not guess from page existence.
+
 ## Blocked Source Handling
 
-- Try public APIs/feeds first, then search cache/snippets, mobile or metadata surfaces, and browser inspection.
+- Try public APIs/feeds first, then search cache/snippets, mobile/Jina/metadata surfaces, TLS impersonation, and browser inspection.
 - Stop at authentication, paywalls, private groups, or CAPTCHA walls.
 - Write down failed routes so the final report does not overstate coverage.
 

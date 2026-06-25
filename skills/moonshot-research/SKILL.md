@@ -12,6 +12,8 @@ Run a public-web research harness: plan the search, saturate relevant source lan
 - Use public sources only. Stop at logins, paywalls, private APIs, CAPTCHAs, or credential prompts and report the access boundary.
 - Browse or otherwise verify live web evidence for any current, latest, trending, price, legal, market, product, social, or company claim.
 - Track every material claim to a source URL, retrieval route, date, and confidence.
+- Do not treat `200 OK` as success by itself. Treat challenge pages, empty SPA shells, tiny bodies, WAF markers, and missing positive proof as failed or suspect fetches.
+- Separate existence claims from actionability claims. For example, a job page existing or saying `상시채용` is not proof that applications are open; require an enabled apply button, rendered DOM proof, or a public status API.
 - Prefer primary sources for technical claims: official docs, repos, release notes, standards, papers, issue trackers, or maintainer posts.
 - Avoid long quotations. Summarize, cite, and quote only short fragments when wording itself matters.
 - State absolute dates. For "recent", "hot", or "these days", default to the last 7 days unless the user gives a different window.
@@ -52,6 +54,12 @@ Useful options:
 - `--lanes web,reddit,hn,github,youtube,x`: choose source lanes.
 - `--rounds 1`: disable expanded follow-up queries for a quick pass.
 - `--escalation basic|public|tls|browser|full`: control blocked-page escalation.
+- `--verification-profile apply-availability`: require enabled apply-action proof and capture rendered network API candidates. Use this for job/application availability checks.
+- `--success-selector "<selector>"`: require an enabled rendered element before a page counts as positive proof.
+- `--failure-selector "<selector>"`: mark the claim failed when rendered failure proof is present.
+- `--proof-text "<text>"`: require text proof in addition to a successful fetch.
+- `--real-chrome --chrome-profile <dir>`: escalate browser fetches to system Chrome with a persistent profile when bundled/headless Chromium is blocked.
+- `--capture-network`: record rendered `/api`, `/graphql`, `.json`, `job`, `apply`, or `status` request URLs with sensitive query keys stripped.
 - `--media-metadata`: use optional `yt-dlp` metadata/caption discovery for media URLs.
 - `--no-fetch-pages`: keep only search/API metadata when page fetching is slow or blocked.
 - `--out <dir>`: write artifacts outside the ignored skill `output/` tree when the user needs a durable deliverable.
@@ -71,11 +79,19 @@ python3 -m playwright install chromium
 
 Escalation behavior:
 
-- `basic`: single `urllib` fetch.
-- `public`: public URL variants such as oEmbed, `.json`, `/rss`, mobile host.
-- `tls`: public variants plus optional `curl_cffi` browser TLS impersonation.
-- `browser`: public variants plus optional Playwright Chromium.
-- `full`: public variants, optional `curl_cffi`, then optional Playwright Chromium.
+- `basic`: Phase 0 direct `urllib` fetch with validation.
+- `public`: Phase 0 plus Phase 1 public URL variants such as oEmbed, `.json`, `/rss`, mobile host, and Jina reader.
+- `tls`: Phase 0/1 plus Phase 2 optional `curl_cffi` browser TLS impersonation with origin warmup, referer, cookies, and Safari/Chrome/Firefox identities.
+- `browser`: Phase 0/1 plus Phase 3 optional Playwright rendering.
+- `full`: Phase 0 direct, Phase 1 public routes, Phase 2 TLS impersonation, then Phase 3 browser rendering.
+
+Positive-proof example for job/application checks:
+
+```powershell
+py -3 scripts\research_harness.py "Wanted example company backend job" --lanes web --rounds 1 --escalation full --verification-profile apply-availability --real-chrome --chrome-profile "$env:TEMP\moonshot-research-chrome"
+```
+
+When a rendered page requires login, private session state, or a CAPTCHA to know whether the button is enabled, report `unknown-auth-required` or the recorded access boundary. Do not infer availability from static listing copy.
 
 After running, read `report.md`, inspect `claim-ledger.json` for auditability, and synthesize the user-facing answer with citations. Do not treat the generated ranking as a statistical platform-wide measurement.
 
@@ -93,11 +109,12 @@ Require each worker to return only source-grounded findings with URLs, dates, se
 
 Use an escalation ladder and stop honestly:
 
-1. Public platform endpoints, feeds, `.json`, `/rss`, oEmbed, official search pages, or documented APIs.
-2. Search-engine operators and alternate public surfaces such as mobile pages, profile pages, discussion mirrors, release feeds, or repository search.
-3. Browser automation or page inspection when available and allowed.
-4. Metadata-only extraction from OGP, JSON-LD, snippets, screenshots, or search result context.
-5. Boundary report: `authentication required`, `paywalled`, `blocked by bot challenge`, `not indexed`, or `no public evidence found`.
+1. Phase 0 direct fetch; reject 403/WAF/challenge/small body/empty SPA as terminal success.
+2. Phase 1 public endpoints, feeds, `.json`, `/rss`, oEmbed, mobile pages, Jina reader, official search pages, or documented APIs.
+3. Phase 2 optional TLS impersonation with `curl_cffi`, origin warmup, referer chain, and cookies.
+4. Phase 3 browser automation; use system Chrome with a persistent profile when ordinary headless Chromium is blocked and the user request needs that proof.
+5. Rendered-page inspection: evaluate success/failure selectors and inspect network requests for public `/api`, `/graphql`, `.json`, status, job, or apply endpoints.
+6. Boundary report: `authentication required`, `paywalled`, `blocked by bot challenge`, `positive proof failed`, `not indexed`, or `no public evidence found`.
 
 Never bypass authentication, defeat paywalls, use leaked credentials, or imply that sparse public evidence proves absence.
 

@@ -29,7 +29,7 @@ When `scripts/research_harness.py` is used, build the final answer from `report.
    - Claim ID.
    - Claim text.
    - Evidence URL(s).
-   - Status: source-observed, contradicted, access-limited, or needs-follow-up.
+   - Status: source-observed, positive-proof-observed, positive-proof-failed, unknown-auth-required, contradicted, access-limited, or needs-follow-up.
    - Confidence and unresolved checks.
 
 5. **Synthesis**
@@ -54,3 +54,13 @@ When ranking "hot" brands, tools, technologies, products, or narratives, score w
 - Counter-evidence: complaints, corrections, dead repos, deleted posts, and bot-like promotion reduce confidence.
 
 Never output a precise numeric ranking unless the collection method actually measured comparable quantities.
+
+## Positive-Proof Claims
+
+Use this stricter contract for claims about whether a user can take an action now: apply to a job, buy a product, join a waitlist, download a file, claim an offer, or access a service.
+
+- State the actionability claim separately from the existence claim.
+- Cite rendered DOM proof, an enabled success selector, or a public status/API response when saying the action is available.
+- Treat disabled buttons, closing/closed labels, unavailable regions, login walls, and CAPTCHA gates as `positive-proof-failed` or `unknown-auth-required`.
+- Do not promote static marketing copy, snippets, or stale listing text to actionability proof.
+- Include the validation verdict from `claim-ledger.json` when the generated harness artifacts are available.

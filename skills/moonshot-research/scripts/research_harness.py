@@ -21,6 +21,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import textwrap
 import time
 import urllib.error
@@ -50,6 +51,47 @@ BLOCK_PATTERNS = (
     "forbidden",
     "waf",
 )
+HARD_CHALLENGE_PATTERNS = (
+    "cf-chl",
+    "cf_clearance",
+    "cloudflare ray id",
+    "attention required! | cloudflare",
+    "akamai bot manager",
+    "datadome",
+    "perimeterx",
+    "px-captcha",
+    "captcha",
+    "verify you are human",
+    "enable javascript and cookies",
+)
+EMPTY_SPA_PATTERNS = (
+    "<div id=\"root\"></div>",
+    "<div id=\"app\"></div>",
+    "__next_data__",
+)
+AUTH_PATTERNS = (
+    "authentication required",
+    "please sign in",
+    "sign in to continue",
+    "log in to continue",
+    "login required",
+    "로그인",
+    "인증",
+)
+SENSITIVE_QUERY_KEYS = {
+    "access_token",
+    "auth",
+    "authorization",
+    "code",
+    "key",
+    "password",
+    "secret",
+    "session",
+    "signature",
+    "sig",
+    "token",
+}
+DEFAULT_MIN_BODY_CHARS = 300
 
 
 @dataclasses.dataclass
@@ -73,6 +115,20 @@ class EvidenceItem:
         return dataclasses.asdict(self)
 
 
+@dataclasses.dataclass
+class ValidationResult:
+    verdict: str
+    access_status: str
+    usable: bool
+    terminal: bool = False
+    reasons: list[str] = dataclasses.field(default_factory=list)
+    body_size: int = 0
+    matched: dict[str, list[str]] = dataclasses.field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return dataclasses.asdict(self)
+
+
 class SearchResultParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -87,7 +143,7 @@ class SearchResultParser(HTMLParser):
         attr_map = {key: value or "" for key, value in attrs}
         href = attr_map.get("href", "")
         css = attr_map.get("class", "")
-        if "result__a" in css or href.startswith("//duckduckgo.com/l/"):
+        if "result__a" in css or href.startswith("//duckduckgo.com/l/") or "uddg=" in href:
             self._in_link = True
             self._current_href = href
             self._current_text = []
@@ -105,6 +161,44 @@ class SearchResultParser(HTMLParser):
             self._in_link = False
             self._current_href = ""
             self._current_text = []
+
+
+class BingResultParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.results: list[dict[str, str]] = []
+        self._h2_depth = 0
+        self._in_link = False
+        self._current_href = ""
+        self._current_text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "h2":
+            self._h2_depth += 1
+            return
+        if tag != "a" or self._h2_depth <= 0:
+            return
+        attr_map = {key: value or "" for key, value in attrs}
+        href = attr_map.get("href", "")
+        if href.startswith(("http://", "https://")):
+            self._in_link = True
+            self._current_href = href
+            self._current_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._in_link:
+            self._current_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self._in_link:
+            title = normalize_space(" ".join(self._current_text))
+            if self._current_href and title:
+                self.results.append({"url": self._current_href, "title": title})
+            self._in_link = False
+            self._current_href = ""
+            self._current_text = []
+        elif tag == "h2" and self._h2_depth > 0:
+            self._h2_depth -= 1
 
 
 class TextExtractor(HTMLParser):
@@ -211,6 +305,8 @@ def unwrap_duckduckgo_url(url: str) -> str:
         return ""
     if url.startswith("//"):
         url = "https:" + url
+    if url.startswith("/"):
+        url = urllib.parse.urljoin("https://duckduckgo.com", url)
     parsed = urllib.parse.urlparse(url)
     query = urllib.parse.parse_qs(parsed.query)
     if "uddg" in query:
@@ -258,9 +354,17 @@ def http_get(url: str, timeout: float = 12.0, accept: str = "*/*") -> tuple[int,
 
 
 def optional_capabilities() -> dict[str, Any]:
+    chrome_paths = [
+        shutil.which("chrome"),
+        shutil.which("google-chrome"),
+        shutil.which("chrome.exe"),
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    ]
     return {
         "curl_cffi": importlib.util.find_spec("curl_cffi") is not None,
         "playwright": importlib.util.find_spec("playwright") is not None,
+        "system_chrome": any(path and Path(path).exists() for path in chrome_paths),
         "yt_dlp": shutil.which("yt-dlp") is not None or importlib.util.find_spec("yt_dlp") is not None,
     }
 
@@ -291,6 +395,8 @@ def public_url_variants(url: str) -> list[tuple[str, str]]:
     if not host.startswith("m.") and not host.startswith("mobile."):
         variants.append(("mobile-host", urllib.parse.urlunparse(parsed._replace(netloc="m." + host))))
     variants.append(("rss-suffix", urllib.parse.urlunparse(parsed._replace(path=path.rstrip("/") + "/rss"))))
+    stripped = urllib.parse.urlunparse(parsed._replace(scheme="", netloc="")).lstrip("/")
+    variants.append(("jina-reader", "https://r.jina.ai/http://" + host + "/" + stripped))
     return [(name, variant) for name, variant in variants if variant != url]
 
 
@@ -304,46 +410,153 @@ def youtube_video_id(url: str) -> str:
     return ""
 
 
-def curl_cffi_get(url: str, timeout: float, accept: str) -> tuple[int, str, str, str]:
+def sanitize_observed_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    query_pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    safe_query = urllib.parse.urlencode(
+        [(key, value) for key, value in query_pairs if key.lower() not in SENSITIVE_QUERY_KEYS],
+        doseq=True,
+    )
+    return urllib.parse.urlunparse(parsed._replace(query=safe_query, fragment=""))
+
+
+def is_api_candidate(url: str) -> bool:
+    lowered = url.lower()
+    return any(marker in lowered for marker in ("/api", "/graphql", ".json", "job", "apply", "status"))
+
+
+def curl_cffi_get(url: str, timeout: float, accept: str) -> tuple[int, str, str, str, list[dict[str, Any]]]:
     try:
         from curl_cffi import requests as curl_requests  # type: ignore
     except Exception as exc:
-        return 0, url, f"curl_cffi unavailable: {exc}", "tls-unavailable"
+        return 0, url, f"curl_cffi unavailable: {exc}", "tls-unavailable", [
+            {"route": "tls-unavailable", "url": url, "status": "0", "error": str(exc)}
+        ]
     last_error = ""
-    for identity in ("chrome", "safari", "firefox"):
+    attempts: list[dict[str, str]] = []
+    parsed = urllib.parse.urlparse(url)
+    origin = urllib.parse.urlunparse((parsed.scheme, parsed.netloc, "/", "", "", "")) if parsed.scheme and parsed.netloc else url
+    for identity in ("safari", "chrome", "firefox", "chrome_android", "safari_ios"):
         try:
-            response = curl_requests.get(
+            session = curl_requests.Session()
+            try:
+                session.get(
+                    origin,
+                    timeout=min(timeout, 5.0),
+                    impersonate=identity,
+                    headers={"Accept": "text/html,*/*", "Accept-Language": "en-US,en;q=0.9,ko;q=0.8"},
+                )
+            except Exception:
+                pass
+            response = session.get(
                 url,
                 timeout=timeout,
                 impersonate=identity,
-                headers={"Accept": accept, "Accept-Language": "en-US,en;q=0.9,ko;q=0.8"},
+                headers={"Accept": accept, "Accept-Language": "en-US,en;q=0.9,ko;q=0.8", "Referer": origin},
             )
-            return response.status_code, str(response.url), response.text, f"curl-cffi-{identity}"
+            route = f"curl-cffi-{identity}"
+            attempts.append({"route": route, "url": str(response.url), "status": str(response.status_code)})
+            if is_usable_public_response(response.status_code, response.text):
+                return response.status_code, str(response.url), response.text, route, attempts
+            last_error = f"status {response.status_code}"
         except Exception as exc:
             last_error = f"{type(exc).__name__}: {exc}"
-    return 0, url, last_error, "tls-failed"
+            attempts.append({"route": f"curl-cffi-{identity}", "url": url, "status": "0", "error": last_error})
+    return 0, url, last_error, "tls-failed", attempts
 
 
-def playwright_get(url: str, timeout: float) -> tuple[int, str, str, str]:
+def playwright_get(
+    url: str,
+    timeout: float,
+    real_chrome: bool = False,
+    headful: bool = False,
+    chrome_profile: str = "",
+    capture_network: bool = False,
+    success_selectors: list[str] | None = None,
+    failure_selectors: list[str] | None = None,
+    proof_texts: list[str] | None = None,
+) -> tuple[int, str, str, str, dict[str, Any]]:
     try:
         from playwright.sync_api import sync_playwright  # type: ignore
     except Exception as exc:
-        return 0, url, f"playwright unavailable: {exc}", "browser-unavailable"
+        return 0, url, f"playwright unavailable: {exc}", "browser-unavailable", {}
+    success_selectors = success_selectors or []
+    failure_selectors = failure_selectors or []
+    proof_texts = proof_texts or []
+    network_requests: list[str] = []
+    proof: dict[str, list[str]] = {"success_selectors": [], "disabled_selectors": [], "failure_selectors": [], "proof_texts": []}
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
+            context = None
+            browser = None
+            if real_chrome:
+                profile_dir = chrome_profile or tempfile.mkdtemp(prefix="moonshot-research-chrome-")
+                context = playwright.chromium.launch_persistent_context(
+                    profile_dir,
+                    channel="chrome",
+                    headless=False if not headful else False,
+                    user_agent=USER_AGENT,
+                    locale="en-US",
+                )
+                page = context.pages[0] if context.pages else context.new_page()
+                route = "playwright-real-chrome"
+            else:
+                browser = playwright.chromium.launch(headless=not headful)
+                context = browser.new_context(user_agent=USER_AGENT, locale="en-US")
+                page = context.new_page()
+                route = "playwright-chromium"
+            if capture_network:
+                page.on(
+                    "request",
+                    lambda request: network_requests.append(sanitize_observed_url(request.url))
+                    if is_api_candidate(request.url) and sanitize_observed_url(request.url) not in network_requests
+                    else None,
+                )
             try:
-                page = browser.new_page(user_agent=USER_AGENT, locale="en-US")
                 response = page.goto(url, wait_until="domcontentloaded", timeout=max(1000, int(timeout * 1000)))
                 page.wait_for_timeout(500)
                 body = page.content()
+                lower_body = body.lower()
+                for text in proof_texts:
+                    if text and text.lower() in lower_body:
+                        proof["proof_texts"].append(text)
+                for selector in failure_selectors:
+                    try:
+                        locator = page.locator(selector)
+                        if locator.count() > 0:
+                            proof["failure_selectors"].append(selector)
+                    except Exception:
+                        continue
+                for selector in success_selectors:
+                    try:
+                        locator = page.locator(selector).first()
+                        if locator.count() <= 0:
+                            continue
+                        visible = locator.is_visible(timeout=250)
+                        disabled = locator.evaluate(
+                            """(el) => Boolean(
+                                el.disabled ||
+                                el.getAttribute('disabled') !== null ||
+                                el.getAttribute('aria-disabled') === 'true' ||
+                                el.closest('[disabled], [aria-disabled="true"]')
+                            )"""
+                        )
+                        if visible and not disabled:
+                            proof["success_selectors"].append(selector)
+                        else:
+                            proof["disabled_selectors"].append(selector)
+                    except Exception:
+                        continue
                 status = response.status if response else 0
                 final_url = page.url
             finally:
-                browser.close()
-        return status, final_url, body, "playwright-chromium"
+                if context:
+                    context.close()
+                if browser:
+                    browser.close()
+        return status, final_url, body, route, {"network_requests": network_requests[:80], "proof": proof}
     except Exception as exc:
-        return 0, url, f"{type(exc).__name__}: {exc}", "browser-failed"
+        return 0, url, f"{type(exc).__name__}: {exc}", "browser-failed", {"network_requests": network_requests[:80], "proof": proof}
 
 
 def yt_dlp_metadata(url: str, timeout: float) -> dict[str, Any] | None:
@@ -398,60 +611,201 @@ def fetch_public_content(
     timeout: float,
     accept: str,
     escalation: str,
-) -> tuple[int, str, str, str, list[dict[str, str]]]:
-    attempts: list[dict[str, str]] = []
+    success_selectors: list[str] | None = None,
+    failure_selectors: list[str] | None = None,
+    proof_texts: list[str] | None = None,
+    min_body_chars: int = DEFAULT_MIN_BODY_CHARS,
+    real_chrome: bool = False,
+    headful: bool = False,
+    chrome_profile: str = "",
+    capture_network: bool = False,
+) -> tuple[int, str, str, str, list[dict[str, Any]]]:
+    attempts: list[dict[str, Any]] = []
     status, final_url, body = http_get(url, timeout=timeout, accept=accept)
     route = "urllib"
-    attempts.append({"route": route, "url": final_url, "status": str(status), "access": detect_access_status(status, body)})
-    if is_usable_public_response(status, body) or escalation == "basic":
+    validation = validate_response(
+        status,
+        body,
+        success_selectors=success_selectors,
+        failure_selectors=failure_selectors,
+        proof_texts=proof_texts,
+        min_body_chars=min_body_chars,
+    )
+    attempts.append(
+        {
+            "phase": "phase0-direct",
+            "route": route,
+            "url": final_url,
+            "status": str(status),
+            "access": validation.access_status,
+            "verdict": validation.verdict,
+            "reasons": validation.reasons,
+        }
+    )
+    if validation.usable or validation.terminal or escalation == "basic":
         return status, final_url, body, route, attempts
 
     if escalation in {"public", "tls", "browser", "full"}:
         for variant_name, variant_url in public_url_variants(url):
             v_status, v_final_url, v_body = http_get(variant_url, timeout=timeout, accept=accept)
+            v_validation = validate_response(
+                v_status,
+                v_body,
+                success_selectors=success_selectors,
+                failure_selectors=failure_selectors,
+                proof_texts=proof_texts,
+                min_body_chars=min_body_chars,
+            )
             attempts.append(
                 {
+                    "phase": "phase1-public-route",
                     "route": variant_name,
                     "url": v_final_url,
                     "status": str(v_status),
-                    "access": detect_access_status(v_status, v_body),
+                    "access": v_validation.access_status,
+                    "verdict": v_validation.verdict,
+                    "reasons": v_validation.reasons,
                 }
             )
-            if is_usable_public_response(v_status, v_body):
+            if v_validation.usable or v_validation.terminal:
                 return v_status, v_final_url, v_body, variant_name, attempts
 
     if escalation in {"tls", "full"}:
-        c_status, c_final_url, c_body, c_route = curl_cffi_get(url, timeout, accept)
-        attempts.append({"route": c_route, "url": c_final_url, "status": str(c_status), "access": detect_access_status(c_status, c_body)})
-        if is_usable_public_response(c_status, c_body):
+        c_status, c_final_url, c_body, c_route, tls_attempts = curl_cffi_get(url, timeout, accept)
+        for tls_attempt in tls_attempts:
+            attempts.append(
+                {
+                    "phase": "phase2-tls-impersonation",
+                    **tls_attempt,
+                    "access": detect_access_status(int(tls_attempt.get("status", "0")), c_body if tls_attempt.get("route") == c_route else ""),
+                }
+            )
+        c_validation = validate_response(
+            c_status,
+            c_body,
+            success_selectors=success_selectors,
+            failure_selectors=failure_selectors,
+            proof_texts=proof_texts,
+            min_body_chars=min_body_chars,
+        )
+        if attempts:
+            attempts[-1]["verdict"] = c_validation.verdict
+            attempts[-1]["reasons"] = c_validation.reasons
+            attempts[-1]["access"] = c_validation.access_status
+        if c_validation.usable or c_validation.terminal:
             return c_status, c_final_url, c_body, c_route, attempts
 
     if escalation in {"browser", "full"}:
-        b_status, b_final_url, b_body, b_route = playwright_get(url, timeout)
-        attempts.append({"route": b_route, "url": b_final_url, "status": str(b_status), "access": detect_access_status(b_status, b_body)})
-        if is_usable_public_response(b_status, b_body):
+        b_status, b_final_url, b_body, b_route, b_meta = playwright_get(
+            url,
+            timeout,
+            real_chrome=real_chrome,
+            headful=headful,
+            chrome_profile=chrome_profile,
+            capture_network=capture_network,
+            success_selectors=success_selectors,
+            failure_selectors=failure_selectors,
+            proof_texts=proof_texts,
+        )
+        b_validation = validate_response(
+            b_status,
+            b_body,
+            success_selectors=success_selectors,
+            failure_selectors=failure_selectors,
+            proof_texts=proof_texts,
+            min_body_chars=min_body_chars,
+            browser_proof=b_meta.get("proof") if b_meta else None,
+        )
+        attempts.append(
+            {
+                "phase": "phase3-real-chrome" if real_chrome else "phase3-browser",
+                "route": b_route,
+                "url": b_final_url,
+                "status": str(b_status),
+                "access": b_validation.access_status,
+                "verdict": b_validation.verdict,
+                "reasons": b_validation.reasons,
+                "network_requests": b_meta.get("network_requests", []) if b_meta else [],
+                "proof": b_meta.get("proof", {}) if b_meta else {},
+            }
+        )
+        if b_validation.usable or b_validation.terminal:
             return b_status, b_final_url, b_body, b_route, attempts
 
     return status, final_url, body, route, attempts
 
 
+def validate_response(
+    status: int,
+    body: str,
+    content_type: str = "",
+    success_selectors: list[str] | None = None,
+    failure_selectors: list[str] | None = None,
+    proof_texts: list[str] | None = None,
+    min_body_chars: int = DEFAULT_MIN_BODY_CHARS,
+    browser_proof: dict[str, list[str]] | None = None,
+) -> ValidationResult:
+    success_selectors = [value for value in (success_selectors or []) if value]
+    failure_selectors = [value for value in (failure_selectors or []) if value]
+    proof_texts = [value for value in (proof_texts or []) if value]
+    browser_proof = browser_proof or {}
+    reasons: list[str] = []
+    matched: dict[str, list[str]] = {
+        "success_selectors": list(browser_proof.get("success_selectors", [])),
+        "disabled_selectors": list(browser_proof.get("disabled_selectors", [])),
+        "failure_selectors": list(browser_proof.get("failure_selectors", [])),
+        "proof_texts": list(browser_proof.get("proof_texts", [])),
+    }
+    body_size = len(normalize_space(body))
+    lower = body.lower()
+    looks_json = "json" in content_type.lower() or body.lstrip().startswith(("{", "["))
+
+    if status == 0:
+        return ValidationResult("fetch_failed", "fetch failed", False, False, ["transport_error"], body_size, matched)
+    if status in {401, 402} or any(marker in lower for marker in AUTH_PATTERNS):
+        return ValidationResult("auth_required", "authentication required", False, True, ["auth_boundary"], body_size, matched)
+    if status == 404:
+        return ValidationResult("not_found", "not found", False, True, ["not_found"], body_size, matched)
+    if status in {403, 429, 503}:
+        reason = "bot_challenge" if any(marker in lower for marker in HARD_CHALLENGE_PATTERNS) else "blocked_or_rate_limited"
+        return ValidationResult(reason, "blocked by bot challenge" if reason == "bot_challenge" else "blocked or rate limited", False, False, [reason], body_size, matched)
+    if any(marker in lower for marker in HARD_CHALLENGE_PATTERNS):
+        return ValidationResult("challenge_page", "possibly blocked", False, False, ["challenge_marker"], body_size, matched)
+
+    for text in proof_texts:
+        if text.lower() in lower and text not in matched["proof_texts"]:
+            matched["proof_texts"].append(text)
+    for selector in failure_selectors:
+        if selector and selector.lower() in lower and selector not in matched["failure_selectors"]:
+            matched["failure_selectors"].append(selector)
+    if matched["failure_selectors"]:
+        return ValidationResult("failure_proof_seen", "positive proof failed", False, True, ["failure_selector_matched"], body_size, matched)
+    if matched["disabled_selectors"]:
+        return ValidationResult("positive_proof_disabled", "positive proof failed", False, True, ["success_selector_disabled"], body_size, matched)
+    if proof_texts and not matched["proof_texts"]:
+        reasons.append("required_proof_text_missing")
+    if success_selectors and not matched["success_selectors"]:
+        reasons.append("required_success_selector_missing")
+    if 200 <= status < 300 and body_size == 0:
+        reasons.append("empty_body")
+    if 200 <= status < 300 and not looks_json and 0 < body_size < min_body_chars:
+        reasons.append("small_body")
+    if 200 <= status < 300 and any(marker in lower for marker in EMPTY_SPA_PATTERNS) and body_size < max(min_body_chars * 2, 600):
+        reasons.append("empty_spa_shell")
+    if 200 <= status < 300 and reasons:
+        return ValidationResult("suspect_ok", "suspect response", False, False, reasons, body_size, matched)
+    if 200 <= status < 300:
+        verdict = "strong_ok" if matched["success_selectors"] or matched["proof_texts"] else "weak_ok"
+        return ValidationResult(verdict, "ok", True, False, [], body_size, matched)
+    return ValidationResult("http_error", "fetch failed", False, False, [f"http_{status}"], body_size, matched)
+
+
 def is_usable_public_response(status: int, body: str) -> bool:
-    return 200 <= status < 300 and detect_access_status(status, body) == "ok" and bool(normalize_space(body)[:80])
+    return validate_response(status, body).usable
 
 
 def detect_access_status(status: int, body: str) -> str:
-    lower = body.lower()
-    if status in {401, 402}:
-        return "authentication required"
-    if status in {403, 429, 503}:
-        if "captcha" in lower or "cf-chl" in lower:
-            return "blocked by bot challenge"
-        return "blocked or rate limited"
-    if status == 0:
-        return "fetch failed"
-    if any(pattern in lower for pattern in BLOCK_PATTERNS):
-        return "possibly blocked"
-    return "ok"
+    return validate_response(status, body, min_body_chars=1).access_status
 
 
 def extract_page(
@@ -462,15 +816,52 @@ def extract_page(
     timeout: float,
     escalation: str = "public",
     media_metadata: bool = False,
+    success_selectors: list[str] | None = None,
+    failure_selectors: list[str] | None = None,
+    proof_texts: list[str] | None = None,
+    min_body_chars: int = DEFAULT_MIN_BODY_CHARS,
+    real_chrome: bool = False,
+    headful: bool = False,
+    chrome_profile: str = "",
+    capture_network: bool = False,
 ) -> EvidenceItem:
     status, final_url, body, fetch_route, attempts = fetch_public_content(
         url,
         timeout=timeout,
         accept="text/html,application/xhtml+xml,application/json",
         escalation=escalation,
+        success_selectors=success_selectors,
+        failure_selectors=failure_selectors,
+        proof_texts=proof_texts,
+        min_body_chars=min_body_chars,
+        real_chrome=real_chrome,
+        headful=headful,
+        chrome_profile=chrome_profile,
+        capture_network=capture_network,
     )
     observed = now_iso()
-    access_status = detect_access_status(status, body)
+    final_validation = validate_response(
+        status,
+        body,
+        success_selectors=success_selectors,
+        failure_selectors=failure_selectors,
+        proof_texts=proof_texts,
+        min_body_chars=min_body_chars,
+    )
+    if attempts:
+        last_attempt = attempts[-1]
+        proof = last_attempt.get("proof") if isinstance(last_attempt, dict) else None
+        if isinstance(proof, dict):
+            final_validation = validate_response(
+                status,
+                body,
+                success_selectors=success_selectors,
+                failure_selectors=failure_selectors,
+                proof_texts=proof_texts,
+                min_body_chars=min_body_chars,
+                browser_proof=proof,
+            )
+    access_status = final_validation.access_status
     parser = TextExtractor()
     if body and body.lstrip().startswith("<"):
         try:
@@ -514,7 +905,13 @@ def extract_page(
         observed_at=observed,
         access_status=access_status,
         route=f"{route}+{fetch_route}",
-        raw={"http_status": status, "json_ld_count": len(parser.json_ld), "attempts": attempts, "media": media},
+        raw={
+            "http_status": status,
+            "json_ld_count": len(parser.json_ld),
+            "attempts": attempts,
+            "validation": final_validation.to_dict(),
+            "media": media,
+        },
     )
 
 
@@ -533,14 +930,42 @@ def source_type_for_url(url: str, lane: str) -> str:
     return "web page"
 
 
+def parse_duckduckgo_results(body: str, limit: int) -> list[dict[str, str]]:
+    parser = SearchResultParser()
+    parser.feed(body)
+    return parser.results[:limit]
+
+
+def parse_bing_results(body: str, limit: int) -> list[dict[str, str]]:
+    parser = BingResultParser()
+    parser.feed(body)
+    return parser.results[:limit]
+
+
+def search_web(query: str, limit: int, timeout: float) -> list[dict[str, str]]:
+    attempts = [
+        ("duckduckgo-html", "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query}), parse_duckduckgo_results),
+        ("duckduckgo-lite", "https://lite.duckduckgo.com/lite/?" + urllib.parse.urlencode({"q": query}), parse_duckduckgo_results),
+        ("bing-html", "https://www.bing.com/search?" + urllib.parse.urlencode({"q": query}), parse_bing_results),
+    ]
+    for route, url, parser in attempts:
+        status, _, body = http_get(url, timeout=timeout, accept="text/html")
+        if status not in {200, 202}:
+            continue
+        results = parser(body, limit)
+        if results:
+            for result in results:
+                result["route"] = route
+            return results
+    return []
+
+
 def search_duckduckgo(query: str, limit: int, timeout: float) -> list[dict[str, str]]:
     url = "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query})
     status, _, body = http_get(url, timeout=timeout, accept="text/html")
     if status != 200:
         return []
-    parser = SearchResultParser()
-    parser.feed(body)
-    return parser.results[:limit]
+    return parse_duckduckgo_results(body, limit)
 
 
 def collect_web(query: str, limit: int, timeout: float) -> list[EvidenceItem]:
@@ -551,10 +976,10 @@ def collect_web(query: str, limit: int, timeout: float) -> list[EvidenceItem]:
             url=result["url"],
             title=result["title"],
             observed_at=now_iso(),
-            route="duckduckgo-html",
+            route=result.get("route", "web-search"),
             source_type=source_type_for_url(result["url"], "web"),
         )
-        for result in search_duckduckgo(query, limit, timeout)
+        for result in search_web(query, limit, timeout)
     ]
 
 
@@ -567,10 +992,10 @@ def collect_site_search(lane: str, query: str, site_query: str, limit: int, time
             url=result["url"],
             title=result["title"],
             observed_at=now_iso(),
-            route="duckduckgo-site-search",
+            route=result.get("route", "site-search"),
             source_type=source_type_for_url(result["url"], lane),
         )
-        for result in search_duckduckgo(search_query, limit, timeout)
+        for result in search_web(search_query, limit, timeout)
     ]
 
 
@@ -645,7 +1070,7 @@ def collect_reddit(query: str, limit: int, timeout: float) -> list[EvidenceItem]
 
 
 def collect_github(query: str, limit: int, timeout: float) -> list[EvidenceItem]:
-    params = urllib.parse.urlencode({"q": query, "sort": "updated", "order": "desc", "per_page": limit})
+    params = urllib.parse.urlencode({"q": query, "sort": "stars", "order": "desc", "per_page": limit})
     url = f"https://api.github.com/search/repositories?{params}"
     status, _, body = http_get(url, timeout=timeout, accept="application/vnd.github+json")
     if status != 200:
@@ -671,6 +1096,13 @@ def collect_github(query: str, limit: int, timeout: float) -> list[EvidenceItem]
                 raw={"stars": stars, "forks": forks, "language": repo.get("language")},
             )
         )
+    if not items:
+        for fallback_query in focused_queries(query):
+            if fallback_query.lower() == query.lower():
+                continue
+            fallback_items = collect_github(fallback_query, limit, timeout)
+            if fallback_items:
+                return fallback_items
     return items
 
 
@@ -707,6 +1139,7 @@ def boundary_item(lane: str, query: str, url: str, status: int, body: str) -> Ev
 
 def expand_queries(seed: str, rounds: int) -> list[str]:
     queries = [normalize_space(seed)]
+    queries.extend(focused_queries(seed))
     if rounds > 1:
         queries.extend(
             [
@@ -724,6 +1157,66 @@ def expand_queries(seed: str, rounds: int) -> list[str]:
             seen.add(key)
             unique.append(query)
     return unique
+
+
+def focused_queries(seed: str) -> list[str]:
+    normalized = normalize_space(seed)
+    lowered = normalized.lower()
+    queries: list[str] = []
+    tokens = re.findall(r"[A-Za-z][A-Za-z0-9.+#_-]*|[가-힣0-9]{2,}", normalized)
+    stop = {
+        "and",
+        "or",
+        "the",
+        "for",
+        "with",
+        "case",
+        "cases",
+        "open",
+        "source",
+        "latest",
+        "trending",
+        "review",
+        "launch",
+        "discussion",
+    }
+    significant = [token for token in tokens if token.lower() not in stop and len(token) > 1]
+    if 2 <= len(significant) < len(tokens):
+        queries.append(" ".join(significant[:6]))
+    if len(significant) >= 3:
+        queries.append(" ".join(significant[:3]))
+    known_patterns = [
+        ("swe-bench", "SWE-bench harness"),
+        ("openhands", "OpenHands software agent"),
+        ("open swe", "Open SWE"),
+        ("langgraph", "LangGraph agent workflow"),
+        ("inspect", "Inspect AI evaluation framework"),
+        ("autogen", "AutoGenBench agent evaluation"),
+        ("phoenix", "Arize Phoenix agent observability"),
+    ]
+    for needle, query in known_patterns:
+        if needle in lowered:
+            queries.append(query)
+    if "agent" in lowered and "harness" in lowered:
+        queries.append("agent harness evaluation")
+    if "loop" in lowered and "agent" in lowered:
+        queries.append("loop engineering AI agents")
+    if "eval" in lowered or "evaluation" in lowered:
+        queries.append("agent evaluation harness")
+    capitalized = [
+        token
+        for token in significant
+        if any(ch.isupper() for ch in token[1:]) or "-" in token or token.isupper()
+    ]
+    queries.extend(capitalized[:4])
+    unique: list[str] = []
+    seen: set[str] = set()
+    for query in queries:
+        key = normalize_space(query).lower()
+        if key and key != lowered and key not in seen:
+            seen.add(key)
+            unique.append(normalize_space(query))
+    return unique[:8]
 
 
 def dedupe_items(items: Iterable[EvidenceItem]) -> list[EvidenceItem]:
@@ -796,6 +1289,14 @@ def enrich_items(
     workers: int,
     escalation: str = "public",
     media_metadata: bool = False,
+    success_selectors: list[str] | None = None,
+    failure_selectors: list[str] | None = None,
+    proof_texts: list[str] | None = None,
+    min_body_chars: int = DEFAULT_MIN_BODY_CHARS,
+    real_chrome: bool = False,
+    headful: bool = False,
+    chrome_profile: str = "",
+    capture_network: bool = False,
 ) -> list[EvidenceItem]:
     needs_fetch = [
         item
@@ -818,6 +1319,14 @@ def enrich_items(
                 timeout,
                 escalation,
                 media_metadata,
+                success_selectors,
+                failure_selectors,
+                proof_texts,
+                min_body_chars,
+                real_chrome,
+                headful,
+                chrome_profile,
+                capture_network,
             ): item
             for item in needs_fetch
         }
@@ -838,10 +1347,59 @@ def enrich_items(
     return items
 
 
+def split_option_values(values: list[str] | None) -> list[str]:
+    split: list[str] = []
+    for value in values or []:
+        split.extend(part.strip() for part in value.split(",") if part.strip())
+    return split
+
+
+def verification_options(args: argparse.Namespace) -> dict[str, Any]:
+    success_selectors = split_option_values(getattr(args, "success_selector", None))
+    failure_selectors = split_option_values(getattr(args, "failure_selector", None))
+    proof_texts = split_option_values(getattr(args, "proof_text", None))
+    profile = getattr(args, "verification_profile", "") or ""
+    requires_browser = False
+    if profile in {"apply-availability", "job-apply"}:
+        requires_browser = True
+        success_selectors.extend(
+            [
+                "button:has-text('지원하기')",
+                "a:has-text('지원하기')",
+                "button:has-text('Apply')",
+                "a:has-text('Apply')",
+            ]
+        )
+        failure_selectors.extend(
+            [
+                "text=마감",
+                "text=지원 마감",
+                "text=Closed",
+                "text=Login required",
+            ]
+        )
+    return {
+        "success_selectors": list(dict.fromkeys(success_selectors)),
+        "failure_selectors": list(dict.fromkeys(failure_selectors)),
+        "proof_texts": list(dict.fromkeys(proof_texts)),
+        "min_body_chars": max(1, int(getattr(args, "min_body_chars", DEFAULT_MIN_BODY_CHARS))),
+        "real_chrome": bool(getattr(args, "real_chrome", False)),
+        "headful": bool(getattr(args, "headful", False)),
+        "chrome_profile": getattr(args, "chrome_profile", "") or "",
+        "capture_network": bool(getattr(args, "capture_network", False) or profile in {"apply-availability", "job-apply"}),
+        "requires_browser": requires_browser,
+        "profile": profile,
+    }
+
+
 def run_research(args: argparse.Namespace) -> dict[str, Any]:
     started = now_iso()
     lanes = [lane.strip().lower() for lane in args.lanes.split(",") if lane.strip()]
     queries = expand_queries(args.query, args.rounds)
+    verification = verification_options(args)
+    escalation = getattr(args, "escalation", "public")
+    if verification["requires_browser"] and escalation in {"basic", "public", "tls"}:
+        escalation = "full"
     collected: list[EvidenceItem] = []
     failures: list[dict[str, str]] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
@@ -862,11 +1420,19 @@ def run_research(args: argparse.Namespace) -> dict[str, Any]:
             items,
             args.timeout,
             args.workers,
-            getattr(args, "escalation", "public"),
+            escalation,
             getattr(args, "media_metadata", False),
+            verification["success_selectors"],
+            verification["failure_selectors"],
+            verification["proof_texts"],
+            verification["min_body_chars"],
+            verification["real_chrome"],
+            verification["headful"],
+            verification["chrome_profile"],
+            verification["capture_network"],
         )
     scored = score_items(items, args.query)
-    report_pack = build_report_pack(scored, args.query, lanes, queries, started, failures)
+    report_pack = build_report_pack(scored, args.query, lanes, queries, started, failures, verification)
     out_dir = resolve_output_dir(args)
     write_report_pack(out_dir, report_pack)
     return {"out_dir": str(out_dir), "report_pack": report_pack}
@@ -876,11 +1442,19 @@ def build_claim_ledger(items: list[EvidenceItem]) -> list[dict[str, Any]]:
     ledger: list[dict[str, Any]] = []
     for index, item in enumerate(items[:30], start=1):
         claim = item.title or item.summary[:120] or item.url
+        validation = item.raw.get("validation") if isinstance(item.raw, dict) else None
+        status = "source-observed" if item.access_status == "ok" else "access-limited"
+        if isinstance(validation, dict) and validation.get("verdict") == "strong_ok":
+            status = "positive-proof-observed"
+        elif item.access_status == "positive proof failed":
+            status = "positive-proof-failed"
+        elif item.access_status == "authentication required":
+            status = "unknown-auth-required"
         ledger.append(
             {
                 "id": f"claim-{index:03d}",
                 "claim": claim,
-                "status": "source-observed" if item.access_status == "ok" else "access-limited",
+                "status": status,
                 "confidence": item.confidence,
                 "evidence_urls": [item.url],
                 "source_lane": item.lane,
@@ -888,6 +1462,7 @@ def build_claim_ledger(items: list[EvidenceItem]) -> list[dict[str, Any]]:
                 "published_at": item.published_at,
                 "observed_at": item.observed_at,
                 "score": item.score,
+                "validation": validation,
                 "notes": item.summary,
             }
         )
@@ -901,24 +1476,32 @@ def build_report_pack(
     queries: list[str],
     started: str,
     failures: list[dict[str, str]],
+    verification: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "query": query,
         "started_at": started,
         "finished_at": now_iso(),
         "capabilities": optional_capabilities(),
+        "verification": verification or {},
         "lanes": lanes,
         "queries": queries,
         "failures": failures,
         "evidence": [item.to_dict() for item in items],
         "claim_ledger": build_claim_ledger(items),
-        "markdown_report": render_markdown_report(query, lanes, queries, items, failures),
+        "markdown_report": render_markdown_report(query, lanes, queries, items, failures, verification or {}),
     }
 
 
 def render_markdown_report(
-    query: str, lanes: list[str], queries: list[str], items: list[EvidenceItem], failures: list[dict[str, str]]
+    query: str,
+    lanes: list[str],
+    queries: list[str],
+    items: list[EvidenceItem],
+    failures: list[dict[str, str]],
+    verification: dict[str, Any] | None = None,
 ) -> str:
+    verification = verification or {}
     lines = [
         f"# Moonshot Research Report: {query}",
         "",
@@ -926,10 +1509,16 @@ def render_markdown_report(
         f"- Lanes: {', '.join(lanes)}",
         f"- Query variants: {len(queries)}",
         f"- Evidence items after dedupe: {len(items)}",
-        "",
-        "## Top Evidence",
-        "",
     ]
+    if verification.get("profile") or verification.get("success_selectors") or verification.get("proof_texts"):
+        lines.extend(
+            [
+                f"- Verification profile: {verification.get('profile') or 'custom-positive-proof'}",
+                f"- Positive proof selectors: {', '.join(verification.get('success_selectors') or []) or 'none'}",
+                f"- Proof text: {', '.join(verification.get('proof_texts') or []) or 'none'}",
+            ]
+        )
+    lines.extend(["", "## Top Evidence", ""])
     for index, item in enumerate(items[:20], start=1):
         title = item.title or item.url
         lines.extend(
@@ -944,6 +1533,7 @@ def render_markdown_report(
                 f"- Observed: {item.observed_at}",
                 f"- Score: {item.score} ({item.confidence})",
                 f"- Access: {item.access_status}",
+                f"- Validation: {item.raw.get('validation', {}).get('verdict', 'unvalidated') if isinstance(item.raw, dict) else 'unvalidated'}",
                 f"- Evidence: {item.summary or '(no summary extracted)'}",
                 "",
             ]
@@ -1011,6 +1601,28 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Fetch escalation: basic urllib, public URL variants, optional TLS, optional browser, or full",
     )
     parser.add_argument("--media-metadata", action="store_true", help="Use optional yt-dlp metadata for media URLs")
+    parser.add_argument(
+        "--verification-profile",
+        choices=("", "apply-availability", "job-apply"),
+        default="",
+        help="Positive-proof preset. apply-availability separates job existence from enabled apply action.",
+    )
+    parser.add_argument(
+        "--success-selector",
+        action="append",
+        help="Playwright selector that must exist and be enabled before a page counts as positive proof. Repeat or comma-separate.",
+    )
+    parser.add_argument(
+        "--failure-selector",
+        action="append",
+        help="Playwright selector/text marker that makes a positive-proof claim fail. Repeat or comma-separate.",
+    )
+    parser.add_argument("--proof-text", action="append", help="Text that must appear before a page counts as positive proof. Repeat or comma-separate.")
+    parser.add_argument("--min-body-chars", type=int, default=DEFAULT_MIN_BODY_CHARS, help="Minimum normalized HTML body size before 200 OK is trusted")
+    parser.add_argument("--real-chrome", action="store_true", help="Use system Chrome with a persistent profile for browser escalation")
+    parser.add_argument("--headful", action="store_true", help="Run Playwright browser visibly when not using --real-chrome")
+    parser.add_argument("--chrome-profile", help="Persistent Chrome profile directory for --real-chrome")
+    parser.add_argument("--capture-network", action="store_true", help="Capture rendered page API/graphql/json/job/apply/status request URLs")
     parser.add_argument("--print-capabilities", action="store_true", help="Print optional dependency capabilities and exit")
     parser.set_defaults(fetch_pages=True)
     return parser
@@ -1028,6 +1640,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--rounds must be >= 1")
     if args.limit_per_lane < 1:
         parser.error("--limit-per-lane must be >= 1")
+    if args.min_body_chars < 1:
+        parser.error("--min-body-chars must be >= 1")
     result = run_research(args)
     print(f"Moonshot research artifacts written to: {result['out_dir']}")
     return 0
