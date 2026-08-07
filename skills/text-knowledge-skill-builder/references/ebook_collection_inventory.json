@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "created_at": "2026-06-08T05:41:44.538986+00:00",
+  "created_at": "2026-07-20T14:05:35.792934+00:00",
   "collection_scope": "ebook OCR collection, relative source labels only",
   "processed_sources": [
     {
@@ -241,6 +241,38 @@
         "chunks": 44,
         "coverage": 44,
         "qa": 55
+      }
+    },
+    {
+      "skill": "ebook-cloud-application-architecture-patterns",
+      "kind": "registered_source",
+      "source_id": "ebook-cloud-application-architecture-patterns-paddle-ocr",
+      "source_file_count": 726,
+      "line_count": 32967,
+      "chunk_count": 507,
+      "accepted_candidates": 507,
+      "public_counts": {
+        "nodes": 180,
+        "edges": 360,
+        "chunks": 60,
+        "coverage": 60,
+        "qa": 70
+      }
+    },
+    {
+      "skill": "ebook-ai-agent-engineering",
+      "kind": "registered_source",
+      "source_id": "ebook-ai-agent-engineering-paddle-ocr",
+      "source_file_count": 420,
+      "line_count": 19571,
+      "chunk_count": 301,
+      "accepted_candidates": 301,
+      "public_counts": {
+        "nodes": 220,
+        "edges": 440,
+        "chunks": 74,
+        "coverage": 74,
+        "qa": 80
       }
     }
   ],

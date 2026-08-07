@@ -5,6 +5,7 @@ from typing import Any
 
 from ocr_pipeline.classifiers.page_type import PAGE_TYPES, PageTypeResult, classify_page_type
 from ocr_pipeline.engines.paddle import PaddleRunner, run_paddle
+from ocr_pipeline.engines.pdf_inspector import pdf_inspector_available, run_pdf_inspector
 from ocr_pipeline.engines.pp_structure import pp_structure_available, probe_pp_structure, run_pp_structure
 from ocr_pipeline.engines.surya import run_surya, surya_available
 from ocr_pipeline.models import OcrResult
@@ -12,7 +13,7 @@ from ocr_pipeline.postprocess.columns import restore_columns
 from ocr_pipeline.postprocess.paragraphs import restore_paragraphs
 
 
-ENGINES = {"auto", "paddle", "pp-structure", "surya"}
+ENGINES = {"auto", "paddle", "pp-structure", "surya", "pdf-inspector"}
 
 
 def run_ocr(
@@ -29,6 +30,14 @@ def run_ocr(
     if page_mode not in PAGE_TYPES:
         raise ValueError(f"Unsupported page mode: {page_mode}")
 
+    is_pdf = image_path.suffix.lower() == ".pdf"
+    if is_pdf or engine == "pdf-inspector":
+        pdf_res = run_pdf_inspector(image_path)
+        if pdf_res.text.strip() or engine == "pdf-inspector":
+            return finalize(pdf_res, requested_engine=engine, page_mode=page_mode)
+        # If PDF was scanned and engine == "auto", fallback to paddle
+        image_path_to_use = image_path
+
     if engine == "paddle":
         result = run_paddle(image_path, lang, paddle_runner)
         return finalize(result, requested_engine=engine, page_mode=page_mode)
@@ -37,6 +46,9 @@ def run_ocr(
         return finalize(result, requested_engine=engine, page_mode=page_mode)
     if engine == "pp-structure":
         result = run_pp_structure(image_path)
+        return finalize(result, requested_engine=engine, page_mode=page_mode)
+    if engine == "pdf-inspector":
+        result = run_pdf_inspector(image_path)
         return finalize(result, requested_engine=engine, page_mode=page_mode)
 
     return run_auto(image_path, page_mode=page_mode, lang=lang, out_dir=out_dir, paddle_runner=paddle_runner)
@@ -116,6 +128,7 @@ def finalize(result: OcrResult, *, requested_engine: str, page_mode: str) -> Ocr
     result.runtime_metadata.setdefault("capabilities", {})
     result.runtime_metadata["capabilities"].setdefault("pp_structure", probe_pp_structure())
     result.runtime_metadata["capabilities"].setdefault("surya", {"available": surya_available()})
+    result.runtime_metadata["capabilities"].setdefault("pdf_inspector", {"available": pdf_inspector_available()})
     return result
 
 

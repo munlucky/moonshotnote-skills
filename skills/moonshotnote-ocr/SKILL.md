@@ -1,20 +1,21 @@
 ---
 name: moonshotnote-ocr
-description: Extract and verify OCR text from images, screenshots, scanned pages, Korean or mixed Korean-English UI captures, receipts, signs, ebook captures, document images, tables, and layout-heavy captures. Use PaddleOCR first for normal screenshots and Korean image OCR; use page-mode auto for ebook pages; use optional PP-StructureV3 when available for table pages; use Surya when document layout, reading order, formulas, or complex markdown reconstruction matter. Use the low-confidence review workflow when OCR output contains [unclear], suspicious lines, or low confidence scores, so Codex checks image evidence before closing.
+description: Extract and verify OCR text from images, screenshots, scanned pages, PDFs, Korean or mixed Korean-English UI captures, receipts, signs, ebook captures, document images, tables, and layout-heavy captures. Use Firecrawl pdf-inspector first for PDF inputs to rapidly classify document types (text_based, scanned, image_based, mixed) and extract native Markdown text in milliseconds without running expensive OCR engines; use PaddleOCR first for normal screenshots and Korean image OCR; use page-mode auto for ebook pages; use optional PP-StructureV3 when available for table pages; use Surya when document layout, reading order, formulas, or complex markdown reconstruction matter. Use the low-confidence review workflow when OCR output contains [unclear], suspicious lines, or low confidence scores, so Codex checks image evidence before closing.
 ---
 
 # moonshotnote-ocr
 
-Use this skill to extract reliable OCR from image files and scanned page images.
+Use this skill to extract reliable OCR and text content from PDF documents, image files, and scanned page images.
 
 ## Engine Choice
 
+- Use `pdf-inspector` (Firecrawl) first for PDF document inputs. It rapidly classifies PDFs (`text_based`, `scanned`, `image_based`, `mixed`) and directly extracts structured Markdown for native text PDFs in milliseconds (0ms OCR compute cost).
+- When a PDF is `scanned` or `image_based` (or for scanned pages in `mixed` PDFs), selective routing automatically directs scanned pages to PaddleOCR, PP-StructureV3, or Surya.
 - Use PaddleOCR first for normal screenshots, UI captures, receipts, signs, mobile captures, Korean text, and mixed Korean-English text.
 - Use `--page-mode auto` for ebook captures so PaddleOCR boxes can classify `plain-text`, `table`, `multi-column`, `layout`, or `unknown`.
 - Use optional PP-StructureV3 only when `doctor.py` reports `optional_capabilities.pp_structure.available=true`; it is intended for table/layout parsing and may be unavailable on a local runtime.
 - Use Surya when the input is a document page where layout, reading order, section headers, formulas, or markdown reconstruction matter.
 - Use `--engine paddle` when the task must avoid Surya runtime use.
-- For PDFs, do not reimplement PDF handling here. If text is selectable, use a PDF skill. If scanned, convert pages to images with a PDF skill, then run this skill on the page images.
 
 ## Output Policy
 
@@ -22,7 +23,7 @@ Default output is intentionally minimal:
 
 - plain text: `<stem>.<engine>.txt`
 
-When `--out` is not provided, save under the source location: `<input-dir>/ocr-output/<engine>/`.
+When `--out` is not provided, save under the source location: `<input-dir>/ocr-output/<requested-engine>/`.
 
 Use optional evidence outputs only when needed:
 
@@ -67,9 +68,10 @@ Run setup once on Windows:
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
 ```
 
-Default setup installs the PaddleOCR core runtime only. Install optional table/layout dependencies only when needed:
+Default setup installs the PaddleOCR core runtime only. Install optional dependencies only when needed:
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallPdf
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallStructure
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallSurya
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -InstallAll
@@ -86,6 +88,7 @@ bash scripts/setup.sh
 On macOS Apple Silicon, keep the default setup path for PaddleOCR first. Optional dependencies can be requested explicitly:
 
 ```bash
+bash scripts/setup.sh --with-pdf
 bash scripts/setup.sh --with-structure
 bash scripts/setup.sh --with-surya
 bash scripts/setup.sh --with-all
@@ -107,6 +110,13 @@ OCR_PYTHON="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}/runtimes/moonshotnote-
 "$OCR_PYTHON" scripts/doctor.py
 ```
 
+Inspect and extract text from a PDF file using Firecrawl `pdf-inspector`:
+
+```powershell
+$ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
+& $ocrPython scripts/ocr_image.py C:\path\to\document.pdf --engine pdf-inspector --json --md
+```
+
 OCR an image with PaddleOCR Korean mode:
 
 ```powershell
@@ -121,11 +131,11 @@ $ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\pyth
 & $ocrPython scripts/ocr_image.py C:\path\to\captures --pattern *-crop.png --engine paddle --lang korean --summary
 ```
 
-Use automatic engine selection:
+Use automatic engine selection (smart PDF pre-flight via pdf-inspector, then paddle/surya for images/scanned pages):
 
 ```powershell
 $ocrPython = "$HOME\.moonshot-relay\runtimes\moonshotnote-ocr-py312\Scripts\python.exe"
-& $ocrPython scripts/ocr_image.py C:\path\to\page.png --engine auto --lang korean
+& $ocrPython scripts/ocr_image.py C:\path\to\input_file.pdf --engine auto --lang korean
 ```
 
 Use ebook page classification:

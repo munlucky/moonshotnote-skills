@@ -8,6 +8,8 @@ from typing import Any
 
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}
+PDF_EXTENSIONS = {".pdf"}
+SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | PDF_EXTENSIONS
 
 
 def run_command(command: list[str]) -> dict[str, Any]:

@@ -10,12 +10,12 @@ from typing import Any
 from ocr_pipeline.engines.paddle import create_paddle_runner
 from ocr_pipeline.output import low_confidence_items, write_outputs
 from ocr_pipeline.router import ENGINES, run_ocr
-from ocr_pipeline.utils import IMAGE_EXTENSIONS
+from ocr_pipeline.utils import SUPPORTED_EXTENSIONS
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="OCR an image or image directory with PaddleOCR, PP-StructureV3, or Surya.")
-    parser.add_argument("input", help="Input image path or directory")
+    parser = argparse.ArgumentParser(description="OCR or inspect an image/PDF or directory with PaddleOCR, pdf-inspector, PP-StructureV3, or Surya.")
+    parser.add_argument("input", help="Input image/PDF path or directory")
     parser.add_argument("--engine", choices=sorted(ENGINES), default="auto")
     parser.add_argument("--page-mode", choices=["auto", "plain-text", "table", "multi-column", "layout", "unknown"], default="auto")
     parser.add_argument("--lang", default="korean", help="PaddleOCR language")
@@ -24,7 +24,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Output directory. Defaults to <input-dir>/ocr-output/<requested-engine>.",
     )
-    parser.add_argument("--pattern", default="*.png", help="Glob pattern when input is a directory")
+    parser.add_argument("--pattern", default="*.*", help="Glob pattern when input is a directory")
     parser.add_argument("--recursive", action="store_true", help="Search directory recursively")
     parser.add_argument("--json", action="store_true", help="Write structured JSON evidence per image")
     parser.add_argument("--md", action="store_true", help="Write markdown review report per image")
@@ -41,7 +41,7 @@ def iter_input_paths(input_path: Path, pattern: str, recursive: bool) -> list[Pa
         raise FileNotFoundError(f"Input path not found: {input_path}")
 
     candidates = input_path.rglob(pattern) if recursive else input_path.glob(pattern)
-    return sorted(path for path in candidates if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS)
+    return sorted(path for path in candidates if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS)
 
 
 def output_dir_for(input_root: Path, image_path: Path, out_dir: Path) -> Path:

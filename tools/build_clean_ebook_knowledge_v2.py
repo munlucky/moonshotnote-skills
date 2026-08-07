@@ -30,6 +30,40 @@ TRADING_TYPES = ["Concept", "SelectionCriterion", "RiskControl", "Workflow", "Wa
 
 
 TOPICS: dict[str, list[str]] = {
+    "cloud-application-architecture": [
+        "cloud application architecture", "cloud native", "architecture quality attributes", "monolith",
+        "modular monolith", "microservice architecture", "microservice boundary", "service decomposition",
+        "domain-driven decomposition", "bounded context", "API gateway", "backend for frontend",
+        "service discovery", "configuration management", "distributed configuration", "synchronous communication",
+        "asynchronous messaging", "event-driven architecture", "message broker", "event schema", "idempotency",
+        "eventual consistency", "transaction boundary", "saga", "outbox pattern", "CQRS", "data ownership",
+        "polyglot persistence", "database per service", "distributed transaction", "resilience", "timeout",
+        "retry", "circuit breaker", "bulkhead", "rate limiting", "load shedding", "scalability",
+        "stateless service", "caching", "content delivery", "observability", "logging", "metrics", "tracing",
+        "health check", "deployment strategy", "blue green deployment", "canary deployment", "containerization",
+        "Kubernetes", "serverless", "security boundary", "zero trust", "secret management", "identity and access",
+        "network isolation", "cost governance", "strangler migration", "legacy modernization", "distributed testing",
+        "contract testing", "operational readiness", "architecture decision record", "failure mode", "availability",
+        "disaster recovery", "capacity planning", "fault isolation", "platform team", "team topology",
+        "migration sequencing", "architecture tradeoff", "cloud workload fit", "anti-corruption layer",
+    ],
+    "ai-agent-engineering": [
+        "agent definition", "LLM agent", "agent loop", "observe plan act", "task decomposition", "planning",
+        "reflection", "reasoning boundary", "state management", "state schema", "short term memory",
+        "long term memory", "conversation memory", "retrieval augmented generation", "vector store", "embedding",
+        "context window", "prompt design", "system prompt", "tool description", "tool calling", "function calling",
+        "MCP", "tool registry", "tool selection", "tool validation", "structured output", "schema validation",
+        "workflow orchestration", "graph workflow", "supervisor agent", "multi-agent collaboration", "handoff",
+        "human in the loop", "approval gate", "streaming", "async execution", "retry", "timeout", "fallback",
+        "idempotency", "sandbox", "permission boundary", "least privilege", "prompt injection", "data exfiltration",
+        "secret leakage", "guardrail", "content safety", "input validation", "output validation", "evaluation",
+        "offline evaluation", "online evaluation", "trajectory evaluation", "tool accuracy", "task success metric",
+        "latency", "token cost", "observability", "trace", "logging", "debugging", "failure analysis",
+        "production monitoring", "deployment", "versioning", "regression testing", "benchmark", "dataset",
+        "agent reliability", "human agent collaboration", "continuous improvement", "agent product design",
+        "user experience", "knowledge boundary", "RAG evaluation", "memory management", "context compression",
+        "termination condition", "loop prevention", "reproducibility", "governance", "incident response",
+    ],
     "domain-driven-design": [
         "도메인 모델 domain model", "유비쿼터스 언어 ubiquitous language", "바운디드 컨텍스트 bounded context",
         "컨텍스트 맵 context map", "서브도메인 subdomain", "핵심 도메인 core domain", "지원 도메인 supporting domain",
@@ -121,6 +155,32 @@ TOPICS: dict[str, list[str]] = {
 
 
 CLEAN_CONFIGS: dict[str, dict[str, Any]] = {
+    "ebook-cloud-application-architecture-patterns": {
+        "kind": "registered_source",
+        "skill_name": "ebook-cloud-application-architecture-patterns",
+        "domain": "cloud-application-architecture",
+        "source_id": "ebook-cloud-application-architecture-patterns-paddle-ocr",
+        "review_status": "paddle_ocr_unreviewed_low_confidence_723",
+        "ocr_engine": "paddleocr_page_capture",
+        "source_root": "프로그래밍/클라우드 애플리케이션 아키텍처 패턴",
+        "source_files": [],
+        "source_globs": ["ocr-output/paddle/*.paddle.md"],
+        "targets": {"nodes": 180, "edges": 360, "chunks": 70, "coverage": 85, "qa": 70},
+        "description": "Source-local public-safe knowledge registration for cloud application architecture patterns, distributed systems, resilience, operations, and modernization.",
+    },
+    "ebook-ai-agent-engineering": {
+        "kind": "registered_source",
+        "skill_name": "ebook-ai-agent-engineering",
+        "domain": "ai-agent-engineering",
+        "source_id": "ebook-ai-agent-engineering-paddle-ocr",
+        "review_status": "paddle_ocr_unreviewed_low_confidence_436",
+        "ocr_engine": "paddleocr_page_capture",
+        "source_root": "프로그래밍/AI 에이전트 엔지니어링",
+        "source_files": [],
+        "source_globs": ["ocr-output/paddle/*.paddle.md"],
+        "targets": {"nodes": 220, "edges": 440, "chunks": 85, "coverage": 110, "qa": 80},
+        "description": "Source-local public-safe knowledge registration for AI agent loops, tools, memory, multi-agent workflows, evaluation, security, and operations.",
+    },
     "daily-webnovel-writing-knowledge-skill": {
         "skill_name": "daily-webnovel-writing-knowledge",
         "domain": "webnovel",
@@ -301,6 +361,8 @@ REGISTERED_SKILLS = [
 ]
 
 SOURCE_LOCAL_ONLY = [
+    "ebook-cloud-application-architecture-patterns",
+    "ebook-ai-agent-engineering",
     "ebook-1page-stock-chart",
     "ebook-short-term-trading-3pct",
     "ebook-big-trader-leading-stock",
@@ -321,6 +383,11 @@ def install_domain_extensions(builder) -> None:
             "modern-java": ENGINEERING_TYPES,
             "python-architecture": ENGINEERING_TYPES,
             "tidy-first": ENGINEERING_TYPES,
+            "cloud-application-architecture": ENGINEERING_TYPES,
+            "ai-agent-engineering": [
+                "Concept", "Architecture", "Workflow", "Tool", "Memory", "Evaluation", "Security",
+                "Operation", "Decision", "Warning", "Practice",
+            ],
             "stock-chart-reading": TRADING_TYPES,
             "stock-investing": TRADING_TYPES,
             "wyckoff-trading": TRADING_TYPES,
@@ -331,7 +398,7 @@ def install_domain_extensions(builder) -> None:
 
     def node_summary(config: dict[str, Any], topic: str) -> str:
         domain = config["domain"]
-        if domain in {"domain-driven-design", "fastapi-clean-architecture", "modern-java", "python-architecture", "tidy-first"}:
+        if domain in {"domain-driven-design", "fastapi-clean-architecture", "modern-java", "python-architecture", "tidy-first", "cloud-application-architecture", "ai-agent-engineering"}:
             return (
                 f"{builder.title(topic)} is treated as a public-safe engineering knowledge point: "
                 "connect the concept to design decisions, workflow boundaries, risks, and review checks "
@@ -348,7 +415,7 @@ def install_domain_extensions(builder) -> None:
     def chunk_summary(config: dict[str, Any], topics: list[str]) -> str:
         domain = config["domain"]
         joined = ", ".join(builder.title(topic) for topic in topics[:4])
-        if domain in {"domain-driven-design", "fastapi-clean-architecture", "modern-java", "python-architecture", "tidy-first"}:
+        if domain in {"domain-driven-design", "fastapi-clean-architecture", "modern-java", "python-architecture", "tidy-first", "cloud-application-architecture", "ai-agent-engineering"}:
             return (
                 f"Curated public-safe engineering topic index for {joined}. Use it to retrieve concepts, "
                 "decisions, boundaries, warnings, and workflows without recreating the source text."

@@ -6,6 +6,7 @@ SKIP_INSTALL="${SKIP_INSTALL:-0}"
 DISABLE_UV_FALLBACK="${DISABLE_UV_FALLBACK:-0}"
 INSTALL_STRUCTURE="${INSTALL_STRUCTURE:-0}"
 INSTALL_SURYA="${INSTALL_SURYA:-0}"
+INSTALL_PDF="${INSTALL_PDF:-0}"
 INSTALL_ALL="${INSTALL_ALL:-0}"
 MOONSHOT_RELAY_HOME="${MOONSHOT_RELAY_HOME:-$HOME/.moonshot-relay}"
 
@@ -19,6 +20,9 @@ for arg in "$@"; do
       ;;
     --with-surya|--install-surya)
       INSTALL_SURYA=1
+      ;;
+    --with-pdf|--install-pdf)
+      INSTALL_PDF=1
       ;;
     --with-all|--install-all)
       INSTALL_ALL=1
@@ -39,6 +43,7 @@ done
 if [[ "$INSTALL_ALL" == "1" ]]; then
   INSTALL_STRUCTURE=1
   INSTALL_SURYA=1
+  INSTALL_PDF=1
 fi
 
 AGENTS_SKILLS_ROOT="$(cd "$HOME/.agents/skills" 2>/dev/null && pwd || printf '%s' "$HOME/.agents/skills")"
@@ -188,6 +193,9 @@ if [[ "$SKIP_INSTALL" != "1" ]]; then
   fi
   if [[ "$INSTALL_SURYA" == "1" ]]; then
     run_checked "$VENV_PYTHON" -m pip install --only-binary=:all: -r "$SCRIPT_DIR/requirements-surya.txt"
+  fi
+  if [[ "$INSTALL_PDF" == "1" ]]; then
+    run_checked "$VENV_PYTHON" -m pip install -r "$SCRIPT_DIR/requirements-pdf.txt"
   fi
 fi
 

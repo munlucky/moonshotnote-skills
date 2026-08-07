@@ -345,13 +345,27 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
 
 
-def read_source_lines(collection_root: Path, config: dict[str, Any]) -> list[str]:
-    lines: list[str] = []
-    for source_file in config["source_files"]:
-        path = collection_root / source_file
+def resolve_source_paths(collection_root: Path, config: dict[str, Any]) -> list[Path]:
+    source_files = list(config.get("source_files", []))
+    source_root = collection_root / config["source_root"] if config.get("source_root") else collection_root
+    for source_glob in config.get("source_globs", []):
+        glob_root = source_root if (source_root / source_glob).parent.exists() else collection_root
+        source_files.extend(str(path.relative_to(collection_root)) for path in sorted(glob_root.glob(source_glob)))
+    resolved: list[Path] = []
+    for source_file in source_files:
+        direct_path = collection_root / source_file
+        rooted_path = source_root / source_file
+        path = direct_path if direct_path.is_file() else rooted_path
         if not path.is_file():
             raise FileNotFoundError(f"missing OCR source: {source_file}")
-        lines.append(f"[[source:{Path(source_file).name}]]")
+        resolved.append(path)
+    return resolved
+
+
+def read_source_lines(collection_root: Path, config: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    for path in resolve_source_paths(collection_root, config):
+        lines.append(f"[[source:{path.name}]]")
         lines.extend(path.read_text(encoding="utf-8", errors="ignore").splitlines())
     return lines
 
@@ -997,7 +1011,9 @@ def build_registered_rows(source_key: str, config: dict[str, Any], chunks: list[
 
 def source_root_from_config(collection_root: Path, config: dict[str, Any]) -> Path:
     if config.get("source_root"):
-        return collection_root / config["source_root"]
+        configured_root = collection_root / config["source_root"]
+        if configured_root.exists():
+            return configured_root
     first = Path(config["source_files"][0])
     parts = list(first.parts)
     if "ocr-output" in parts:
@@ -1017,6 +1033,7 @@ def write_registered_source_knowledge(
     run_id: str,
 ) -> dict[str, Any]:
     rows = build_registered_rows(source_key, config, chunks, candidates)
+    source_paths = resolve_source_paths(collection_root, config)
     out = source_root_from_config(collection_root, config) / "ocr-output" / "knowledge-registration"
     public_dir = out / "public-safe"
     private_dir = out / "private-extraction"
@@ -1050,7 +1067,7 @@ def write_registered_source_knowledge(
             {
                 "created_at": now(),
                 "source_id": config["source_id"],
-                "source_basenames": [Path(path).name for path in config["source_files"]],
+                "source_basenames": [path.name for path in source_paths],
                 "line_count": len(lines),
                 "chunk_count": len(chunks),
                 "tracked_public_package_contains_raw_source": False,
@@ -1087,7 +1104,7 @@ def write_registered_source_knowledge(
         "skill": source_key,
         "kind": "registered_source",
         "source_id": config["source_id"],
-        "source_file_count": len(config["source_files"]),
+        "source_file_count": len(source_paths),
         "line_count": len(lines),
         "chunk_count": len(chunks),
         "accepted_candidates": sum(1 for candidate in candidates if candidate.accepted),
@@ -1097,11 +1114,21 @@ def write_registered_source_knowledge(
 
 def write_inventory(repo: Path, processed: list[dict[str, Any]]) -> None:
     path = repo / "skills" / "text-knowledge-skill-builder" / "references" / "ebook_collection_inventory.json"
+    existing_rows: list[dict[str, Any]] = []
+    if path.is_file():
+        try:
+            existing_rows = json.loads(path.read_text(encoding="utf-8")).get("processed_sources", [])
+        except (json.JSONDecodeError, OSError):
+            existing_rows = []
+    merged: dict[str, dict[str, Any]] = {
+        str(row.get("source_id")): row for row in existing_rows if row.get("source_id")
+    }
+    merged.update({str(row["source_id"]): row for row in processed})
     payload = {
         "version": 1,
         "created_at": now(),
         "collection_scope": "ebook OCR collection, relative source labels only",
-        "processed_sources": processed,
+        "processed_sources": list(merged.values()),
         "gap_sources": GAP_SOURCES,
         "public_boundary": "No absolute local paths or OCR text are stored in this inventory.",
     }
@@ -1148,7 +1175,7 @@ def main() -> int:
                     "skill": skill,
                     "kind": "skill",
                     "source_id": config["source_id"],
-                    "source_file_count": len(config["source_files"]),
+                    "source_file_count": len(resolve_source_paths(collection_root, config)),
                     "line_count": len(lines),
                     "chunk_count": len(chunks),
                     "accepted_candidates": accepted_count,

@@ -22,6 +22,7 @@ OPTIONAL_IMPORTS = [
     "paddlex",
     "surya",
     "transformers",
+    "pdf_inspector",
 ]
 
 
@@ -91,6 +92,16 @@ def surya_capability() -> dict[str, object]:
     return {"available": True, "reason": None, "cli": cli}
 
 
+def pdf_inspector_capability() -> dict[str, object]:
+    has_inspector = module_available("pdf_inspector")
+    if not has_inspector:
+        return {
+            "available": False,
+            "reason": "pdf-inspector is not installed; rerun setup with -InstallPdf when needed",
+        }
+    return {"available": True, "reason": None}
+
+
 def main() -> int:
     skill_root = Path(__file__).resolve().parents[1]
     runtime_root = default_runtime_root()
@@ -125,10 +136,12 @@ def main() -> int:
             "paddlex": package_version("paddlex"),
             "surya-ocr": package_version("surya-ocr"),
             "transformers": package_version("transformers"),
+            "pdf-inspector": package_version("pdf-inspector"),
         },
         "optional_capabilities": {
             "pp_structure": pp_structure_capability(),
             "surya": surya_capability(),
+            "pdf_inspector": pdf_inspector_capability(),
         },
         "cli": {
             "surya": resolve_cli("surya"),

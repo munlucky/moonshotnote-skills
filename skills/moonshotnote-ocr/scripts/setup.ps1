@@ -5,6 +5,7 @@ param(
     [switch]$SkipInstall,
     [switch]$InstallStructure,
     [switch]$InstallSurya,
+    [switch]$InstallPdf,
     [switch]$InstallAll
 )
 
@@ -165,6 +166,10 @@ if (-not $SkipInstall) {
     if ($InstallSurya -or $InstallAll) {
         $suryaRequirements = Join-Path $PSScriptRoot "requirements-surya.txt"
         Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "--only-binary=:all:", "-r", $suryaRequirements)
+    }
+    if ($InstallPdf -or $InstallAll) {
+        $pdfRequirements = Join-Path $PSScriptRoot "requirements-pdf.txt"
+        Invoke-Checked -FilePath $VenvPython -Arguments @("-m", "pip", "install", "-r", $pdfRequirements)
     }
 }
 
