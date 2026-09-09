@@ -15,6 +15,7 @@ Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` 
 - `daily-webnovel-writing-knowledge`: public-safe Korean webnovel writing graph for planning, serialization strategy, episode structure, cliffhangers, reader metrics, submission, contracts, and sustainable completion habits.
 - `teddynote-langchain-rag`: public-safe RAG and LangChain knowledge graph for document loading, splitting, embeddings, vector stores, retrievers, prompts, chains, evaluation, deployment, and troubleshooting.
 - `moonshot-research`: public-web deep research workflow for current trend discovery, X/Reddit/Hacker News/GitHub/news scans, contradiction checks, and cited report generation.
+- `codebase-master-guide`: interactive slidebook-based developer guide and 100% line-by-line master code review workflow with C4 infrastructure topologies, E2E transaction boundaries, 2-tier zero-dead-space layout, edge scenarios, and quiz stations.
 
 ## Install
 
@@ -34,6 +35,7 @@ npx skills add munlucky/moonshotnote-skills --skill codebase-understanding -g -a
 npx skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag -g -a codex -y
 npx skills add munlucky/moonshotnote-skills --skill moonshot-research -g -a codex -y
+npx skills add munlucky/moonshotnote-skills --skill codebase-master-guide -g -a codex -y
 ```
 
 For local development from this checkout:
@@ -52,6 +54,7 @@ npx skills add . --skill codebase-understanding -g -a codex -y --copy
 npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
 npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
 npx skills add . --skill moonshot-research -g -a codex -y --copy
+npx skills add . --skill codebase-master-guide -g -a codex -y --copy
 ```
 
 ## moonshotnote-ocr Setup
@@ -452,6 +455,14 @@ python3 skills/codebase-understanding/scripts/serve_dashboard.py .codebase-under
 Generated graph output stays under `.codebase-understanding/` and should not be committed unless a user explicitly wants a durable repo map.
 The dashboard includes preset searches for entry points, prompt flow, commands, tools, permissions, messages, config, and tests. Selecting a node shows responsibility, evidence, risk hints, source excerpts, relationships, and copyable follow-up commands; use it to narrow the graph before reading source.
 
+## codebase-master-guide Usage
+
+The Codebase Master Guide skill generates interactive, zero-dead-space developer guide slidebooks (Standalone HTML) with 100% line-by-line source code review, C4 infrastructure topologies, E2E transaction boundaries, edge scenarios, and self-diagnosis quizzes:
+
+```powershell
+py -3 skills\codebase-master-guide\scripts\render_slidebook.py --spec skills\codebase-master-guide\templates\example-spec.json --out guide.html
+```
+
 ## Dependency Licenses
 
 The skill scripts are MIT licensed. Runtime OCR dependencies keep their own licenses. In particular, `surya-ocr` is GPL-3.0-or-later, so review dependency licensing before bundling this skill into proprietary redistributed products. See `THIRD_PARTY_NOTICES.md`.
@@ -478,6 +489,8 @@ py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validat
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\daily-webnovel-writing-knowledge-skill
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\teddynote-langchain-rag
 py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\moonshot-research
+py -3.10 C:\Users\moon\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\codebase-master-guide
+py -3 -m py_compile skills\codebase-master-guide\scripts\render_slidebook.py
 py -3 -m py_compile skills\moonshot-research\scripts\research_harness.py
 py -3 -m unittest discover -s skills\moonshot-research\tests
 py -3 skills\moonshot-research\scripts\research_harness.py --print-capabilities
@@ -542,6 +555,7 @@ npx skills add . --skill codebase-understanding -g -a codex -y --copy
 npx skills add . --skill daily-webnovel-writing-knowledge -g -a codex -y --copy
 npx skills add . --skill teddynote-langchain-rag -g -a codex -y --copy
 npx skills add . --skill moonshot-research -g -a codex -y --copy
+npx skills add . --skill codebase-master-guide -g -a codex -y --copy
 npx skills ls -g --json
 ```
 
@@ -582,6 +596,7 @@ npx -y skills add munlucky/moonshotnote-skills --skill codebase-understanding --
 npx -y skills add munlucky/moonshotnote-skills --skill daily-webnovel-writing-knowledge --list
 npx -y skills add munlucky/moonshotnote-skills --skill teddynote-langchain-rag --list
 npx -y skills add munlucky/moonshotnote-skills --skill moonshot-research --list
+npx -y skills add munlucky/moonshotnote-skills --skill codebase-master-guide --list
 ```
 
 The GitHub Actions workflow in `.github/workflows/validate.yml` runs lightweight publish checks only: manifest validation, Python syntax compilation, and `npx skills add . --list`. It intentionally does not install PaddleOCR, Surya, or model files.

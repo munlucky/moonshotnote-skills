@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Master Guide"
+  short_description: "Interactive slidebook developer guide and 100% line-by-line master code review workflow"
+  default_prompt: "Use $codebase-master-guide to analyze a codebase and generate an interactive developer guide slidebook with C4 infrastructure topology, 5-zone network isolation, Outbox transaction boundaries, 100% full-line code review, and quiz stations."

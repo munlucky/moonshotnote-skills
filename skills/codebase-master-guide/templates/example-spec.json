@@ -1,0 +1,46 @@
+{
+  "projectTitle": "샘플 서비스 전수 코드 리뷰 마스터 슬라이드북",
+  "slug": "sample-service-guide",
+  "slides": [
+    {
+      "ch": "CH.00",
+      "chTitle": "온보딩 & 인프라 아키텍처",
+      "title": "샘플 서비스 전수 코드 리뷰 마스터 슬라이드북",
+      "sub": "서비스 백엔드 전체 소스코드를 라인별로 분석하고 엔터프라이즈 인프라 동작 원리를 마스터합니다.",
+      "type": "card",
+      "contentHtml": "<div class=\"flex-1 flex flex-col justify-between space-y-4 py-2\"><div class=\"p-6 rounded-3xl bg-[var(--bg-card)] border-2 border-blue-500/40 text-center space-y-3\"><h2 class=\"text-2xl font-black text-[var(--text-title)]\">엔터프라이즈 백엔드 아키텍처 핸드북</h2><p class=\"text-sm text-[var(--text-body)]\">코드 한 줄 한 줄의 기술적 이유(Why)와 망 분리·무중단 인프라 동작 원리를 전수 학습합니다.</p></div><div class=\"p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border)] text-xs text-[var(--text-muted)] flex justify-between\"><span>💡 키보드 방향키(←, →)로 슬라이드를 넘기세요.</span><span class=\"text-blue-400 font-bold\">CH.01 식별자 지도로 이동 ➔</span></div></div>"
+    },
+    {
+      "ch": "CH.02",
+      "chTitle": "SampleController",
+      "title": "SampleController: HTTP 202 비동기 접수",
+      "sub": "SampleController.java:15~35 (20행)",
+      "lines": "SampleController.java:15~35",
+      "startLine": 15,
+      "highlightLines": [18, 22],
+      "lang": "JAVA",
+      "code": "@RestController\n@RequestMapping(\"/api/v1/orders\")\npublic class SampleController {\n  private final OrderService orderService;\n\n  @PostMapping\n  public ResponseEntity<OrderReceipt> createOrder(@RequestHeader(\"x-token\") String token) {\n    OrderReceipt receipt = orderService.acceptOrder(token);\n    return ResponseEntity.accepted().body(receipt);\n  }\n}",
+      "comments": [
+        {
+          "line": "Line 18: @PostMapping",
+          "text": "주문 요청을 동기 처리하지 않고 비동기 접수증(202)을 발급하여 30ms 이내에 즉시 응답합니다."
+        },
+        {
+          "line": "Line 22: ResponseEntity.accepted()",
+          "text": "HTTP 202 ACCEPTED를 반환하여 클라이언트 화면 전환을 즉시 완료시키고, 실제 결제 처리는 Outbox 패턴으로 위임합니다."
+        }
+      ]
+    },
+    {
+      "ch": "CH.12",
+      "chTitle": "자가진단 퀴즈",
+      "title": "퀴즈 1: 최초 접수 시 우리 DB의 상태는?",
+      "sub": "SampleService.java:45 핵심 비즈니스 로직",
+      "type": "quiz",
+      "q": "사용자가 처음 주문을 요청하여 202 ACCEPTED 로 접수되었을 때 우리 DB의 상태 컬럼 값은 무엇일까요?",
+      "a": "REQUESTED (접수 대기) 상태를 유지합니다.",
+      "exp": "외부 결제사 연동이 완료되기 전까지는 DB 상태를 REQUESTED로 유지하며, 결제 완료 웹훅을 수신한 후 SUCCESS로 전이합니다.",
+      "jumpSlideIndex": 1
+    }
+  ]
+}

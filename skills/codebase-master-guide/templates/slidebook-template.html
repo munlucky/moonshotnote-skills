@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PROJECT_TITLE}}</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ========================================================================= */
+    /* 🌙 GITHUB DARK (Official GitHub Primer & PrettyLights Color Palette)       */
+    /* ========================================================================= */
+    :root, .theme-dark {
+      --bg-main: #0d1117;
+      --bg-deck: #161b22;
+      --bg-card: #161b22;
+      --bg-subtle: #21262d;
+      --border: #30363d;
+      --border-focus: #388bfd;
+      --text-title: #f0f6fc;
+      --text-body: #c9d1d9;
+      --text-muted: #8b949e;
+      
+      /* GitHub Code Block */
+      --code-bg: #0d1117;
+      --code-border: #30363d;
+      --code-text: #e6edf3;
+      --gutter-num: #6e7681;
+      --gutter-active: #f0f6fc;
+      --highlight-bg: rgba(56, 139, 253, 0.15);
+      --highlight-border: #388bfd;
+      --line-hover: rgba(110, 118, 129, 0.15);
+
+      /* Monospace Typography */
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+      /* GitHub PrettyLights Syntax Tokens */
+      --tok-kw: #ff7b72;       /* GitHub Red */
+      --tok-anno: #d2a8ff;     /* GitHub Purple */
+      --tok-type: #79c0ff;     /* GitHub Sky Blue */
+      --tok-method: #d2a8ff;   /* GitHub Purple */
+      --tok-str: #a5d6ff;      /* GitHub Soft Blue */
+      --tok-const: #79c0ff;    /* GitHub Sky Blue */
+      --tok-num: #79c0ff;      /* GitHub Sky Blue */
+      --tok-bool: #ff7b72;     /* GitHub Red */
+      --tok-comment: #8b949e;  /* GitHub Slate Muted */
+      --tok-op: #e6edf3;       /* GitHub Text */
+    }
+
+    /* ========================================================================= */
+    /* ☀️ GITHUB LIGHT (Official GitHub Primer & PrettyLights Color Palette)      */
+    /* ========================================================================= */
+    .theme-light {
+      --bg-main: #f6f8fa;
+      --bg-deck: #ffffff;
+      --bg-card: #f6f8fa;
+      --bg-subtle: #ffffff;
+      --border: #d0d7de;
+      --border-focus: #0969da;
+      --text-title: #1f2328;
+      --text-body: #24292f;
+      --text-muted: #656d76;
+      
+      /* GitHub Code Block */
+      --code-bg: #ffffff;
+      --code-border: #d0d7de;
+      --code-text: #1f2328;
+      --gutter-num: #8c959f;
+      --gutter-active: #1f2328;
+      --highlight-bg: #ddf4ff;
+      --highlight-border: #0969da;
+      --line-hover: rgba(175, 184, 193, 0.2);
+
+      /* GitHub PrettyLights Syntax Tokens (Light) */
+      --tok-kw: #cf222e;       /* GitHub Crimson */
+      --tok-anno: #8250df;     /* GitHub Royal Purple */
+      --tok-type: #0550ae;     /* GitHub Deep Blue */
+      --tok-method: #8250df;   /* GitHub Royal Purple */
+      --tok-str: #0a3069;      /* GitHub Navy */
+      --tok-const: #0550ae;    /* GitHub Deep Blue */
+      --tok-num: #0550ae;      /* GitHub Deep Blue */
+      --tok-bool: #cf222e;     /* GitHub Crimson */
+      --tok-comment: #57606a;  /* GitHub Muted Slate */
+      --tok-op: #1f2328;       /* GitHub Text */
+    }
+
+    html, body {
+      background-color: var(--bg-main);
+      color: var(--text-body);
+      transition: background-color 0.2s ease, color 0.2s ease;
+      overflow-x: hidden !important;
+      max-width: 100vw;
+    }
+
+    /* ========================================================================= */
+    /* 💻 GITHUB-STYLE CODE VIEWPORT & LINE GUTTERS                              */
+    /* ========================================================================= */
+    .code-editor-viewport {
+      font-family: var(--font-mono) !important;
+      overflow-y: auto;
+      user-select: text;
+    }
+
+    /* Wrap Modes */
+    .wrap-on .code-editor-viewport {
+      overflow-x: hidden !important;
+    }
+    .wrap-on .line-text-cell {
+      white-space: pre-wrap !important;
+      word-break: normal !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    .wrap-off .code-editor-viewport {
+      overflow-x: auto !important;
+    }
+    .wrap-off .line-text-cell {
+      white-space: pre !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+    }
+
+    .code-line-row {
+      display: flex;
+      align-items: flex-start;
+      min-width: 100%;
+      padding: 2.5px 0;
+      border-left: 3px solid transparent;
+      transition: background-color 0.1s ease;
+    }
+    .code-line-row:hover {
+      background-color: var(--line-hover);
+    }
+    .code-line-row:hover .gutter-cell {
+      color: var(--gutter-active) !important;
+    }
+
+    /* GitHub Line Highlight */
+    .code-line-row.is-highlighted {
+      background-color: var(--highlight-bg) !important;
+      border-left-color: var(--highlight-border) !important;
+    }
+    .code-line-row.is-highlighted .gutter-cell {
+      color: var(--border-focus) !important;
+      font-weight: 700 !important;
+    }
+
+    @keyframes pulseLineFocus {
+      0% { background-color: rgba(56, 139, 253, 0.45); box-shadow: 0 0 15px rgba(56, 139, 253, 0.6); }
+      50% { background-color: rgba(56, 139, 253, 0.25); box-shadow: 0 0 8px rgba(56, 139, 253, 0.3); }
+      100% { background-color: var(--highlight-bg); box-shadow: none; }
+    }
+    .code-line-row.pulse-focus {
+      animation: pulseLineFocus 1.8s ease-out forwards !important;
+      border-left: 3px solid var(--highlight-border) !important;
+    }
+
+    .gutter-cell {
+      width: 4rem;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 1.15rem;
+      margin-right: 1rem;
+      font-size: calc(var(--code-font-size, 15px) - 2px);
+      font-family: var(--font-mono) !important;
+      color: var(--gutter-num);
+      user-select: none;
+      font-weight: 500;
+      border-right: 1px solid var(--code-border);
+      cursor: pointer;
+    }
+
+    .line-text-cell {
+      flex: 1;
+      font-family: var(--font-mono) !important;
+      font-size: var(--code-font-size, 15px) !important;
+      line-height: var(--code-line-height, 1.65) !important;
+      color: var(--code-text);
+      padding-right: 1.25rem;
+      tab-size: 2;
+    }
+
+    /* GitHub PrettyLights Token Classes */
+    .tok-kw { color: var(--tok-kw) !important; font-weight: 600; }
+    .tok-anno { color: var(--tok-anno) !important; font-weight: 600; }
+    .tok-str { color: var(--tok-str) !important; }
+    .tok-type { color: var(--tok-type) !important; font-weight: 600; }
+    .tok-method { color: var(--tok-method) !important; }
+    .tok-const { color: var(--tok-const) !important; font-weight: 600; }
+    .tok-num { color: var(--tok-num) !important; }
+    .tok-comment { color: var(--tok-comment) !important; font-style: italic; }
+    .tok-bool { color: var(--tok-bool) !important; font-weight: 600; }
+    .tok-op { color: var(--tok-op) !important; }
+
+    mark.code-search-match {
+      background-color: #facc15 !important;
+      color: #020617 !important;
+      font-weight: 800 !important;
+      border-radius: 3px;
+      padding: 0 3px;
+      box-shadow: 0 0 6px rgba(250, 204, 21, 0.8);
+    }
+
+    .slide-enter {
+      animation: slideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="theme-dark flex flex-col min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- TOP GLOBAL APP BAR                                                        -->
+  <!-- ========================================================================= -->
+  <header class="h-16 border-b border-[var(--border)] bg-[var(--bg-deck)] px-5 lg:px-8 flex items-center justify-between flex-shrink-0 z-20 shadow-md">
+    <div class="flex items-center gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-lg">
+        ⚡
+      </div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="font-extrabold text-base md:text-lg text-[var(--text-title)] tracking-tight">
+            {{PROJECT_TITLE}}
+          </span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30 hidden sm:inline">
+            💻 100% 라인 전수 리뷰
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Chapter Jump -->
+      <button onclick="toggleTocModal()" class="px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-xs md:text-sm font-bold hover:border-blue-500 flex items-center gap-2 transition-all text-[var(--text-title)] shadow-sm">
+        <span>📑</span>
+        <span>전체 목차 ({{TOTAL_SLIDES}}개)</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" class="px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-xs md:text-sm font-bold hover:border-blue-500 flex items-center gap-2 transition-all text-[var(--text-title)] shadow-sm">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText" class="hidden sm:inline">라이트 테마</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WIDE SLIDE VIEWPORT (화면 98% 너비 × 87vh 높이)                           -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden relative">
+    
+    <!-- Large Slide Viewport Card -->
+    <div id="slideCard" class="w-full max-w-[98vw] h-[85vh] md:h-[87vh] bg-[var(--bg-deck)] border-2 border-[var(--border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden slide-enter">
+      
+      <!-- Slide Top Metadata Chrome -->
+      <div class="px-6 py-3.5 border-b border-[var(--border)] bg-[var(--bg-subtle)] flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <span id="slideChapterBadge" class="px-3 py-1 rounded-lg text-xs md:text-sm font-mono font-extrabold bg-blue-600 text-white shadow">
+            CH.00
+          </span>
+          <span id="slideChapterTitle" class="text-xs md:text-base font-extrabold text-[var(--text-title)]">
+            챕터 제목
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3.5">
+          <span id="slideFileRange" class="text-xs md:text-sm font-mono text-blue-400 font-bold hidden md:inline"></span>
+          <span id="slideCounterBadge" class="px-3 py-1 rounded-lg text-xs md:text-sm font-mono font-extrabold bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-title)]">
+            1 / {{TOTAL_SLIDES}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Slide Main Body (세로 스크롤만 지원, 좌우 스크롤 절대 금지) -->
+      <div id="slideContent" class="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden space-y-5">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- BOTTOM NAVIGATION CONTROLLER BAR                                          -->
+  <!-- ========================================================================= -->
+  <footer class="h-16 border-t border-[var(--border)] bg-[var(--bg-deck)] px-6 lg:px-8 flex items-center justify-between flex-shrink-0 z-20 shadow-lg">
+    
+    <!-- Prev Button -->
+    <button onclick="prevSlide()" id="btnPrev" class="px-5 py-2.5 rounded-xl bg-[var(--bg-card)] border-2 border-[var(--border)] hover:border-blue-500 text-xs md:text-sm font-black flex items-center gap-2 transition-all text-[var(--text-title)] shadow">
+      <span>◀</span>
+      <span>이전 슬라이드</span>
+      <span class="text-[11px] text-[var(--text-muted)] hidden md:inline">[←]</span>
+    </button>
+
+    <!-- Progress Indicator Bar -->
+    <div class="flex-1 max-w-sm sm:max-w-md md:max-w-xl mx-4 flex flex-col items-center gap-1.5">
+      <div class="w-full bg-[var(--border)] h-3 rounded-full overflow-hidden">
+        <div id="progressBar" class="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 h-full transition-all duration-200" style="width: 2%;"></div>
+      </div>
+      <div class="text-xs md:text-sm text-[var(--text-muted)] font-mono font-bold flex items-center gap-2">
+        <span id="progressText">슬라이드 1 of {{TOTAL_SLIDES}}</span>
+        <span class="text-[var(--border)]">|</span>
+        <span class="text-blue-400">키보드 방향키(←, →)로 넘김</span>
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <button onclick="nextSlide()" id="btnNext" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-black flex items-center gap-2 transition-all shadow-lg">
+      <span>다음 슬라이드</span>
+      <span>▶</span>
+      <span class="text-[11px] text-blue-200 hidden md:inline">[→]</span>
+    </button>
+
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- TABLE OF CONTENTS (TOC DRAWER MODAL)                                      -->
+  <!-- ========================================================================= -->
+  <div id="tocModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-deck)] border-2 border-[var(--border)] w-full max-w-3xl rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-4 mb-4">
+        <div>
+          <h3 class="font-black text-lg md:text-xl text-[var(--text-title)] flex items-center gap-2">
+            <span>📑</span> 프로젝트 전수 코드 리뷰 목차 ({{TOTAL_SLIDES}}개 슬라이드)
+          </h3>
+          <p class="text-xs md:text-sm text-[var(--text-muted)] mt-1">원하는 컴포넌트나 코드 조각을 클릭하면 즉시 이동합니다.</p>
+        </div>
+        <button onclick="toggleTocModal(false)" class="text-2xl font-black text-[var(--text-muted)] hover:text-[var(--text-title)] px-2">✕</button>
+      </div>
+
+      <div id="tocList" class="flex-1 overflow-y-auto space-y-2 pr-2 text-xs md:text-sm">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- FULLSCREEN CODE MODAL                                                     -->
+  <!-- ========================================================================= -->
+  <div id="codeFullscreenModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex flex-col p-4 sm:p-6">
+    <div class="flex items-center justify-between bg-[var(--bg-deck)] border border-[var(--border)] p-4 rounded-2xl mb-3 shadow-xl">
+      <div class="flex items-center gap-3">
+        <span class="text-blue-400 text-lg">⛶</span>
+        <div>
+          <h3 id="fsModalTitle" class="font-black text-sm md:text-lg text-[var(--text-title)]"></h3>
+          <span id="fsModalBadge" class="text-xs font-mono text-blue-400 font-bold"></span>
+        </div>
+      </div>
+      <button onclick="closeFullscreenCodeModal()" class="px-4 py-2 rounded-xl bg-red-600/20 text-red-400 hover:bg-red-600/30 text-xs md:text-sm font-bold border border-red-500/30 transition-all">
+        ✕ 닫기 (ESC)
+      </button>
+    </div>
+    
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+      <div id="fsCodeContainer" class="lg:col-span-8 bg-[var(--code-bg)] border-2 border-[var(--code-border)] rounded-2xl p-4 overflow-y-auto font-mono text-xs md:text-sm"></div>
+      <div id="fsNotesContainer" class="lg:col-span-4 bg-[var(--bg-deck)] border-2 border-[var(--border)] rounded-2xl p-4 overflow-y-auto space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- TOAST NOTIFICATION                                                        -->
+  <!-- ========================================================================= -->
+  <div id="copyToast" class="fixed bottom-20 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl bg-blue-600 text-white font-bold text-xs md:text-sm shadow-2xl border-2 border-blue-400 transition-all duration-200 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+    <span>✓</span>
+    <span id="copyToastMsg">클립보드에 복사되었습니다.</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- CORE SLIDEBOOK SCRIPT                                                     -->
+  <!-- ========================================================================= -->
+  <script id="app-script">
+    // --- 1. SLIDES DATA PAYLOAD ---
+    const slides = {{SLIDES_JSON}};
+    const totalSlides = slides.length;
+
+    // --- 2. STATE ---
+    let currentSlide = 0;
+    let codeFontSize = 15;
+    let isWordWrap = true;
+    let isCodeWide = false;
+    let currentSearchQuery = '';
+
+    // --- 3. SYNTAX TOKENIZER & GUTTER BUILDER ---
+    function tokenizeJavaLine(raw) {
+      if (!raw) return '&nbsp;';
+      let escaped = raw
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Comments
+      if (escaped.trim().startsWith('//')) {
+        return `<span class="tok-comment">${escaped}</span>`;
+      }
+
+      // Strings
+      escaped = escaped.replace(/(&quot;.*?&quot;|".*?")/g, '<span class="tok-str">$1</span>');
+
+      // Annotations
+      escaped = escaped.replace(/(@[A-Za-z0-9_]+)/g, '<span class="tok-anno">$1</span>');
+
+      // Keywords
+      const keywords = ['public','private','protected','static','final','class','interface','extends','implements','return','if','else','for','while','try','catch','throw','throws','new','this','super','import','package','void','boolean','int','long','double','float','byte','short','char','default','switch','case','break','continue'];
+      const kwRegex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+      escaped = escaped.replace(kwRegex, '<span class="tok-kw">$1</span>');
+
+      // Constants / Booleans
+      escaped = escaped.replace(/\b(true|false|null)\b/g, '<span class="tok-bool">$1</span>');
+
+      return escaped;
+    }
+
+    function buildCodeRowsWithGutter(codeStr, startLine, highlightLines, searchQuery) {
+      if (!codeStr) return '';
+      const lines = codeStr.split('\n');
+      const start = typeof startLine === 'number' ? startLine : 1;
+      const highlights = new Set(highlightLines || []);
+
+      return lines.map((line, idx) => {
+        const lineNum = start + idx;
+        const isHl = highlights.has(lineNum);
+        let highlightedHtml = tokenizeJavaLine(line);
+
+        if (searchQuery && searchQuery.trim().length > 0) {
+          const q = searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const reg = new RegExp(`(${q})`, 'gi');
+          highlightedHtml = highlightedHtml.replace(reg, '<mark class="code-search-match">$1</mark>');
+        }
+
+        return `
+          <div class="code-line-row ${isHl ? 'is-highlighted' : ''}" id="codeLineRow-${lineNum}">
+            <div class="gutter-cell" onclick="onGutterLineClick(${lineNum})" title="Line ${lineNum} 클릭하여 코칭 노트 연동">${lineNum}</div>
+            <div class="line-text-cell">${highlightedHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- 4. RENDER ENGINE ---
+    function renderSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      currentSlide = index;
+
+      const slide = slides[index];
+      document.getElementById('slideChapterBadge').innerText = slide.ch || 'CH.00';
+      document.getElementById('slideChapterTitle').innerText = slide.chTitle || slide.title || '';
+      document.getElementById('slideCounterBadge').innerText = `${index + 1} / ${totalSlides}`;
+      document.getElementById('slideFileRange').innerText = slide.lines ? `[${slide.lines}]` : '';
+
+      const pct = Math.round(((index + 1) / totalSlides) * 100);
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressText').innerText = `슬라이드 ${index + 1} of ${totalSlides} (${pct}%)`;
+
+      document.getElementById('btnPrev').style.opacity = (index === 0) ? '0.35' : '1';
+      document.getElementById('btnNext').innerText = (index === totalSlides - 1) ? '처음으로 ↺' : '다음 슬라이드 ▶';
+
+      const card = document.getElementById('slideCard');
+      card.classList.remove('slide-enter');
+      void card.offsetWidth;
+      card.classList.add('slide-enter');
+
+      const container = document.getElementById('slideContent');
+
+      if (slide.type === 'card') {
+        container.innerHTML = `
+          <div class="h-full min-h-[calc(85vh-150px)] flex flex-col justify-between space-y-4">
+            <div class="space-y-1.5 border-b border-[var(--border)] pb-3 flex-shrink-0">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xl md:text-3xl font-black text-[var(--text-title)] tracking-tight">${slide.title}</h2>
+                <span class="text-xs md:text-sm font-mono text-blue-400 font-extrabold bg-blue-500/10 px-3 py-1 rounded-xl border border-blue-500/30 shadow-sm">${slide.ch}</span>
+              </div>
+              <p class="text-sm md:text-lg text-[var(--text-muted)] leading-relaxed font-medium">${slide.sub}</p>
+            </div>
+            <div class="flex-1 flex flex-col justify-between space-y-4">
+              ${slide.contentHtml}
+            </div>
+          </div>
+        `;
+      } else if (slide.type === 'quiz') {
+        container.innerHTML = `
+          <div class="h-full min-h-[calc(85vh-150px)] flex flex-col justify-between space-y-5">
+            <div class="space-y-1.5 border-b border-[var(--border)] pb-3 flex-shrink-0">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xl md:text-3xl font-black text-[var(--text-title)] tracking-tight">${slide.title}</h2>
+                <span class="text-xs md:text-sm font-mono text-amber-400 font-extrabold bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/30 shadow-sm">자가진단 퀴즈</span>
+              </div>
+              <p class="text-sm md:text-lg text-[var(--text-muted)] leading-relaxed font-medium">${slide.sub}</p>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-between space-y-5">
+              <div class="p-6 md:p-8 rounded-3xl bg-[var(--bg-card)] border-2 border-blue-500/40 space-y-4 shadow-xl">
+                <div class="flex items-center justify-between">
+                  <span class="px-3.5 py-1 rounded-full text-xs md:text-sm font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    💡 실무 심층 질문 (Mission Challenge)
+                  </span>
+                  <span class="text-xs md:text-sm font-mono text-[var(--text-muted)] font-bold">
+                    난이도: ⭐⭐⭐ (상)
+                  </span>
+                </div>
+                <div class="text-lg md:text-2xl font-black text-[var(--text-title)] leading-relaxed">
+                  Q. ${slide.q}
+                </div>
+                <div class="pt-2">
+                  <button onclick="toggleSlideQuizAns()" id="btnSlideQuiz" class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-base font-black transition-all shadow-lg flex items-center gap-2">
+                    <span>👉</span>
+                    <span>사수의 정답 & 코드 근거 확인</span>
+                  </button>
+                </div>
+                <div id="slideQuizAnsBox" class="hidden p-6 rounded-2xl bg-blue-500/10 border-2 border-blue-500/40 text-sm md:text-base space-y-3 mt-4">
+                  <div class="font-black text-blue-400 text-base md:text-xl flex items-center gap-2">
+                    <span>✓</span> 정답: ${slide.a}
+                  </div>
+                  <p class="text-[var(--text-body)] leading-relaxed text-sm md:text-base">${slide.exp}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-5 rounded-2xl bg-[var(--bg-subtle)] border-2 border-[var(--border)] space-y-2 shadow-md">
+                  <div class="font-black text-sm md:text-base text-emerald-400 flex items-center gap-2">
+                    <span>📋</span> 주니어 코드 리뷰 실무 체크포인트
+                  </div>
+                  <p class="text-xs md:text-sm text-[var(--text-body)] leading-relaxed">
+                    동일한 비즈니스 정책이라도 DB 트랜잭션 경계, 외부 시스템과의 멱등 키 분리 여부, 스케줄러 자가치유 대상 포함 여부에 따라 원장의 상태 전이가 완전히 달라집니다. PR 리뷰 시 항상 상태 머신 다이어그램과 엔티티 불변식을 대조하세요.
+                  </p>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-[var(--bg-subtle)] border-2 border-[var(--border)] space-y-2 shadow-md flex flex-col justify-between">
+                  <div>
+                    <div class="font-black text-sm md:text-base text-purple-400 flex items-center gap-2">
+                      <span>🎯</span> 관련 소스코드 슬라이드 바로가기
+                    </div>
+                    <p class="text-xs md:text-sm text-[var(--text-body)] leading-relaxed mt-1">
+                      이 퀴즈의 정답 근거가 되는 서비스 및 엔티티 구현부를 다시 복습하고 싶다면 바로 이동할 수 있습니다.
+                    </p>
+                  </div>
+                  <div class="pt-2 flex items-center gap-2">
+                    <button onclick="goToSlide(${slide.jumpSlideIndex || 8})" class="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-blue-400 text-xs md:text-sm font-bold text-blue-400">
+                      관련 코드 슬라이드 ➔
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      } else {
+        // CODE SLIDE
+        const codeRowsHtml = buildCodeRowsWithGutter(slide.code, slide.startLine, slide.highlightLines, currentSearchQuery);
+        
+        const commentsHtml = (slide.comments || []).map((c, cIdx) => {
+          const numMatch = c.line.match(/\d+/);
+          const targetLine = numMatch ? parseInt(numMatch[0], 10) : null;
+          return `
+            <div onclick="focusAndScrollToLine(${targetLine})" class="coaching-card p-4 rounded-2xl bg-[var(--bg-subtle)] border-2 border-[var(--border)] hover:border-blue-500 cursor-pointer space-y-1.5 shadow-sm transition-all duration-150 group" id="coachingCard-${targetLine || cIdx}" data-target-line="${targetLine}">
+              <div class="flex items-center justify-between">
+                <div class="text-sm md:text-base font-black text-blue-400 font-mono flex items-center gap-2">
+                  <span>📌</span> ${c.line}
+                </div>
+                ${targetLine ? `<span class="text-[11px] font-bold text-slate-400 bg-[var(--bg-card)] px-2 py-0.5 rounded border border-[var(--border)] group-hover:text-blue-400">라인 포커스 ➔</span>` : ''}
+              </div>
+              <p class="text-xs md:text-sm text-[var(--text-body)] leading-relaxed">
+                ${c.text}
+              </p>
+            </div>
+          `;
+        }).join('');
+
+        const codeColClass = isCodeWide ? 'lg:col-span-12' : 'lg:col-span-7';
+        const notesColClass = isCodeWide ? 'lg:col-span-12 pt-2' : 'lg:col-span-5';
+
+        container.innerHTML = `
+          <div class="space-y-1.5 border-b border-[var(--border)] pb-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg md:text-2xl font-black text-[var(--text-title)]">${slide.title}</h2>
+              <span class="text-xs md:text-sm font-mono text-blue-400 font-bold bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-500/20">${slide.lines}</span>
+            </div>
+            <p class="text-xs md:text-sm text-[var(--text-muted)] font-mono">${slide.sub}</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pt-1 ${isWordWrap ? 'wrap-on' : 'wrap-off'}">
+            
+            <div class="${codeColClass} bg-[var(--code-bg)] border-2 border-[var(--code-border)] rounded-2xl p-3 sm:p-5 overflow-hidden shadow-lg flex flex-col max-h-[63vh] md:max-h-[67vh] transition-all duration-200">
+              
+              <div class="flex items-center justify-between border-b border-[var(--code-border)] pb-3 mb-3 text-xs md:text-sm font-mono text-[var(--text-muted)] flex-shrink-0 flex-wrap gap-2">
+                <div class="flex items-center gap-2.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                  </div>
+                  <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-extrabold text-[11px] border border-blue-500/20">${slide.lang || 'CODE'}</span>
+                  <span class="font-extrabold text-[var(--text-title)] text-xs md:text-sm truncate max-w-[200px] md:max-w-none">☕ ${slide.lines}</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <div class="inline-flex items-center bg-[var(--bg-deck)] border border-[var(--border)] rounded-lg p-0.5 text-xs font-bold shadow-sm">
+                    <button onclick="changeFontSize(-1)" title="글자 축소 (A-)" class="px-2 py-0.5 hover:text-blue-400 text-[var(--text-body)] rounded">A-</button>
+                    <span id="fontSizeDisplay" class="px-1.5 text-[11px] text-blue-400 font-mono select-none">${codeFontSize}px</span>
+                    <button onclick="changeFontSize(1)" title="글자 확대 (A+)" class="px-2 py-0.5 hover:text-blue-400 text-[var(--text-body)] rounded">A+</button>
+                  </div>
+
+                  <button onclick="toggleWordWrap()" id="btnWordWrap" title="자동 줄바꿈 켬/끔" class="px-2.5 py-1 rounded-lg bg-[var(--bg-deck)] hover:border-blue-500 text-xs text-[var(--text-body)] font-bold border border-[var(--border)] flex items-center gap-1 transition-all shadow-sm">
+                    <span>↩</span>
+                    <span id="wrapText">${isWordWrap ? '줄바꿈:켬' : '줄바꿈:끔'}</span>
+                  </button>
+
+                  <button onclick="toggleCodeLayout()" id="btnLayout" title="코드 전면 확대 / 분할 모드 전환" class="px-2.5 py-1 rounded-lg bg-[var(--bg-deck)] hover:border-blue-500 text-xs text-[var(--text-body)] font-bold border border-[var(--border)] flex items-center gap-1 transition-all shadow-sm">
+                    <span>${isCodeWide ? '📑' : '🔲'}</span>
+                    <span>${isCodeWide ? '분할 뷰' : '코드 와이드'}</span>
+                  </button>
+
+                  <div class="relative hidden sm:inline-flex items-center">
+                    <input type="text" id="codeSearchInput" oninput="onCodeSearch(this.value)" placeholder="🔍 코드 검색..." value="${currentSearchQuery}" class="w-28 focus:w-40 transition-all bg-[var(--bg-deck)] border border-[var(--border)] rounded-lg px-2 py-0.5 text-xs text-[var(--text-title)] placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    <button onclick="clearCodeSearch()" id="btnClearSearch" class="${currentSearchQuery ? '' : 'hidden'} absolute right-1.5 text-xs text-slate-400 hover:text-white">✕</button>
+                  </div>
+
+                  <button onclick="openFullscreenCodeModal()" title="전체화면으로 크게 보기" class="px-2.5 py-1 rounded-lg bg-[var(--bg-deck)] hover:border-blue-500 text-xs text-[var(--text-body)] font-bold border border-[var(--border)] flex items-center gap-1 transition-all shadow-sm">
+                    <span>⛶</span>
+                    <span class="hidden md:inline">전체화면</span>
+                  </button>
+
+                  <button onclick="copyCurrentSlideCode()" title="전체 소스코드 복사" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs text-white font-black flex items-center gap-1 transition-all shadow">
+                    <span>📋</span>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="codeViewport" class="code-editor-viewport flex-1 pr-1">
+                ${codeRowsHtml}
+              </div>
+            </div>
+
+            <div class="${notesColClass} space-y-3 overflow-y-auto max-h-[63vh] md:max-h-[67vh] pr-1.5">
+              <div class="text-xs md:text-sm font-black uppercase tracking-wider text-blue-400 flex items-center justify-between pb-1">
+                <div class="flex items-center gap-2">
+                  <span>👨‍🏫</span> 사수의 라인별 1:1 코칭 노트
+                </div>
+                <span class="text-[11px] text-[var(--text-muted)] font-normal">카드를 클릭하면 해당 라인으로 이동</span>
+              </div>
+              ${commentsHtml}
+            </div>
+
+          </div>
+        `;
+      }
+    }
+
+    // --- 5. INTERACTIVE CONTROLS ---
+    function changeFontSize(delta) {
+      codeFontSize += delta;
+      if (codeFontSize < 13) codeFontSize = 13;
+      if (codeFontSize > 24) codeFontSize = 24;
+
+      document.documentElement.style.setProperty('--code-font-size', `${codeFontSize}px`);
+      const disp = document.getElementById('fontSizeDisplay');
+      if (disp) disp.innerText = `${codeFontSize}px`;
+      showCopyToast(`코드 글자 크기: ${codeFontSize}px`);
+    }
+
+    function toggleWordWrap() {
+      isWordWrap = !isWordWrap;
+      const wrapEl = document.querySelector('.wrap-on, .wrap-off');
+      if (wrapEl) {
+        if (isWordWrap) {
+          wrapEl.classList.remove('wrap-off');
+          wrapEl.classList.add('wrap-on');
+        } else {
+          wrapEl.classList.remove('wrap-on');
+          wrapEl.classList.add('wrap-off');
+        }
+      }
+      const wrapText = document.getElementById('wrapText');
+      if (wrapText) wrapText.innerText = isWordWrap ? '줄바꿈:켬' : '줄바꿈:끔';
+      showCopyToast(isWordWrap ? '자동 줄바꿈이 활성화되었습니다.' : '가로 스크롤 모드가 활성화되었습니다.');
+    }
+
+    function toggleCodeLayout() {
+      isCodeWide = !isCodeWide;
+      renderSlide(currentSlide);
+      showCopyToast(isCodeWide ? '코드 와이드 뷰(전면 12열)로 전환되었습니다.' : '코드+코칭 분할 뷰로 전환되었습니다.');
+    }
+
+    function onCodeSearch(val) {
+      currentSearchQuery = val;
+      const slide = slides[currentSlide];
+      if (!slide || !slide.code) return;
+
+      const btnClear = document.getElementById('btnClearSearch');
+      if (btnClear) {
+        if (val) btnClear.classList.remove('hidden');
+        else btnClear.classList.add('hidden');
+      }
+
+      const viewport = document.getElementById('codeViewport');
+      if (viewport) {
+        viewport.innerHTML = buildCodeRowsWithGutter(slide.code, slide.startLine, slide.highlightLines, val);
+      }
+    }
+
+    function clearCodeSearch() {
+      const input = document.getElementById('codeSearchInput');
+      if (input) input.value = '';
+      onCodeSearch('');
+    }
+
+    function focusAndScrollToLine(lineNum) {
+      if (!lineNum) return;
+      const targetEl = document.getElementById(`codeLineRow-${lineNum}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetEl.classList.remove('pulse-focus');
+        void targetEl.offsetWidth;
+        targetEl.classList.add('pulse-focus');
+      }
+    }
+
+    function onGutterLineClick(lineNum) {
+      focusAndScrollToLine(lineNum);
+      const card = document.querySelector(`[data-target-line="${lineNum}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('border-blue-500', 'bg-blue-500/10');
+        setTimeout(() => {
+          card.classList.remove('border-blue-500', 'bg-blue-500/10');
+        }, 1800);
+      }
+      showCopyToast(`Line ${lineNum} 선택됨`);
+    }
+
+    function openFullscreenCodeModal() {
+      const slide = slides[currentSlide];
+      if (!slide || !slide.code) return;
+
+      const modal = document.getElementById('codeFullscreenModal');
+      document.getElementById('fsModalTitle').innerText = slide.title;
+      document.getElementById('fsModalBadge').innerText = slide.lines;
+
+      const codeContainer = document.getElementById('fsCodeContainer');
+      codeContainer.innerHTML = buildCodeRowsWithGutter(slide.code, slide.startLine, slide.highlightLines, '');
+
+      const notesContainer = document.getElementById('fsNotesContainer');
+      notesContainer.innerHTML = (slide.comments || []).map(c => `
+        <div class="p-4 rounded-2xl bg-[var(--bg-subtle)] border-2 border-[var(--border)] space-y-1.5 shadow-sm">
+          <div class="text-sm font-black text-blue-400 font-mono flex items-center gap-2">
+            <span>📌</span> ${c.line}
+          </div>
+          <p class="text-xs sm:text-sm text-[var(--text-body)] leading-relaxed">${c.text}</p>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeFullscreenCodeModal() {
+      const modal = document.getElementById('codeFullscreenModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function showCopyToast(msg) {
+      const toast = document.getElementById('copyToast');
+      const msgEl = document.getElementById('copyToastMsg');
+      if (!toast || !msgEl) return;
+      msgEl.innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2000);
+    }
+
+    function copyCurrentSlideCode() {
+      const slide = slides[currentSlide];
+      if (slide && slide.code) {
+        navigator.clipboard.writeText(slide.code).then(() => {
+          showCopyToast(`[${slide.lines}] 코드가 클립보드에 복사되었습니다!`);
+        }).catch(() => {
+          showCopyToast('복사에 실패했습니다. 브라우저 권한을 확인해주세요.');
+        });
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) renderSlide(currentSlide - 1);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        renderSlide(currentSlide + 1);
+      } else {
+        renderSlide(0);
+      }
+    }
+
+    function goToSlide(idx) {
+      renderSlide(idx);
+      toggleTocModal(false);
+    }
+
+    function toggleSlideQuizAns() {
+      const el = document.getElementById('slideQuizAnsBox');
+      const btn = document.getElementById('btnSlideQuiz');
+      if (!el || !btn) return;
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        btn.innerText = '🔼 해설 접기';
+      } else {
+        el.classList.add('hidden');
+        btn.innerText = '👉 사수의 정답 & 코드 근거 확인';
+      }
+    }
+
+    // --- 6. KEYBOARD NAVIGATION ---
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'Escape') {
+        toggleTocModal(false);
+        closeFullscreenCodeModal();
+      }
+      if (e.key === '+' || e.key === '=') changeFontSize(1);
+      if (e.key === '-' || e.key === '_') changeFontSize(-1);
+    });
+
+    // --- 7. TOC MODAL GENERATION ---
+    function toggleTocModal(forceOpen) {
+      const modal = document.getElementById('tocModal');
+      const isOpen = !modal.classList.contains('hidden');
+      const shouldOpen = (forceOpen !== undefined) ? forceOpen : !isOpen;
+
+      if (shouldOpen) {
+        const list = document.getElementById('tocList');
+        list.innerHTML = slides.map((s, i) => `
+          <button onclick="goToSlide(${i})" class="w-full text-left p-3 rounded-2xl border-2 ${i === currentSlide ? 'bg-blue-600 text-white font-black border-blue-500 shadow-md' : 'bg-[var(--bg-card)] text-[var(--text-body)] border-[var(--border)] hover:border-blue-400'} flex items-center justify-between transition-all">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs px-2.5 py-1 rounded-lg ${i === currentSlide ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-blue-400'} font-bold">${i + 1}</span>
+              <span class="truncate max-w-sm md:max-w-xl font-bold">${s.title}</span>
+            </div>
+            <span class="text-xs font-mono text-[var(--text-muted)] flex-shrink-0">${s.ch}</span>
+          </button>
+        `).join('');
+
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // --- 8. THEME TOGGLE ---
+    let currentTheme = 'theme-dark';
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+
+      if (currentTheme === 'theme-dark') {
+        currentTheme = 'theme-light';
+        body.classList.remove('theme-dark');
+        body.classList.add('theme-light');
+        icon.innerText = '🌙';
+        text.innerText = '다크 테마';
+      } else {
+        currentTheme = 'theme-dark';
+        body.classList.remove('theme-light');
+        body.classList.add('theme-dark');
+        icon.innerText = '☀️';
+        text.innerText = '라이트 테마';
+      }
+      renderSlide(currentSlide);
+    }
+
+    // --- 9. INITIALIZE ---
+    renderSlide(0);
+  </script>
+</body>
+</html>
