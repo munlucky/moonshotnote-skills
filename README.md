@@ -2,6 +2,10 @@
 
 Public Codex-compatible Agent Skills maintained under the `moonshotnote-skills` repository.
 
+The additions `diagram-design`, `explain-diff-html`, `humanize-korean`, and
+`ebook-to-md` are pending provenance and redistribution review. Do not publish
+them as cleared until the unresolved items in [COPYRIGHT-REVIEW-2026-10-27.md](COPYRIGHT-REVIEW-2026-10-27.md) are resolved.
+
 - `moonshotnote-ocr`: Korean-first screenshot and document-image OCR with PaddleOCR, optional PP-StructureV3/Surya fallbacks, and low-confidence visual review.
 - `fastapi-clean-architecture`: public-safe FastAPI and clean architecture knowledge graph extracted from verified OCR notes.
 - `text-knowledge-skill-builder`: reusable workflow for turning source text into public-safe knowledge-backed skills.

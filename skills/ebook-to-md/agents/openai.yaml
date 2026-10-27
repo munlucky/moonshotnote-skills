@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ebook to Markdown"
+  short_description: "Browser ebook capture, OCR, and Markdown"
+  default_prompt: "Use $ebook-to-md to convert this browser ebook into Markdown."
